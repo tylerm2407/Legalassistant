@@ -62,15 +62,15 @@ async def verify_supabase_jwt(
             )
         return user_id
 
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as exc:
         _logger.warning("jwt_expired", token_prefix=token[:10])
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired.",
-        )
+        ) from exc
     except jwt.InvalidTokenError as exc:
         _logger.warning("jwt_invalid", error=str(exc), token_prefix=token[:10])
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token.",
-        )
+        ) from exc

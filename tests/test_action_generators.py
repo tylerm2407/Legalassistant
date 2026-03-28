@@ -57,7 +57,9 @@ CHECKLIST_JSON = json.dumps({
 
 def _make_mock_response(text: str) -> MagicMock:
     """Build a mock Anthropic response with the given text."""
-    content_block = MagicMock()
+    from anthropic.types import TextBlock
+
+    content_block = MagicMock(spec=TextBlock)
     content_block.text = text
     response = MagicMock()
     response.content = [content_block]
@@ -75,7 +77,7 @@ class TestGenerateDemandLetter:
             return_value=_make_mock_response(DEMAND_LETTER_JSON)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.letter_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.letter_generator import generate_demand_letter
 
             result = await generate_demand_letter(
@@ -98,7 +100,7 @@ class TestGenerateDemandLetter:
             return_value=_make_mock_response(DEMAND_LETTER_JSON)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.letter_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.letter_generator import generate_demand_letter
 
             await generate_demand_letter(mock_profile, "Return my deposit")
@@ -121,7 +123,7 @@ class TestGenerateRightsSummary:
             return_value=_make_mock_response(RIGHTS_SUMMARY_JSON)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.rights_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.rights_generator import generate_rights_summary
 
             result = await generate_rights_summary(
@@ -143,7 +145,7 @@ class TestGenerateRightsSummary:
             return_value=_make_mock_response(RIGHTS_SUMMARY_JSON)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.rights_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.rights_generator import generate_rights_summary
 
             await generate_rights_summary(mock_profile, "security deposit rights")
@@ -166,7 +168,7 @@ class TestGenerateChecklist:
             return_value=_make_mock_response(CHECKLIST_JSON)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.checklist_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.checklist_generator import generate_checklist
 
             result = await generate_checklist(
@@ -189,7 +191,7 @@ class TestGenerateChecklist:
             return_value=_make_mock_response(CHECKLIST_JSON)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.checklist_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.checklist_generator import generate_checklist
 
             result = await generate_checklist(mock_profile, "next steps")
@@ -213,7 +215,7 @@ class TestGenerateChecklist:
             return_value=_make_mock_response(partial_json)
         )
 
-        with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        with patch("backend.actions.checklist_generator.get_anthropic_client", return_value=mock_client):
             from backend.actions.checklist_generator import generate_checklist
 
             result = await generate_checklist(mock_profile, "next steps")

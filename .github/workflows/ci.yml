@@ -18,15 +18,37 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev]" pytest-cov
 
       - name: Lint
         run: ruff check backend/ tests/
 
-      - name: Test
-        run: python -m pytest tests/ -v
+      - name: Test with coverage
+        run: python -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing
         env:
           ANTHROPIC_API_KEY: test-key
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_KEY: test-key
           SUPABASE_SERVICE_ROLE_KEY: test-key
+          SUPABASE_JWT_SECRET: test-jwt-secret
+          REDIS_URL: ""
+
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install and build web
+        run: |
+          cd web
+          npm ci
+          npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-key
+          NEXT_PUBLIC_API_URL: http://localhost:8000

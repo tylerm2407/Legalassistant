@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import os
 
-from supabase import Client, create_client
-
 from backend.models.legal_profile import LegalProfile
 from backend.utils.logger import get_logger
+from supabase import Client, create_client
 
 _logger = get_logger(__name__)
 

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 
-import anthropic
 from anthropic.types import TextBlock
 
 from backend.memory.profile import get_profile, update_profile

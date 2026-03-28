@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 
-import anthropic
 from anthropic.types import TextBlock
 
 from backend.models.legal_profile import LegalProfile

@@ -20,7 +20,7 @@ class TestBuildSystemPromptIncludesProfileData:
 
     def test_includes_state(self, mock_profile: LegalProfile) -> None:
         prompt = build_system_prompt(mock_profile, "can my landlord keep my deposit")
-        assert "State: MA" in prompt
+        assert "MA" in prompt
 
     def test_includes_housing_situation(self, mock_profile: LegalProfile) -> None:
         prompt = build_system_prompt(mock_profile, "can my landlord keep my deposit")

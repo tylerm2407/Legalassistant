@@ -1,10 +1,10 @@
-.PHONY: dev test lint verify seed
+.PHONY: dev test lint verify seed format install
 
 dev:
 	uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 test:
-	python -m pytest tests/ -v
+	python -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing
 
 lint:
 	ruff check backend/ tests/

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 
-import anthropic
 from anthropic.types import TextBlock
 
 from backend.legal.state_laws import STATE_LAWS

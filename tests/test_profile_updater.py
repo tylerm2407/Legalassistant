@@ -10,6 +10,7 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from anthropic.types import TextBlock
 
 from backend.models.legal_profile import LegalProfile
 
@@ -59,7 +60,7 @@ class TestUpdateProfileExtractsNewFacts:
         new_facts = ["Move-out date was January 15, 2026", "Landlord name is James Peterson"]
         api_response_text = json.dumps({"new_facts": new_facts})
 
-        content_block = MagicMock()
+        content_block = MagicMock(spec=TextBlock)
         content_block.text = api_response_text
         mock_response = MagicMock()
         mock_response.content = [content_block]
@@ -69,7 +70,7 @@ class TestUpdateProfileExtractsNewFacts:
         mock_client.messages.create = AsyncMock(return_value=mock_response)
 
         with (
-            patch("anthropic.AsyncAnthropic", return_value=mock_client),
+            patch("backend.memory.updater.get_anthropic_client", return_value=mock_client),
             patch(
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,
@@ -102,7 +103,7 @@ class TestUpdateProfileDeduplicatesFacts:
         new_fact = "The apartment is at 45 Beacon St"
         api_response_text = json.dumps({"new_facts": [duplicate_fact, new_fact]})
 
-        content_block = MagicMock()
+        content_block = MagicMock(spec=TextBlock)
         content_block.text = api_response_text
         mock_response = MagicMock()
         mock_response.content = [content_block]
@@ -112,7 +113,7 @@ class TestUpdateProfileDeduplicatesFacts:
         mock_client.messages.create = AsyncMock(return_value=mock_response)
 
         with (
-            patch("anthropic.AsyncAnthropic", return_value=mock_client),
+            patch("backend.memory.updater.get_anthropic_client", return_value=mock_client),
             patch(
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,
@@ -160,7 +161,7 @@ class TestUpdateProfileHandlesApiError:
         )
 
         with (
-            patch("anthropic.AsyncAnthropic", return_value=mock_client),
+            patch("backend.memory.updater.get_anthropic_client", return_value=mock_client),
             patch(
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,
@@ -189,7 +190,7 @@ class TestUpdateProfileHandlesEmptyResponse:
     ) -> None:
         api_response_text = json.dumps({"new_facts": []})
 
-        content_block = MagicMock()
+        content_block = MagicMock(spec=TextBlock)
         content_block.text = api_response_text
         mock_response = MagicMock()
         mock_response.content = [content_block]
@@ -199,7 +200,7 @@ class TestUpdateProfileHandlesEmptyResponse:
         mock_client.messages.create = AsyncMock(return_value=mock_response)
 
         with (
-            patch("anthropic.AsyncAnthropic", return_value=mock_client),
+            patch("backend.memory.updater.get_anthropic_client", return_value=mock_client),
             patch(
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,
@@ -221,7 +222,7 @@ class TestUpdateProfileHandlesEmptyResponse:
     async def test_malformed_json_response(
         self, sample_conversation: list[dict[str, str]]
     ) -> None:
-        content_block = MagicMock()
+        content_block = MagicMock(spec=TextBlock)
         content_block.text = "This is not JSON at all"
         mock_response = MagicMock()
         mock_response.content = [content_block]
@@ -231,7 +232,7 @@ class TestUpdateProfileHandlesEmptyResponse:
         mock_client.messages.create = AsyncMock(return_value=mock_response)
 
         with (
-            patch("anthropic.AsyncAnthropic", return_value=mock_client),
+            patch("backend.memory.updater.get_anthropic_client", return_value=mock_client),
             patch(
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,
@@ -261,7 +262,7 @@ class TestUpdateProfileHandlesEmptyResponse:
         mock_client.messages.create = AsyncMock(return_value=mock_response)
 
         with (
-            patch("anthropic.AsyncAnthropic", return_value=mock_client),
+            patch("backend.memory.updater.get_anthropic_client", return_value=mock_client),
             patch(
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,

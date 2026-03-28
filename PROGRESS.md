@@ -19,7 +19,7 @@
 ## Phase 2 — Profile CRUD ✅
 - [x] Profile CRUD (get_profile, update_profile)
 - [x] Profile auto-updater (background task)
-- [ ] Supabase schema applied (run SQL in dashboard)
+- [x] Supabase schema applied
 
 ## Phase 3 — Document Pipeline ✅
 - [x] PDF/image text extraction
@@ -52,7 +52,26 @@
 - [x] Profile updater tests (6 tests)
 - [x] Action generator tests (7 tests)
 
-## Phase 8 — Demo Prep
+## Phase 8 — Demo & Polish ✅
 - [x] Sarah Chen demo seed script ready
-- [ ] Supabase schema applied + profile seeded
-- [ ] End-to-end verification
+- [x] Supabase schema applied + profile seeded
+- [x] End-to-end verification
+
+## Phase 9 — Security Hardening ✅
+- [x] JWT authentication on all endpoints
+- [x] CORS middleware with configurable origins
+- [x] Redis-backed rate limiting (fail-open)
+- [x] Input validation with Pydantic field constraints
+- [x] File upload size limits (25MB)
+- [x] Supabase Row Level Security policies
+- [x] Singleton Anthropic client with timeout
+- [x] Structured logging with user_id context
+
+## Phase 10 — Comprehensive Testing ✅
+- [x] API endpoint tests (28 tests)
+- [x] JWT authentication tests (8 tests)
+- [x] Rate limiter tests (6 tests)
+- [x] Anthropic client singleton tests (3 tests)
+- [x] Document analyzer tests (5 tests)
+- [x] Rights library tests (10 tests)
+- [x] CI pipeline with coverage reporting

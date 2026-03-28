@@ -103,7 +103,24 @@ app.add_middleware(
 
 @app.middleware("http")
 async def attach_user_id_to_state(request: Request, call_next):
-    """Extract user_id from JWT and attach to request.state for rate limiter."""
+    """Extract user_id from JWT and attach to request.state for rate limiter.
+
+    Parses the Authorization header to extract the user_id from the JWT
+    without full verification (auth is handled by endpoint dependencies).
+    Falls back to 'anonymous' if the header is missing or unparseable.
+    """
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        try:
+            import jwt as pyjwt
+
+            payload = pyjwt.decode(token, options={"verify_signature": False})
+            request.state.user_id = payload.get("sub", "anonymous")
+        except Exception:
+            request.state.user_id = "anonymous"
+    else:
+        request.state.user_id = "anonymous"
     response = await call_next(request)
     return response
 

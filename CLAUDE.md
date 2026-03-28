@@ -34,10 +34,18 @@ casemate/
 │   ├── memory/
 │   │   ├── injector.py           ← THE most important file. Builds system prompts.
 │   │   ├── updater.py            ← Extracts facts from conversations post-response
-│   │   └── profile.py            ← LegalProfile Pydantic model
+│   │   ├── profile.py            ← LegalProfile Pydantic model
+│   │   └── conversation_store.py ← Conversation CRUD (create, list, save, delete)
 │   ├── legal/
 │   │   ├── classifier.py         ← Classifies question into one of 10 legal areas
 │   │   ├── state_laws.py         ← State-specific legal context (all 50 states)
+│   │   ├── states/               ← Regional state law files (all 50 states)
+│   │   │   ├── northeast.py      ← 9 states (MA, NY, CT, etc.)
+│   │   │   ├── southeast.py      ← 14 states (FL, GA, VA, etc.)
+│   │   │   ├── midwest.py        ← 12 states (IL, OH, MI, etc.)
+│   │   │   ├── south_central.py  ← 2 states (TX, OK)
+│   │   │   ├── west.py           ← 13 states (CA, WA, CO, etc.)
+│   │   │   └── federal.py        ← Federal-level legal context
 │   │   └── areas/                ← One module per legal domain
 │   │       ├── landlord_tenant.py
 │   │       ├── employment.py
@@ -56,7 +64,7 @@ casemate/
 │   ├── documents/
 │   │   ├── extractor.py          ← PDF/image text extraction
 │   │   └── analyzer.py           ← Claude analysis → fact extraction
-│   ├── knowledge/                ← Rights library (18 guides)
+│   ├── knowledge/                ← Rights library (19 guides)
 │   ├── workflows/                ← Guided legal workflows
 │   ├── deadlines/                ← Deadline detection + tracking
 │   ├── referrals/                ← Attorney matching
@@ -75,16 +83,27 @@ casemate/
 ├── web/
 │   ├── app/
 │   │   ├── page.tsx              ← Marketing landing page
+│   │   ├── api/waitlist/route.ts ← Waitlist signup API (Mailchimp + Supabase)
 │   │   ├── onboarding/page.tsx   ← 5-question intake wizard
 │   │   ├── chat/page.tsx         ← Main chat interface
-│   │   └── profile/page.tsx      ← Legal profile viewer/editor
+│   │   ├── profile/page.tsx      ← Legal profile viewer/editor
+│   │   ├── attorneys/page.tsx    ← Attorney search/referral page
+│   │   ├── deadlines/page.tsx    ← Deadline tracking dashboard
+│   │   ├── rights/page.tsx       ← Know Your Rights library browser
+│   │   └── workflows/page.tsx    ← Guided legal workflow page
 │   └── components/
 │       ├── ChatInterface.tsx     ← Conversation UI + memory indicator
 │       ├── LegalProfileSidebar.tsx← Live profile display (visible during chat)
 │       ├── CaseHistory.tsx       ← Active issues timeline
 │       ├── DocumentUpload.tsx    ← File upload + fact extraction preview
 │       ├── ActionGenerator.tsx   ← Letter/rights/checklist generator
-│       └── OnboardingFlow.tsx    ← 5-step intake wizard component
+│       ├── OnboardingFlow.tsx    ← 5-step intake wizard component
+│       ├── WaitlistForm.tsx      ← Email waitlist signup form
+│       ├── DeadlineDashboard.tsx ← Deadline list + status management
+│       ├── AttorneyCard.tsx      ← Attorney referral display card
+│       ├── WorkflowWizard.tsx    ← Step-by-step workflow UI
+│       ├── RightsGuide.tsx       ← Rights guide detail display
+│       └── ConversationHistory.tsx← Conversation list + navigation
 │
 ├── mobile/                       ← Expo React Native app
 │
@@ -286,6 +305,7 @@ GET    /api/cases             → list[LegalIssue]
 PATCH  /api/cases/{id}        → LegalIssue
 GET    /api/conversations     → list[Conversation]
 DELETE /api/conversations/{id}→ {"status": "deleted"}
+POST   /api/waitlist           → { success: true }
 GET    /health                → {"status": "ok", "version": "..."}
 ```
 
@@ -387,51 +407,51 @@ except:
 ## Build order — follow this exactly
 
 ### Hour 0–1: Foundation (before any feature work)
-- [ ] `make install` — verify deps install clean
-- [ ] Supabase schema created (user_profiles, conversations, documents tables)
-- [ ] `.env` populated with all keys
-- [ ] `GET /health` returns 200
-- [ ] First commit: `chore: initial scaffold with Supabase schema`
+- [x] `make install` — verify deps install clean
+- [x] Supabase schema created (user_profiles, conversations, documents tables)
+- [x] `.env` populated with all keys
+- [x] `GET /health` returns 200
+- [x] First commit: `chore: initial scaffold with Supabase schema`
 
 ### Hour 1–3: Memory layer (the product)
-- [ ] `backend/memory/profile.py` — LegalProfile model, all fields, full docstrings
-- [ ] `backend/memory/injector.py` — build_system_prompt(), classify_legal_area()
-- [ ] `POST /api/chat` — reads profile, builds prompt, calls Claude, returns response
-- [ ] Verify: ask a question as a Massachusetts renter, confirm state law in response
-- [ ] Commit: `feat(memory): profile injection working end-to-end`
+- [x] `backend/memory/profile.py` — LegalProfile model, all fields, full docstrings
+- [x] `backend/memory/injector.py` — build_system_prompt(), classify_legal_area()
+- [x] `POST /api/chat` — reads profile, builds prompt, calls Claude, returns response
+- [x] Verify: ask a question as a Massachusetts renter, confirm state law in response
+- [x] Commit: `feat(memory): profile injection working end-to-end`
 
 ### Hour 3–5: Onboarding + profile storage
-- [ ] `POST /api/profile` — creates profile from intake answers
-- [ ] `web/app/onboarding/page.tsx` — 5-question wizard, stores to Supabase
-- [ ] Profile visible in sidebar after onboarding
-- [ ] Commit: `feat(onboarding): intake flow stores legal profile`
+- [x] `POST /api/profile` — creates profile from intake answers
+- [x] `web/app/onboarding/page.tsx` — 5-question wizard, stores to Supabase
+- [x] Profile visible in sidebar after onboarding
+- [x] Commit: `feat(onboarding): intake flow stores legal profile`
 
 ### Hour 5–8: Profile auto-updater + document upload
-- [ ] `backend/memory/updater.py` — runs as background task after every response
-- [ ] `POST /api/documents` — PDF/image upload, text extraction, fact injection
-- [ ] Verify: mention a new fact in chat, confirm it appears in profile after response
-- [ ] Commit: `feat(memory): profile auto-updater and document pipeline`
+- [x] `backend/memory/updater.py` — runs as background task after every response
+- [x] `POST /api/documents` — PDF/image upload, text extraction, fact injection
+- [x] Verify: mention a new fact in chat, confirm it appears in profile after response
+- [x] Commit: `feat(memory): profile auto-updater and document pipeline`
 
 ### Hour 8–12: Action generator
-- [ ] `backend/actions/letter_generator.py` — demand letter from profile context
-- [ ] `POST /api/actions/letter` — full letter, pre-filled, ready to send
-- [ ] `web/components/ActionGenerator.tsx` — UI for generating actions
-- [ ] **This is the demo feature. Make it look good.**
-- [ ] Commit: `feat(actions): demand letter generation with profile context`
+- [x] `backend/actions/letter_generator.py` — demand letter from profile context
+- [x] `POST /api/actions/letter` — full letter, pre-filled, ready to send
+- [x] `web/components/ActionGenerator.tsx` — UI for generating actions
+- [x] **This is the demo feature. Make it look good.**
+- [x] Commit: `feat(actions): demand letter generation with profile context`
 
 ### Hour 12–18: UI polish
-- [ ] `LegalProfileSidebar.tsx` — visible during chat, updates live
-- [ ] `CaseHistory.tsx` — active issues timeline
-- [ ] Chat bubbles look clean, CaseMate responses formatted with citations
-- [ ] Mobile responsive (judges will test on phones)
-- [ ] Commit: `feat(ui): profile sidebar, case history, chat polish`
+- [x] `LegalProfileSidebar.tsx` — visible during chat, updates live
+- [x] `CaseHistory.tsx` — active issues timeline
+- [x] Chat bubbles look clean, CaseMate responses formatted with citations
+- [x] Mobile responsive (judges will test on phones)
+- [x] Commit: `feat(ui): profile sidebar, case history, chat polish`
 
 ### Hour 18–24: Hardening + demo prep
-- [ ] Run full test suite — fix anything red
-- [ ] Run `make verify` — zero failures
-- [ ] Build Sarah Chen demo profile with 12 prior conversations
-- [ ] Pre-generate the landlord deposit demo response
-- [ ] Commit: `chore: demo profile, final QA pass`
+- [x] Run full test suite — fix anything red
+- [x] Run `make verify` — zero failures
+- [x] Build Sarah Chen demo profile with 12 prior conversations
+- [x] Pre-generate the landlord deposit demo response
+- [x] Commit: `chore: demo profile, final QA pass`
 
 ---
 

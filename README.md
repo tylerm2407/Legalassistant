@@ -90,11 +90,11 @@ Every answer CaseMate gives is personalized to this profile. Not a generic perso
 ## Features
 
 - **Persistent Memory** — Legal profile grows with every conversation
-- **State-Specific Guidance** — Real statute citations for MA, CA, NY, TX, FL
+- **State-Specific Guidance** — Real statute citations for all 50 US states, organized by region
 - **10 Legal Domains** — Landlord/tenant, employment, consumer, debt, small claims, contracts, traffic, family law, criminal records, immigration
 - **Action Generators** — Demand letters, rights summaries, next-steps checklists — all pre-filled from your profile
 - **Document Analysis** — Upload leases, notices, contracts — CaseMate extracts key facts and red flags
-- **Know Your Rights Library** — 18 pre-built guides with rights, action steps, deadlines, and statute citations
+- **Know Your Rights Library** — 19 pre-built guides with rights, action steps, deadlines, and statute citations
 - **Guided Workflows** — Step-by-step legal processes (eviction defense, wage claim filing, etc.)
 - **Attorney Referrals** — State and domain-specific attorney matching
 - **Deadline Tracking** — Auto-detected and manual legal deadlines
@@ -199,6 +199,12 @@ make verify           # Lint + test
 
 ---
 
+## Early Access / Waitlist
+
+CaseMate is currently in pre-launch. Join the waitlist on the landing page to get notified when we launch. Signups are synced to Mailchimp and backed up in Supabase.
+
+---
+
 ## Environment variables
 
 ```bash
@@ -209,10 +215,26 @@ SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...   # for backend profile writes
 SUPABASE_JWT_SECRET=...            # for JWT verification
 
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+
+# Mailchimp (waitlist signup)
+MAILCHIMP_API_KEY=                 # Mailchimp API key (Account → Extras → API keys)
+MAILCHIMP_SERVER_PREFIX=           # Datacenter prefix, e.g. "us21" (from API key suffix)
+MAILCHIMP_LIST_ID=                 # Audience/list ID (Audience → Settings → Audience ID)
+
+# Email export (optional)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=hello@casematelaw.com
+
 # Optional
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-BACKEND_URL=http://localhost:8000
 REDIS_URL=                         # for rate limiting (fail-open if empty)
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8081
 ```
 
 ---
@@ -247,6 +269,7 @@ REDIS_URL=                         # for rate limiting (fail-open if empty)
 | `POST` | `/api/export/document` | Export document as file |
 | `POST` | `/api/export/email` | Export document via email |
 | `GET` | `/api/attorneys/search` | Search for attorneys |
+| `POST` | `/api/waitlist` | Join the waitlist (Mailchimp + Supabase) |
 
 ---
 
@@ -260,7 +283,7 @@ REDIS_URL=                         # for rate limiting (fail-open if empty)
 │   ├── legal/                   # Classifier + state law library
 │   ├── actions/                 # Demand letter, rights, checklist generators
 │   ├── documents/               # PDF extraction + Claude analysis
-│   ├── knowledge/               # Rights library (18 guides)
+│   ├── knowledge/               # Rights library (19 guides)
 │   ├── workflows/               # Guided legal workflows
 │   ├── deadlines/               # Deadline detection + tracking
 │   ├── referrals/               # Attorney matching

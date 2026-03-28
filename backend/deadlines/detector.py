@@ -8,8 +8,9 @@ Detected deadlines are automatically created in the user's deadline tracker.
 from __future__ import annotations
 
 import json
+from typing import cast
 
-from anthropic.types import TextBlock
+from anthropic.types import MessageParam, TextBlock
 
 from backend.deadlines.tracker import create_deadline
 from backend.utils.client import get_anthropic_client
@@ -59,7 +60,7 @@ async def _detect_deadlines(conversation: list[dict[str, str]]) -> list[dict[str
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
         system=DEADLINE_DETECTION_PROMPT,
-        messages=conversation,  # type: ignore[arg-type]
+        messages=cast(list[MessageParam], conversation),
     )
 
     first_block = response.content[0] if response.content else None

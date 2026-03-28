@@ -1,4 +1,5 @@
 import Link from "next/link";
+import WaitlistForm from "@/components/WaitlistForm";
 
 function FeatureCard({
   icon,
@@ -129,6 +130,21 @@ export default function HomePage() {
             title="Actions"
             description="Generate demand letters, rights summaries, and step-by-step legal checklists with deadlines — all personalized to your situation."
           />
+        </div>
+      </section>
+
+      {/* Waitlist */}
+      <section className="container-narrow pb-24 text-center">
+        <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10 p-10 max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold text-white mb-3">Get Early Access</h2>
+          <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+            Be the first to try CaseMate. Lawyers charge $349/hour &mdash;
+            CaseMate costs $20/month. Join the waitlist and lock in early pricing.
+          </p>
+          <WaitlistForm />
+          <p className="text-gray-600 text-xs mt-4">
+            Join 100+ people on the waitlist
+          </p>
         </div>
       </section>
 

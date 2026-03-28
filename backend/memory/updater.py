@@ -9,8 +9,9 @@ must never crash the main request flow.
 from __future__ import annotations
 
 import json
+from typing import cast
 
-from anthropic.types import TextBlock
+from anthropic.types import MessageParam, TextBlock
 
 from backend.memory.profile import get_profile, update_profile
 from backend.utils.client import get_anthropic_client
@@ -58,7 +59,7 @@ async def _extract_facts(conversation: list[dict[str, str]]) -> list[str]:
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
         system=EXTRACTION_PROMPT,
-        messages=conversation,  # type: ignore[arg-type]
+        messages=cast(list[MessageParam], conversation),
     )
 
     first_block = response.content[0] if response.content else None

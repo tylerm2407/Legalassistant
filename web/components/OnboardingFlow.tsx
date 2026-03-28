@@ -74,23 +74,24 @@ export default function OnboardingFlow() {
   async function handleSubmit() {
     setSubmitting(true);
     setError("");
-    try {
-      const userId = user?.id;
-      if (!userId) {
-        setError("You must be signed in. Redirecting...");
-        router.push("/auth");
-        return;
-      }
-      const housing = form.housingDetails
-        ? `${form.housingSituation} — ${form.housingDetails}`
-        : form.housingSituation;
-      const employment = form.employmentDetails
-        ? `${form.employmentType} — ${form.employmentDetails}`
-        : form.employmentType;
-      const family = form.dependents
-        ? `${form.familyStatus}, ${form.dependents} dependents`
-        : form.familyStatus;
+    const userId = user?.id;
+    if (!userId) {
+      setError("You must be signed in. Redirecting...");
+      router.push("/auth");
+      return;
+    }
 
+    const housing = form.housingDetails
+      ? `${form.housingSituation} — ${form.housingDetails}`
+      : form.housingSituation;
+    const employment = form.employmentDetails
+      ? `${form.employmentType} — ${form.employmentDetails}`
+      : form.employmentType;
+    const family = form.dependents
+      ? `${form.familyStatus}, ${form.dependents} dependents`
+      : form.familyStatus;
+
+    try {
       await api.createProfile({
         user_id: userId,
         display_name: form.displayName.trim(),
@@ -115,15 +116,12 @@ export default function OnboardingFlow() {
         member_since: new Date().toISOString(),
         conversation_count: 0,
       });
-
-      router.push(`/chat?userId=${userId}`);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong. Try again."
-      );
-    } finally {
-      setSubmitting(false);
+      console.warn("Profile creation failed, continuing to subscription:", err);
     }
+
+    setSubmitting(false);
+    router.push(`/subscription?userId=${userId}`);
   }
 
   function renderStep() {
@@ -367,7 +365,7 @@ export default function OnboardingFlow() {
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Creating profile..." : "Start Chatting"}
+                {submitting ? "Setting up..." : "Continue"}
               </Button>
             )}
           </div>

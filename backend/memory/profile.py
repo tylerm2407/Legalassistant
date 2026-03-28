@@ -65,7 +65,7 @@ async def get_profile(user_id: str) -> LegalProfile | None:
             return None
 
         _logger.info("profile_fetched", user_id=user_id)
-        return LegalProfile(**data)  # type: ignore[arg-type]
+        return LegalProfile.model_validate(data)
 
     except ValueError:
         _logger.error("supabase_config_error", user_id=user_id)
@@ -109,7 +109,7 @@ async def update_profile(profile: LegalProfile) -> LegalProfile:
             raise RuntimeError(f"Upsert returned no data for user_id={profile.user_id}")
 
         _logger.info("profile_updated", user_id=profile.user_id)
-        return LegalProfile(**result.data[0])  # type: ignore[arg-type]
+        return LegalProfile.model_validate(result.data[0])
 
     except ValueError:
         _logger.error("supabase_config_error", user_id=profile.user_id)

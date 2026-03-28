@@ -107,6 +107,32 @@ After every chat response, `update_profile_from_conversation()`:
 3. New facts are merged into the user's profile in Supabase
 4. Next conversation will include these facts in the system prompt
 
+### Deadline Detection
+After every chat response, `detect_and_save_deadlines()` runs as a background task:
+1. Sends the conversation to Claude with an extraction prompt for time-sensitive deadlines
+2. Claude returns structured deadlines with dates and legal areas
+3. Deadlines are saved to the `deadlines` table linked to the conversation
+4. Users can view, update, and manage deadlines from the dashboard
+
+### Waitlist Signup
+1. Frontend sends `{ email, source }` to `POST /api/waitlist` (Next.js API route)
+2. Email is normalized and validated
+3. If Mailchimp env vars are configured, subscriber is added to the Mailchimp audience with "waitlist" tag
+4. Email is upserted into the `waitlist_signups` Supabase table as a backup
+5. Returns `{ success: true }`
+
+### Document Export
+1. User requests export via `POST /api/export/document` with type (letter/rights/checklist/custom) and content
+2. Backend generates a PDF using the appropriate template generator
+3. PDF is returned as a downloadable attachment
+4. Alternatively, `POST /api/export/email` generates the PDF and sends it via SMTP
+
+### Attorney Referral
+1. User searches via `GET /api/attorneys/search?state=MA&legal_area=landlord_tenant`
+2. Backend queries the `attorneys` table filtered by state
+3. If `legal_area` is provided, `get_referral_suggestions()` scores attorneys by specialization match
+4. Results include match_reason and relevance_score for ranked display
+
 ---
 
 ## The memory architecture
@@ -206,6 +232,22 @@ Injects: M.G.L. c.186 §15B (security deposits), M.G.L. c.186 §18 (retaliation)
          MA SJC rulings on habitability standards, etc.
 ```
 
+### 50-state coverage
+
+State-specific legal context is organized into regional files under `backend/legal/states/`:
+
+```
+states/
+├── northeast.py      ← 9 states (CT, MA, ME, NH, NJ, NY, PA, RI, VT)
+├── southeast.py      ← 14 states (AL, AR, DC, DE, FL, GA, KY, LA, MD, MS, NC, SC, TN, VA, WV)
+├── midwest.py        ← 12 states (IA, IL, IN, KS, MI, MN, MO, ND, NE, OH, SD, WI)
+├── south_central.py  ← 2 states (OK, TX)
+├── west.py           ← 13 states (AK, AZ, CA, CO, HI, ID, MT, NM, NV, OR, UT, WA, WY)
+└── federal.py        ← Federal-level statutes (FDCPA, FLSA, FCRA, etc.)
+```
+
+Each regional file exports a dict mapping state codes to legal area dicts. The `state_laws.py` aggregator merges all regions into a single `STATE_LAWS` lookup used by the memory injector.
+
 ### Legal area classification
 
 Before building the system prompt, CaseMate classifies the user's question into one of ten legal domains. This classification determines which state-specific legal context to inject and which response patterns to apply.
@@ -282,6 +324,7 @@ POST   /api/workflows         Start a workflow
 GET    /api/workflows/{id}    Get workflow by ID
 POST   /api/export/document   Export document as file
 GET    /api/attorneys/search   Search for attorneys
+POST   /api/waitlist           Waitlist email signup (Mailchimp + Supabase)
 GET    /health                Health check
 ```
 
@@ -289,9 +332,13 @@ GET    /health                Health check
 
 ## Database Schema (Supabase)
 
-- `user_profiles` — Legal profile with active_issues (JSONB), legal_facts (JSONB)
-- `conversations` — Chat history with legal_area classification
+- `user_profiles` — Legal profile with active_issues (JSONB), legal_facts (JSONB), conversation_count
+- `conversations` — Chat history with messages (JSONB), legal_area classification
 - `documents` — Uploaded documents with extracted_facts, red_flags
+- `deadlines` — Legal deadline tracking with title, date, status (active/completed/dismissed/expired), linked to conversations
+- `workflow_instances` — Active workflow instances with template_id, steps (JSONB), current_step, status
+- `attorneys` — Shared attorney directory with state, specializations (JSONB), rating, contact info (public read, admin write)
+- `waitlist_signups` — Pre-launch email collection with email, source, mailchimp_synced flag (upsert on email)
 
 ---
 
@@ -329,10 +376,14 @@ casemate/
 │   ├── memory/
 │   │   ├── injector.py               ← builds system prompts from profiles
 │   │   ├── updater.py                ← extracts facts after conversations
-│   │   └── profile.py                ← LegalProfile Pydantic model
+│   │   ├── profile.py                ← LegalProfile Pydantic model
+│   │   └── conversation_store.py     ← conversation CRUD operations
 │   ├── legal/
 │   │   ├── classifier.py             ← classifies questions into legal domains
 │   │   ├── state_laws.py             ← state-specific legal context library
+│   │   ├── states/                   ← regional state law files (all 50 states)
+│   │   │   ├── northeast.py, southeast.py, midwest.py
+│   │   │   ├── south_central.py, west.py, federal.py
 │   │   └── areas/                    ← one file per legal domain
 │   │       ├── landlord_tenant.py
 │   │       ├── employment.py
@@ -345,7 +396,7 @@ casemate/
 │   ├── documents/
 │   │   ├── extractor.py              ← PDF and image text extraction
 │   │   └── analyzer.py               ← Claude analysis + fact extraction
-│   ├── knowledge/                    ← Rights library (18 guides)
+│   ├── knowledge/                    ← Rights library (19 guides)
 │   ├── workflows/                    ← Guided legal workflows
 │   ├── deadlines/                    ← Deadline detection + tracking
 │   ├── referrals/                    ← Attorney matching
@@ -365,16 +416,27 @@ casemate/
 ├── web/
 │   ├── app/
 │   │   ├── page.tsx                  ← marketing landing page
+│   │   ├── api/waitlist/route.ts     ← waitlist signup API (Mailchimp + Supabase)
 │   │   ├── onboarding/page.tsx       ← 5-question intake flow
 │   │   ├── chat/page.tsx             ← main chat interface
-│   │   └── profile/page.tsx          ← legal profile viewer/editor
+│   │   ├── profile/page.tsx          ← legal profile viewer/editor
+│   │   ├── attorneys/page.tsx        ← attorney search/referral
+│   │   ├── deadlines/page.tsx        ← deadline tracking dashboard
+│   │   ├── rights/page.tsx           ← Know Your Rights library
+│   │   └── workflows/page.tsx        ← guided legal workflows
 │   └── components/
 │       ├── ChatInterface.tsx         ← conversation UI with memory indicator
 │       ├── LegalProfileSidebar.tsx   ← live profile display
 │       ├── CaseHistory.tsx           ← active issues timeline
 │       ├── DocumentUpload.tsx        ← file upload + preview
 │       ├── ActionGenerator.tsx       ← letter/rights/checklist generator
-│       └── OnboardingFlow.tsx        ← 5-step intake wizard
+│       ├── OnboardingFlow.tsx        ← 5-step intake wizard
+│       ├── WaitlistForm.tsx          ← email waitlist signup form
+│       ├── DeadlineDashboard.tsx     ← deadline list + management
+│       ├── AttorneyCard.tsx          ← attorney referral card
+│       ├── WorkflowWizard.tsx        ← step-by-step workflow UI
+│       ├── RightsGuide.tsx           ← rights guide detail view
+│       └── ConversationHistory.tsx   ← conversation list + nav
 │
 ├── mobile/                           ← Expo React Native app
 │   ├── app/                          ← Expo Router screens

@@ -99,7 +99,7 @@ export default function AuthPage() {
           )}
 
           <Button
-            onClick={() => {}}
+            type="submit"
             disabled={loading || !email.trim() || !password}
             className="w-full"
           >

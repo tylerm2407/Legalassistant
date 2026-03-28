@@ -97,4 +97,4 @@ def classify_legal_area(question: str) -> str:
     if not scores:
         return "general"
 
-    return max(scores, key=scores.get)  # type: ignore[arg-type]
+    return max(scores, key=lambda k: scores[k])

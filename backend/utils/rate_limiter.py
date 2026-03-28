@@ -19,7 +19,7 @@ _logger = get_logger(__name__)
 _redis_client = None
 
 
-def _get_redis():
+def _get_redis() -> object | None:
     """Get or create the Redis client singleton.
 
     Returns:

@@ -7,51 +7,52 @@
 - [x] CI/CD pipeline (.github/workflows/ci.yml)
 - [x] ADR decisions (001-005)
 
-## Phase 1 — Backend Foundation
-- [ ] Models (LegalProfile, Conversation, ActionOutput)
-- [ ] Utils (logger, retry)
-- [ ] Memory injector (build_system_prompt)
-- [ ] Legal classifier (10 domains)
-- [ ] State laws (MA, CA, NY, TX, FL)
-- [ ] Legal area modules (10 files)
-- [ ] FastAPI main.py with routes
+## Phase 1 — Backend Foundation ✅
+- [x] Models (LegalProfile, Conversation, ActionOutput)
+- [x] Utils (logger, retry)
+- [x] Memory injector (build_system_prompt)
+- [x] Legal classifier (10 domains)
+- [x] State laws (MA, CA, NY, TX, FL)
+- [x] Legal area modules (10 files)
+- [x] FastAPI main.py with routes
 
-## Phase 2 — Profile CRUD
-- [ ] Profile CRUD (get_profile, update_profile)
-- [ ] Profile auto-updater (background task)
-- [ ] Supabase schema applied
+## Phase 2 — Profile CRUD ✅
+- [x] Profile CRUD (get_profile, update_profile)
+- [x] Profile auto-updater (background task)
+- [ ] Supabase schema applied (run SQL in dashboard)
 
-## Phase 3 — Document Pipeline
-- [ ] PDF/image text extraction
-- [ ] Claude document analysis
-- [ ] Upload route
+## Phase 3 — Document Pipeline ✅
+- [x] PDF/image text extraction
+- [x] Claude document analysis
+- [x] Upload route
 
-## Phase 4 — Action Generators
-- [ ] Demand letter generator
-- [ ] Rights summary generator
-- [ ] Checklist generator
+## Phase 4 — Action Generators ✅
+- [x] Demand letter generator
+- [x] Rights summary generator
+- [x] Checklist generator
 
-## Phase 5 — Web Frontend
-- [ ] Shared types
-- [ ] API client + Supabase client
-- [ ] UI primitives (Button, Card, Input, Badge)
-- [ ] Onboarding flow
-- [ ] Chat interface with sidebar
-- [ ] Action generator UI
-- [ ] Profile page
+## Phase 5 — Web Frontend ✅
+- [x] Shared types
+- [x] API client + Supabase client
+- [x] UI primitives (Button, Card, Input, Badge)
+- [x] Onboarding flow
+- [x] Chat interface with sidebar
+- [x] Action generator UI
+- [x] Profile page
 
-## Phase 6 — Mobile Frontend
-- [ ] Expo setup + routing
-- [ ] Chat screen
-- [ ] Profile + Cases screens
-- [ ] Components (ChatBubble, ActionSheet, etc.)
+## Phase 6 — Mobile Frontend ✅
+- [x] Expo setup + routing
+- [x] Chat screen
+- [x] Profile + Cases screens
+- [x] Components (ChatBubble, ActionSheet, etc.)
 
-## Phase 7 — Tests
-- [ ] Memory injector tests
-- [ ] Legal classifier tests
-- [ ] Profile updater tests
-- [ ] Action generator tests
+## Phase 7 — Tests ✅
+- [x] Memory injector tests (28 tests)
+- [x] Legal classifier tests (15 tests)
+- [x] Profile updater tests (6 tests)
+- [x] Action generator tests (7 tests)
 
 ## Phase 8 — Demo Prep
-- [ ] Sarah Chen demo profile seeded
+- [x] Sarah Chen demo seed script ready
+- [ ] Supabase schema applied + profile seeded
 - [ ] End-to-end verification

@@ -1,6 +1,24 @@
 # Changelog
 
-All notable changes to Lex will be documented in this file.
+All notable changes to CaseMate are documented in this file.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+---
+
+## [Unreleased]
+
+### Added
+- README.md — product overview, demo, architecture summary, quick start
+- ARCHITECTURE.md — full system design, memory architecture, API contracts, folder structure
+- CLAUDE.md — Claude Code configuration, build order, code standards
+- docs/decisions/001 — Memory as the core differentiator
+- docs/decisions/002 — State-specific legal context injection
+- docs/decisions/003 — Profile auto-update strategy
+- docs/decisions/004 — Document pipeline design
+- docs/decisions/005 — Action generator scope
+- Project scaffold — full folder structure, Makefile, pyproject.toml, .env.example, CI workflow
+
+---
 
 ## [0.2.0] — 2026-03-28
 
@@ -40,6 +58,19 @@ All notable changes to Lex will be documented in this file.
 ## [0.1.0] — 2026-03-27
 
 ### Added
+
+**Core features:**
+- Legal profile onboarding (5-question intake)
+- Persistent memory injection into every Claude API call
+- State-specific legal context for 10 US states at launch
+- Legal area classification (10 domains)
+- Profile auto-updater (background task post-response)
+- Document upload pipeline (PDF + image OCR)
+- Action generator: demand letter, rights summary, next-steps checklist
+- Case history timeline
+- Legal profile sidebar (visible during chat)
+
+**Infrastructure:**
 - Initial project scaffold with full monorepo structure
 - Backend models: LegalProfile, LegalIssue, Conversation, Message, ActionOutput
 - Memory injection system: build_system_prompt() with profile + state laws
@@ -53,3 +84,5 @@ All notable changes to Lex will be documented in this file.
 - Test suite for memory layer, classifier, and action generators
 - CI/CD pipeline with lint + test on push
 - 5 Architecture Decision Records
+
+**Stack:** Next.js 14 · FastAPI · Anthropic claude-sonnet-4-6 · Supabase · Tailwind CSS

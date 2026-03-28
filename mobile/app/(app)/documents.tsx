@@ -100,7 +100,7 @@ export default function DocumentsScreen() {
         <Text style={styles.emptyIcon}>📄</Text>
         <Text style={styles.emptyTitle}>No documents yet</Text>
         <Text style={styles.emptyText}>
-          Upload legal documents like leases, contracts, or court papers. Lex
+          Upload legal documents like leases, contracts, or court papers. CaseMate
           will extract key facts to help with your case.
         </Text>
       </View>

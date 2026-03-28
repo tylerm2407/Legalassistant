@@ -135,7 +135,7 @@ export default function OnboardingFlow() {
               Let&apos;s get to know you
             </h2>
             <p className="text-sm text-gray-400">
-              Lex uses this information to give you personalized guidance.
+              CaseMate uses this information to give you personalized guidance.
             </p>
             <Input
               label="Your Name"
@@ -170,7 +170,7 @@ export default function OnboardingFlow() {
               Housing Situation
             </h2>
             <p className="text-sm text-gray-400">
-              This helps Lex understand tenant/homeowner rights that apply to
+              This helps CaseMate understand tenant/homeowner rights that apply to
               you.
             </p>
             <div className="space-y-2">

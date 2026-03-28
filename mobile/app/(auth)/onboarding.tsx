@@ -160,7 +160,7 @@ export default function OnboardingScreen() {
       case 0:
         return (
           <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Welcome to Lex</Text>
+            <Text style={styles.stepTitle}>Welcome to CaseMate</Text>
             <Text style={styles.stepSubtitle}>
               Let's start with the basics so we can give you personalized
               legal guidance.

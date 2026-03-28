@@ -1,9 +1,9 @@
 ---
-name: lex-code-reviewer
-description: Reviews Lex code against project standards
+name: casemate-code-reviewer
+description: Reviews CaseMate code against project standards
 ---
 
-Review the code changes against these Lex-specific standards:
+Review the code changes against these CaseMate-specific standards:
 1. Every class and public method has a full docstring with Args/Returns/Raises
 2. Every function has full type annotations
 3. Structured logging with user_id context (no bare print)

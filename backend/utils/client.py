@@ -1,4 +1,4 @@
-"""Singleton Anthropic client for the Lex backend.
+"""Singleton Anthropic client for the CaseMate backend.
 
 Provides a single shared AsyncAnthropic client instance to avoid
 creating a new client on every API request.

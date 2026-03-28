@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for the Lex test suite.
+"""Shared pytest fixtures for the CaseMate test suite.
 
 Provides reusable fixtures for a mock legal profile, patched Anthropic
 client, and patched Supabase client so tests never hit real APIs.

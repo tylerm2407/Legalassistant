@@ -19,7 +19,7 @@ from backend.utils.retry import retry_anthropic
 
 _logger = get_logger(__name__)
 
-RIGHTS_PROMPT: str = """You are Lex, an AI legal assistant generating a rights summary.
+RIGHTS_PROMPT: str = """You are CaseMate, an AI legal assistant generating a rights summary.
 
 Generate a clear, plain-English summary of the user's legal rights
 based on their situation and state.

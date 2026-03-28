@@ -18,7 +18,7 @@ from backend.utils.retry import retry_anthropic
 
 _logger = get_logger(__name__)
 
-ANALYSIS_PROMPT: str = """You are Lex, an AI legal assistant analyzing a document for a user.
+ANALYSIS_PROMPT: str = """You are CaseMate, an AI legal assistant analyzing a document for a user.
 
 Given the document text and the user's legal profile, extract the following and return as JSON:
 {

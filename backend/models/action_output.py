@@ -1,6 +1,6 @@
 """Pydantic models for structured action outputs.
 
-These models represent the deliverables that Lex can generate for a user:
+These models represent the deliverables that CaseMate can generate for a user:
 demand letters, rights summaries, and next-steps checklists. Each model
 captures both the generated text and the supporting legal citations.
 """

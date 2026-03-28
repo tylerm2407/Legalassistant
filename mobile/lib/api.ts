@@ -4,6 +4,16 @@ import type {
   DemandLetter,
   RightsSummary,
   Checklist,
+  ConversationSummary,
+  ConversationDetail,
+  Deadline,
+  DeadlineCreateRequest,
+  RightsDomain,
+  RightsGuide,
+  WorkflowTemplate,
+  WorkflowInstance,
+  WorkflowSummary,
+  ReferralSuggestion,
 } from "./types";
 import { supabase } from "./supabase";
 
@@ -170,4 +180,143 @@ export async function uploadDocument(
   }
 
   return response.json();
+}
+
+// --- Conversations ---
+export async function getConversations(
+  userId: string
+): Promise<{ conversations: ConversationSummary[] }> {
+  return request<{ conversations: ConversationSummary[] }>("/conversations");
+}
+
+export async function getConversation(
+  conversationId: string
+): Promise<{ conversation: ConversationDetail }> {
+  return request<{ conversation: ConversationDetail }>(`/conversations/${conversationId}`);
+}
+
+export async function deleteConversation(
+  conversationId: string
+): Promise<{ status: string }> {
+  return request<{ status: string }>(`/conversations/${conversationId}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Deadlines ---
+export async function getDeadlines(
+  userId: string
+): Promise<{ deadlines: Deadline[] }> {
+  return request<{ deadlines: Deadline[] }>("/deadlines");
+}
+
+export async function createDeadline(
+  deadline: DeadlineCreateRequest
+): Promise<{ deadline: Deadline }> {
+  return request<{ deadline: Deadline }>("/deadlines", {
+    method: "POST",
+    body: JSON.stringify(deadline),
+  });
+}
+
+export async function updateDeadline(
+  deadlineId: string,
+  update: Partial<Deadline>
+): Promise<{ deadline: Deadline }> {
+  return request<{ deadline: Deadline }>(`/deadlines/${deadlineId}`, {
+    method: "PATCH",
+    body: JSON.stringify(update),
+  });
+}
+
+export async function deleteDeadline(
+  deadlineId: string
+): Promise<{ status: string }> {
+  return request<{ status: string }>(`/deadlines/${deadlineId}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Rights Library ---
+export async function getRightsDomains(): Promise<{ domains: RightsDomain[] }> {
+  return request<{ domains: RightsDomain[] }>("/rights/domains");
+}
+
+export async function getRightsGuides(
+  domain?: string
+): Promise<{ guides: RightsGuide[] }> {
+  const query = domain ? `?domain=${domain}` : "";
+  return request<{ guides: RightsGuide[] }>(`/rights/guides${query}`);
+}
+
+export async function getRightsGuide(
+  guideId: string
+): Promise<{ guide: RightsGuide }> {
+  return request<{ guide: RightsGuide }>(`/rights/guides/${guideId}`);
+}
+
+// --- Workflows ---
+export async function getWorkflowTemplates(
+  domain?: string
+): Promise<{ templates: WorkflowTemplate[] }> {
+  const query = domain ? `?domain=${domain}` : "";
+  return request<{ templates: WorkflowTemplate[] }>(`/workflows/templates${query}`);
+}
+
+export async function startWorkflow(
+  templateId: string
+): Promise<{ workflow: WorkflowInstance }> {
+  return request<{ workflow: WorkflowInstance }>("/workflows", {
+    method: "POST",
+    body: JSON.stringify({ template_id: templateId }),
+  });
+}
+
+export async function getActiveWorkflows(): Promise<{ workflows: WorkflowSummary[] }> {
+  return request<{ workflows: WorkflowSummary[] }>("/workflows");
+}
+
+export async function getWorkflow(
+  workflowId: string
+): Promise<{ workflow: WorkflowInstance }> {
+  return request<{ workflow: WorkflowInstance }>(`/workflows/${workflowId}`);
+}
+
+export async function updateWorkflowStep(
+  workflowId: string,
+  stepIndex: number,
+  status: string
+): Promise<{ workflow: WorkflowInstance }> {
+  return request<{ workflow: WorkflowInstance }>(`/workflows/${workflowId}/steps`, {
+    method: "PATCH",
+    body: JSON.stringify({ step_index: stepIndex, status }),
+  });
+}
+
+// --- Attorneys ---
+export async function findAttorneys(
+  state: string,
+  legalArea?: string
+): Promise<{ suggestions: ReferralSuggestion[] }> {
+  const params = new URLSearchParams({ state });
+  if (legalArea) params.append("legal_area", legalArea);
+  return request<{ suggestions: ReferralSuggestion[] }>(`/attorneys/search?${params}`);
+}
+
+// --- Export ---
+export async function exportPdf(
+  type: string,
+  content: Record<string, unknown>
+): Promise<Blob> {
+  const url = `${API_BASE}/export/document`;
+  const headers = await getAuthHeaders();
+  const response = await fetchWithRetry(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ type, content }),
+  });
+  if (!response.ok) {
+    throw new Error(`Export error ${response.status}`);
+  }
+  return response.blob();
 }

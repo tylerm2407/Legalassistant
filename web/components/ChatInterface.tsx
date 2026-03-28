@@ -55,7 +55,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `Hi ${profile.display_name}! I'm Lex, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
+      content: `Hi ${profile.display_name}! I'm CaseMate, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
       timestamp: new Date(),
     },
   ]);
@@ -130,7 +130,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     setMessages([
       {
         role: "assistant",
-        content: `Hi ${profile.display_name}! I'm Lex, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
+        content: `Hi ${profile.display_name}! I'm CaseMate, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
         timestamp: new Date(),
       },
     ]);
@@ -185,7 +185,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               </svg>
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-white">Lex</h1>
+              <h1 className="text-lg font-semibold text-white">CaseMate</h1>
               <p className="text-xs text-gray-500">AI Legal Assistant</p>
             </div>
           </div>

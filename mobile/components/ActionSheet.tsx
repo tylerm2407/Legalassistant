@@ -120,7 +120,7 @@ export default function ActionSheet({
 
           <Text style={styles.title}>Generate Action</Text>
           <Text style={styles.subtitle}>
-            Choose what you'd like Lex to generate for your issue.
+            Choose what you'd like CaseMate to generate for your issue.
           </Text>
 
           {/* Action buttons */}

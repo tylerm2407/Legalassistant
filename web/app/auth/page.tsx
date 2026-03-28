@@ -62,7 +62,7 @@ export default function AuthPage() {
           <p className="text-sm text-gray-400 mt-2">
             {isSignUp
               ? "Sign up to get personalized legal guidance"
-              : "Sign in to continue with Lex"}
+              : "Sign in to continue with CaseMate"}
           </p>
         </div>
 

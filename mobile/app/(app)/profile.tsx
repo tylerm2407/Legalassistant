@@ -12,25 +12,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProfileCard from "@/components/ProfileCard";
 import IssueCard from "@/components/IssueCard";
-import { getProfile } from "@/lib/api";
+import { getProfile, createProfile } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 import type { LegalProfile } from "@/lib/types";
 
-const EMPTY_PROFILE: LegalProfile = {
-  user_id: "user_placeholder",
-  display_name: "",
-  state: "",
-  housing_situation: "",
-  employment_type: "",
-  family_status: "",
-  active_issues: [],
-  legal_facts: [],
-  documents: [],
-  member_since: new Date().toISOString(),
-  conversation_count: 0,
-};
-
 export default function ProfileScreen() {
-  const [profile, setProfile] = useState<LegalProfile>(EMPTY_PROFILE);
+  const [profile, setProfile] = useState<LegalProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -38,15 +25,24 @@ export default function ProfileScreen() {
   const [editHousing, setEditHousing] = useState("");
   const [editEmployment, setEditEmployment] = useState("");
   const [editFamily, setEditFamily] = useState("");
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    loadProfile();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) {
+        setUserId(session.user.id);
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    if (userId) loadProfile();
+  }, [userId]);
 
   const loadProfile = async () => {
     setIsLoading(true);
     try {
-      const data = await getProfile("user_placeholder");
+      const data = await getProfile(userId);
       setProfile(data);
       setEditName(data.display_name);
       setEditState(data.state);
@@ -55,22 +51,44 @@ export default function ProfileScreen() {
       setEditFamily(data.family_status);
     } catch {
       // Use empty profile on error
+      setProfile({
+        user_id: userId,
+        display_name: "",
+        state: "",
+        housing_situation: "",
+        employment_type: "",
+        family_status: "",
+        active_issues: [],
+        legal_facts: [],
+        documents: [],
+        member_since: new Date().toISOString(),
+        conversation_count: 0,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSave = () => {
-    setProfile((prev) => ({
-      ...prev,
-      display_name: editName,
-      state: editState,
-      housing_situation: editHousing,
-      employment_type: editEmployment,
-      family_status: editFamily,
-    }));
-    setIsEditing(false);
-    Alert.alert("Saved", "Your profile has been updated.");
+  const handleSave = async () => {
+    try {
+      const updated = await createProfile({
+        user_id: userId,
+        display_name: editName,
+        state: editState,
+        housing_situation: editHousing,
+        employment_type: editEmployment,
+        family_status: editFamily,
+      });
+      setProfile(updated);
+      setIsEditing(false);
+      Alert.alert("Saved", "Your profile has been updated.");
+    } catch (err: unknown) {
+      Alert.alert("Error", err instanceof Error ? err.message : "Failed to save profile.");
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
 
   if (isLoading) {
@@ -85,7 +103,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Profile Card */}
-      <ProfileCard profile={profile} onPress={() => {}} />
+      {profile && <ProfileCard profile={profile} onPress={() => {}} />}
 
       {/* Edit toggle */}
       <TouchableOpacity
@@ -171,17 +189,17 @@ export default function ProfileScreen() {
       {/* Active Issues */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          Active Issues ({profile.active_issues.length})
+          Active Issues ({profile?.active_issues.length || 0})
         </Text>
-        {profile.active_issues.length === 0 ? (
+        {!profile?.active_issues.length ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              No active issues. Chat with Lex to get started.
+              No active issues. Chat with CaseMate to get started.
             </Text>
           </View>
         ) : (
           <View style={styles.issuesList}>
-            {profile.active_issues.map((issue, index) => (
+            {(profile?.active_issues || []).map((issue, index) => (
               <IssueCard key={index} issue={issue} />
             ))}
           </View>
@@ -191,9 +209,9 @@ export default function ProfileScreen() {
       {/* Documents */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          Documents ({profile.documents.length})
+          Documents ({profile?.documents.length || 0})
         </Text>
-        {profile.documents.length === 0 ? (
+        {!profile?.documents.length ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
               No documents uploaded yet.
@@ -201,7 +219,7 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <View style={styles.documentsList}>
-            {profile.documents.map((doc, index) => (
+            {(profile?.documents || []).map((doc, index) => (
               <View key={index} style={styles.documentItem}>
                 <Text style={styles.documentIcon}>📄</Text>
                 <Text style={styles.documentName}>{doc}</Text>
@@ -216,15 +234,24 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Activity</Text>
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{profile.conversation_count}</Text>
+            <Text style={styles.statValue}>{profile?.conversation_count || 0}</Text>
             <Text style={styles.statLabel}>Conversations</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{profile.legal_facts.length}</Text>
+            <Text style={styles.statValue}>{profile?.legal_facts.length || 0}</Text>
             <Text style={styles.statLabel}>Legal Facts</Text>
           </View>
         </View>
       </View>
+
+      {/* Logout */}
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.logoutButtonText}>Sign Out</Text>
+      </TouchableOpacity>
 
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -369,5 +396,17 @@ const styles = StyleSheet.create({
     color: "#64748b",
     fontWeight: "500",
     marginTop: 4,
+  },
+  logoutButton: {
+    marginTop: 32,
+    backgroundColor: "#fee2e2",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  logoutButtonText: {
+    color: "#dc2626",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

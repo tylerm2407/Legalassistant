@@ -74,7 +74,7 @@ export default function AppLayout() {
         name="chat"
         options={{
           title: "Chat",
-          headerTitle: "Lex",
+          headerTitle: "CaseMate",
           tabBarIcon: ({ focused }) => (
             <TabIcon icon="💬" focused={focused} />
           ),
@@ -91,12 +91,22 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name="documents"
+        name="tools"
         options={{
-          title: "Documents",
-          headerTitle: "Documents",
+          title: "Tools",
+          headerTitle: "Legal Tools",
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="📄" focused={focused} />
+            <TabIcon icon="🛠️" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="deadlines"
+        options={{
+          title: "Deadlines",
+          headerTitle: "Your Deadlines",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="⏰" focused={focused} />
           ),
         }}
       />
@@ -109,6 +119,35 @@ export default function AppLayout() {
             <TabIcon icon="👤" focused={focused} />
           ),
         }}
+      />
+      {/* Hidden stack screens */}
+      <Tabs.Screen
+        name="rights"
+        options={{ href: null, headerTitle: "Know Your Rights" }}
+      />
+      <Tabs.Screen
+        name="rights-guide"
+        options={{ href: null, headerTitle: "Rights Guide" }}
+      />
+      <Tabs.Screen
+        name="workflows"
+        options={{ href: null, headerTitle: "Legal Workflows" }}
+      />
+      <Tabs.Screen
+        name="workflow-wizard"
+        options={{ href: null, headerTitle: "Workflow" }}
+      />
+      <Tabs.Screen
+        name="attorneys"
+        options={{ href: null, headerTitle: "Find Attorneys" }}
+      />
+      <Tabs.Screen
+        name="conversations"
+        options={{ href: null, headerTitle: "Conversations" }}
+      />
+      <Tabs.Screen
+        name="documents"
+        options={{ href: null, headerTitle: "Documents" }}
       />
     </Tabs>
   );

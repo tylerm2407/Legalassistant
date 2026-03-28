@@ -1,6 +1,6 @@
 """Pydantic models for conversations and individual messages.
 
-A Conversation is a full thread between a user and Lex, containing an
+A Conversation is a full thread between a user and CaseMate, containing an
 ordered list of Messages. Each message is tagged with a role and optional
 legal area so the UI can render domain-specific badges and the backend
 can filter conversations by topic.
@@ -18,7 +18,7 @@ class Message(BaseModel):
     """A single message within a conversation.
 
     Attributes:
-        role: Who produced this message — the user, the assistant (Lex),
+        role: Who produced this message — the user, the assistant (CaseMate),
               or an error sentinel used for failed API calls.
         content: The full text content of the message.
         timestamp: When the message was created.
@@ -33,7 +33,7 @@ class Message(BaseModel):
 
 
 class Conversation(BaseModel):
-    """A complete conversation thread between a user and Lex.
+    """A complete conversation thread between a user and CaseMate.
 
     Attributes:
         id: Unique conversation identifier (UUID string).

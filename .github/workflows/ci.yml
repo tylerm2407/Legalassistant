@@ -2,13 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
     branches: [main]
 
 jobs:
   lint-and-test:
+    name: Backend — lint, typecheck, test
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,25 +22,31 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]" pytest-cov
 
-      - name: Lint
+      - name: Lint (ruff)
         run: ruff check backend/ tests/
 
-      - name: Test with coverage
+      - name: Typecheck (mypy)
+        run: mypy backend/
+
+      - name: Test with coverage (pytest)
         run: python -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing
         env:
           ANTHROPIC_API_KEY: test-key
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_KEY: test-key
+          SUPABASE_ANON_KEY: test-key
           SUPABASE_SERVICE_ROLE_KEY: test-key
           SUPABASE_JWT_SECRET: test-jwt-secret
           REDIS_URL: ""
 
   web-build:
+    name: Frontend — lint, typecheck, build
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"

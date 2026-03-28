@@ -140,7 +140,7 @@ export default function DeadlineDashboard() {
       {activeDeadlines.length === 0 && !showForm ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-2">No active deadlines</p>
-          <p className="text-xs text-gray-600">Deadlines will appear here as Lex detects them in your conversations</p>
+          <p className="text-xs text-gray-600">Deadlines will appear here as CaseMate detects them in your conversations</p>
         </div>
       ) : (
         <div className="space-y-3">

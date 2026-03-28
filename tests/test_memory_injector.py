@@ -1,7 +1,7 @@
-"""Tests for the memory injector — the most critical module in Lex.
+"""Tests for the memory injector — the most critical module in CaseMate.
 
 The injector builds the system prompt that makes every Claude response
-personalized. If this breaks, Lex gives generic answers and the product
+personalized. If this breaks, CaseMate gives generic answers and the product
 is worthless.
 """
 
@@ -98,7 +98,7 @@ class TestBuildSystemPromptIncludesLegalFacts:
 
 
 class TestBuildSystemPromptIncludesResponseRules:
-    """Verify the 8 response rules from LEX_BASE_INSTRUCTIONS are present."""
+    """Verify the 8 response rules from CASEMATE_BASE_INSTRUCTIONS are present."""
 
     def test_rule_1_cite_statutes(self, mock_profile: LegalProfile) -> None:
         prompt = build_system_prompt(mock_profile, "hello")
@@ -174,7 +174,7 @@ class TestBuildSystemPromptFederalFallback:
         profile = LegalProfile(
             user_id="user_test",
             display_name="Test User",
-            state="WY",
+            state="ZZ",
             housing_situation="renter",
             employment_type="employed",
             family_status="single",
@@ -182,7 +182,7 @@ class TestBuildSystemPromptFederalFallback:
         prompt = build_system_prompt(profile, "can my landlord keep my deposit")
         # Should NOT contain MA-specific or other state-specific references
         assert "M.G.L." not in prompt
-        assert "State law (WY)" not in prompt
+        assert "State law (ZZ)" not in prompt
 
     def test_supported_state_gets_both_state_and_federal(self, mock_profile: LegalProfile) -> None:
         prompt = build_system_prompt(mock_profile, "can my landlord keep my deposit")

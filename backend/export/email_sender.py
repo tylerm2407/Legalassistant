@@ -38,7 +38,7 @@ async def send_document_email(
     smtp_port = int(os.environ.get("SMTP_PORT", "587"))
     smtp_user = os.environ.get("SMTP_USER", "")
     smtp_pass = os.environ.get("SMTP_PASS", "")
-    from_email = os.environ.get("SMTP_FROM", "lex@lexlegal.ai")
+    from_email = os.environ.get("SMTP_FROM", "support@casemate.ai")
 
     if not smtp_host or not smtp_user:
         _logger.warning(
@@ -57,7 +57,7 @@ async def send_document_email(
         msg.add_attachment(
             attachment_bytes,
             maintype="application",
-            subtype="octet-stream",
+            subtype="pdf",
             filename=attachment_filename,
         )
 

@@ -25,7 +25,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#050505] bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.15)_0%,rgba(139,92,246,0.05)_45%,transparent_70%)]">
       {/* Nav */}
       <nav className="container-wide py-6 flex items-center justify-between">
-        <div className="text-xl font-bold text-blue-400">Lex</div>
+        <div className="text-xl font-bold text-blue-400">CaseMate</div>
         <div className="flex items-center gap-4">
           <Link
             href="/chat?demo=true"
@@ -50,7 +50,7 @@ export default function HomePage() {
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">Legal Assistant</span>
         </h1>
         <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Lex remembers your situation, cites your state&apos;s actual statutes,
+          CaseMate remembers your situation, cites your state&apos;s actual statutes,
           and generates demand letters, rights summaries, and checklists
           tailored to you.
         </p>
@@ -107,7 +107,7 @@ export default function HomePage() {
             }
             iconColor="text-blue-400"
             title="Memory"
-            description="Lex builds a profile of your legal situation over time. No need to repeat yourself — it remembers your housing, employment, family status, and active issues."
+            description="CaseMate builds a profile of your legal situation over time. No need to repeat yourself — it remembers your housing, employment, family status, and active issues."
           />
           <FeatureCard
             icon={
@@ -135,7 +135,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8">
         <div className="container-wide text-center text-sm text-gray-600">
-          Lex is an AI assistant and does not provide legal advice. Consult a
+          CaseMate is an AI assistant and does not provide legal advice. Consult a
           licensed attorney for legal matters.
         </div>
       </footer>

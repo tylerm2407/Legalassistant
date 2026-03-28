@@ -1,6 +1,6 @@
 """System prompt builder that injects the user's legal profile into every Claude call.
 
-This is the most important file in the Lex backend. The build_system_prompt
+This is the most important file in the CaseMate backend. The build_system_prompt
 function constructs a personalized system prompt that makes Claude aware of
 the user's state, legal situation, active issues, and known facts — so every
 response is tailored rather than generic.
@@ -14,7 +14,7 @@ from backend.legal.classifier import classify_legal_area
 from backend.legal.state_laws import STATE_LAWS
 from backend.models.legal_profile import LegalProfile
 
-LEX_BASE_INSTRUCTIONS: str = """You are Lex, a personalized AI legal assistant.
+CASEMATE_BASE_INSTRUCTIONS: str = """You are CaseMate, a personalized AI legal assistant.
 You help everyday people understand their legal rights, navigate disputes,
 and take concrete next steps.
 
@@ -87,7 +87,7 @@ def build_system_prompt(profile: LegalProfile, user_message: str) -> str:
     """Build a complete system prompt personalized to the user's legal profile.
 
     This function is called before every Claude API request. It combines:
-    1. Base Lex instructions and rules
+    1. Base CaseMate instructions and rules
     2. The user's personal legal context (state, situation, active issues)
     3. State-specific law citations relevant to the detected legal domain
     4. Domain-specific guidance based on the classified legal area
@@ -103,7 +103,7 @@ def build_system_prompt(profile: LegalProfile, user_message: str) -> str:
     legal_area = classify_legal_area(user_message)
 
     # Start with base instructions
-    prompt_parts: list[str] = [LEX_BASE_INSTRUCTIONS]
+    prompt_parts: list[str] = [CASEMATE_BASE_INSTRUCTIONS]
 
     # Add personal context wrapped in JSON to prevent prompt injection
     profile_data = json.dumps({

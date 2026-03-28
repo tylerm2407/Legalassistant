@@ -1,4 +1,6 @@
-# Lex — Your Personal AI Legal Assistant
+# CaseMate
+
+> The legal friend everyone deserves.
 
 ![CI](https://github.com/tylerm2407/Legalassistant/actions/workflows/ci.yml/badge.svg)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
@@ -6,15 +8,32 @@
 ![Expo](https://img.shields.io/badge/Expo-React_Native-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Lex remembers your legal situation.** Every answer is specific to your state, your housing, your employment, and every legal fact you've shared. Not a generic chatbot — a knowledgeable friend who has been advising you for months.
+CaseMate is a personalized AI legal assistant that **remembers your full legal situation across every conversation** — your state, your housing, your employment, your ongoing disputes. It answers every legal question in the context of your actual life, not a generic stranger's.
 
-## The Problem
+Most legal AI tools answer one question and forget you exist. CaseMate builds a **legal profile** that compounds over time — so the fifth conversation is smarter than the first, and you never have to re-explain your situation.
 
-Legal advice is expensive ($200–500/hour). Free resources give generic answers that don't account for your specific situation, state laws, or history. Most people facing legal issues — landlord disputes, employment violations, debt collection — can't afford real help and don't know their rights.
+---
 
-## The Solution
+## The problem
 
-Lex builds a persistent legal profile from every conversation. When you ask about your security deposit, Lex already knows you're in Massachusetts, you've been renting for 2 years, your landlord didn't do a move-in inspection, and your deposit hasn't earned interest. The answer cites M.G.L. c.186 §15B and calculates your specific damages.
+The average hourly rate for a lawyer in the United States is $349. A person with a median income of $52,000/year cannot afford to call a lawyer every time a landlord, employer, or debt collector does something illegal. They Google it, get generic answers, and give up.
+
+The legal system is designed for people who can afford $349/hour. CaseMate changes that.
+
+---
+
+## Demo
+
+1. Complete a 90-second legal intake (state, housing, employment, active issues)
+2. Ask any legal question — CaseMate already knows your situation
+3. Get a specific, jurisdiction-aware answer with your exact rights
+4. Generate a ready-to-send letter, rights summary, or next-steps checklist
+
+**Example:** A user in Massachusetts with a landlord dispute types *"my landlord is claiming I owe $800 for bathroom tiles."* CaseMate already knows: Massachusetts law, no move-in inspection was done, there's pre-existing water damage on file. It responds citing M.G.L. c.186 §15B, calculates the user is owed their deposit PLUS potential 3x damages, and offers to generate the demand letter — pre-filled, ready to send.
+
+That response would cost $700 at a law firm. CaseMate costs $20/month.
+
+---
 
 ## How It Works
 
@@ -37,13 +56,44 @@ Claude API  ─── personalized response with statute citations
 Background: extract new facts → update profile  ─── memory grows
 ```
 
+---
+
+## What CaseMate remembers
+
+```json
+{
+  "state": "Massachusetts",
+  "housing": "renter | month-to-month | no signed lease",
+  "employment": "full-time W2 | tech industry",
+  "active_issues": [
+    {
+      "type": "landlord-tenant",
+      "summary": "Landlord claiming $800 deposit for pre-existing damage",
+      "status": "open",
+      "started": "2026-03-10"
+    }
+  ],
+  "legal_facts": [
+    "Landlord did not perform move-in inspection",
+    "Unit had pre-existing water damage documented",
+    "Gave 30 days written notice"
+  ],
+  "documents": ["lease_2024.pdf", "move_out_notice.png"],
+  "conversations": 12
+}
+```
+
+Every answer CaseMate gives is personalized to this profile. Not a generic person. You.
+
+---
+
 ## Features
 
 - **Persistent Memory** — Legal profile grows with every conversation
 - **State-Specific Guidance** — Real statute citations for MA, CA, NY, TX, FL
 - **10 Legal Domains** — Landlord/tenant, employment, consumer, debt, small claims, contracts, traffic, family law, criminal records, immigration
 - **Action Generators** — Demand letters, rights summaries, next-steps checklists — all pre-filled from your profile
-- **Document Analysis** — Upload leases, notices, contracts — Lex extracts key facts and red flags
+- **Document Analysis** — Upload leases, notices, contracts — CaseMate extracts key facts and red flags
 - **Know Your Rights Library** — 18 pre-built guides with rights, action steps, deadlines, and statute citations
 - **Guided Workflows** — Step-by-step legal processes (eviction defense, wage claim filing, etc.)
 - **Attorney Referrals** — State and domain-specific attorney matching
@@ -51,7 +101,63 @@ Background: extract new facts → update profile  ─── memory grows
 - **Document Export** — Generate downloadable letters, summaries, and checklists
 - **Cross-Platform** — Web (Next.js) + iOS/Android (Expo React Native)
 
-## Quick Start
+---
+
+## Legal areas covered
+
+| Area | Key capabilities |
+|------|-----------------|
+| Landlord-tenant | Deposits, illegal entry, habitability, eviction defense |
+| Employment rights | Wage theft, wrongful termination, non-compete enforceability |
+| Consumer protection | Debt collection violations, billing disputes, warranty claims |
+| Debt & collections | FDCPA violations, statute of limitations, negotiation |
+| Small claims | Filing guidance, evidence preparation, judgment enforcement |
+| Contract disputes | Reading agreements, breach analysis, demand letters |
+| Traffic violations | Defense options, DMV hearings, insurance impact |
+| Family law basics | Custody basics, support calculations, separation agreements |
+| Criminal records | Expungement eligibility, background check rights |
+| Immigration basics | Status questions, document requirements, rights during enforcement |
+
+State-specific law is applied to every answer. CaseMate knows you're in Massachusetts before you say a word.
+
+---
+
+## Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full technical design.
+
+The core insight: every API call to Claude injects the user's legal profile as structured context. The memory layer is not a feature — it is the product.
+
+```
+User question
+    +
+Legal profile (from Supabase)
+    +
+State-specific legal system prompt
+    =
+A personalized answer no generic chatbot can give
+```
+
+---
+
+## Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
+| Mobile | Expo, React Native, Expo Router |
+| Backend | FastAPI, Python 3.12 |
+| AI | Anthropic Claude (claude-sonnet-4-6) |
+| Database | Supabase (profiles + conversations + documents) |
+| Auth | Supabase Auth (JWT) |
+| File storage | Supabase Storage (document uploads) |
+| Logging | structlog |
+| PDF | pdfplumber |
+| Deployment | Vercel (frontend) + Railway (backend) |
+
+---
+
+## Quick start
 
 ### Prerequisites
 
@@ -87,9 +193,29 @@ npx expo start        # Starts Expo dev server
 ### Run Tests
 
 ```bash
-make test             # Run all tests
+make test             # Run all tests with coverage
 make verify           # Lint + test
 ```
+
+---
+
+## Environment variables
+
+```bash
+# Required
+ANTHROPIC_API_KEY=sk-ant-...
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...   # for backend profile writes
+SUPABASE_JWT_SECRET=...            # for JWT verification
+
+# Optional
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+BACKEND_URL=http://localhost:8000
+REDIS_URL=                         # for rate limiting (fail-open if empty)
+```
+
+---
 
 ## API Endpoints
 
@@ -122,6 +248,8 @@ make verify           # Lint + test
 | `POST` | `/api/export/email` | Export document via email |
 | `GET` | `/api/attorneys/search` | Search for attorneys |
 
+---
+
 ## Project Structure
 
 ```
@@ -147,6 +275,8 @@ make verify           # Lint + test
 └── scripts/                     # Demo seed scripts
 ```
 
+---
+
 ## Security
 
 - **JWT Authentication** — All API endpoints require valid Supabase JWT
@@ -157,14 +287,13 @@ make verify           # Lint + test
 - **Row Level Security** — Supabase RLS policies ensure users only access their own data
 - **Prompt Injection Mitigation** — Profile context is structured data, not raw user input in system prompt
 
+---
+
 ## Testing
 
 ```bash
-# Run all tests with verbose output
-pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=backend --cov-report=term-missing
+# Run all tests with verbose output and coverage
+pytest tests/ -v --cov=backend --cov-report=term-missing
 
 # Run specific test file
 pytest tests/test_api_endpoints.py -v
@@ -173,16 +302,27 @@ pytest tests/test_api_endpoints.py -v
 ruff check backend/ tests/
 ```
 
-## Architecture
+---
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system design.
+## Business model
 
-## Demo
+| Tier | Price | Limits |
+|------|-------|--------|
+| Free | $0/month | 3 questions/month, basic profile |
+| Personal | $20/month | Unlimited questions, document upload, letter generation |
+| Family | $35/month | Up to 5 profiles, shared document vault |
 
-Ask Sarah Chen's profile: *"Can my landlord keep my security deposit for bathroom tile damage?"*
+At 1% penetration of Americans who cannot afford a lawyer: **$360M ARR**.
 
-Lex responds with MA-specific deposit law (M.G.L. c.186 §15B), references her move-in photos showing pre-existing water damage, calculates triple damages ($6,600), and offers to generate a demand letter.
+---
+
+## Built at
+
+**New England Inter-Collegiate AI Hackathon**
+225 Dyer Street · Providence, Rhode Island · March 28–29, 2026
 
 ## Team
 
-Built by Tyler Moore and Owen Ash for the New England Inter-Collegiate AI Hackathon, March 2026.
+Built by Tyler Moore and Owen Ash.
+
+> *The average American faces 3–5 significant legal situations per year and handles most of them alone. CaseMate ends that.*

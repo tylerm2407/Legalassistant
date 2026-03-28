@@ -139,7 +139,7 @@ function ProfilePageInner() {
         <div className="container-wide py-4 flex items-center justify-between">
           <div>
             <a href="/" className="text-xl font-bold text-blue-400">
-              Lex
+              CaseMate
             </a>
             <span className="text-gray-600 mx-2">/</span>
             <span className="text-sm text-gray-400">Profile</span>

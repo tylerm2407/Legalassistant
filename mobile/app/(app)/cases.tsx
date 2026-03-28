@@ -72,7 +72,7 @@ export default function CasesScreen() {
         <Text style={styles.emptyTitle}>No active cases</Text>
         <Text style={styles.emptyText}>
           {filter === "all"
-            ? "Ask Lex about a legal issue to get started. Your cases will appear here."
+            ? "Ask CaseMate about a legal issue to get started. Your cases will appear here."
             : `No ${filter} cases found. Try changing the filter.`}
         </Text>
       </View>

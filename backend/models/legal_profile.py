@@ -1,6 +1,6 @@
 """Pydantic models for the user's persistent legal profile.
 
-The LegalProfile is the single most important data model in Lex. It is
+The LegalProfile is the single most important data model in CaseMate. It is
 injected into every Claude API call so that responses are personalized
 to the user's specific legal situation, state, and history.
 """
@@ -30,7 +30,7 @@ class LegalIssue(BaseModel):
         issue_type: The legal domain (landlord_tenant, employment, etc.).
         summary: A one-sentence description of the specific dispute.
         status: Current state of the issue.
-        started_at: When the issue was first mentioned to Lex.
+        started_at: When the issue was first mentioned to CaseMate.
         updated_at: When the issue was last updated.
         notes: Additional context extracted from conversations over time.
     """
@@ -46,7 +46,7 @@ class LegalIssue(BaseModel):
 class LegalProfile(BaseModel):
     """The user's persistent legal context. Injected into every Claude API call.
 
-    This is the single most important data model in Lex. Every field either
+    This is the single most important data model in CaseMate. Every field either
     comes from the onboarding intake or is automatically extracted from
     conversations by the ProfileAutoUpdater background task.
 
@@ -60,7 +60,7 @@ class LegalProfile(BaseModel):
         active_issues: Ongoing legal disputes tracked over time.
         legal_facts: Specific facts extracted from conversations.
         documents: References to uploaded documents in Supabase Storage.
-        member_since: Used to show users how long Lex has helped them.
+        member_since: Used to show users how long CaseMate has helped them.
         conversation_count: Total conversations — shows product usage depth.
     """
 

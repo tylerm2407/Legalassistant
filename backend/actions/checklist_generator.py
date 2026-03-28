@@ -19,7 +19,7 @@ from backend.utils.retry import retry_anthropic
 
 _logger = get_logger(__name__)
 
-CHECKLIST_PROMPT: str = """You are Lex, an AI legal assistant generating a next-steps checklist.
+CHECKLIST_PROMPT: str = """You are CaseMate, an AI legal assistant generating a next-steps checklist.
 
 Generate a prioritized checklist of actions the user should take based on their legal situation.
 Return ONLY a JSON object with this exact structure:

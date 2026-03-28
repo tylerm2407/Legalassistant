@@ -14,7 +14,7 @@ export default function SplashScreen() {
             <View style={styles.logoCircle}>
               <Text style={styles.logoIcon}>⚖</Text>
             </View>
-            <Text style={styles.logoText}>Lex</Text>
+            <Text style={styles.logoText}>CaseMate</Text>
           </View>
 
           <Text style={styles.tagline}>
@@ -45,7 +45,7 @@ export default function SplashScreen() {
           </View>
 
           <Text style={styles.disclaimer}>
-            Lex provides legal information, not legal advice. For serious legal
+            CaseMate provides legal information, not legal advice. For serious legal
             matters, consult a licensed attorney.
           </Text>
         </View>

@@ -6,7 +6,7 @@ import { AuthProvider } from "@/lib/auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lex — AI Legal Assistant",
+  title: "CaseMate — AI Legal Assistant",
   description:
     "Your personal AI legal assistant. Get personalized legal guidance with memory, state-specific citations, and actionable documents.",
 };

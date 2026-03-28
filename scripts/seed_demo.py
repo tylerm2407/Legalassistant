@@ -1,7 +1,7 @@
 """Seed script to create the Sarah Chen demo profile in Supabase.
 
 This script upserts a fully populated demo user profile that showcases
-Lex's personalized legal assistant capabilities, including active issues,
+CaseMate's personalized legal assistant capabilities, including active issues,
 legal facts, and document references.
 
 Usage:

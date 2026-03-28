@@ -75,7 +75,7 @@ export default function LoginScreen() {
             <Text style={styles.subtitle}>
               {isSignUp
                 ? "Sign up to get personalized legal guidance"
-                : "Sign in to continue with Lex"}
+                : "Sign in to continue with CaseMate"}
             </Text>
           </View>
 

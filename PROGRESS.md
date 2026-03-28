@@ -1,4 +1,15 @@
-# Lex — Build Progress
+# CaseMate — Build Progress
+
+> Updated every 30 minutes during the hackathon.
+> Last updated: 2026-03-28
+
+---
+
+## Current status
+
+**Phase:** All core phases complete — security hardened, 110+ tests passing
+
+---
 
 ## Phase 0 — Scaffold ✅
 - [x] Repository structure created
@@ -75,3 +86,23 @@
 - [x] Document analyzer tests (5 tests)
 - [x] Rights library tests (10 tests)
 - [x] CI pipeline with coverage reporting
+
+---
+
+## Build log (updated Saturday / Sunday)
+
+### [23:00] — Pre-build complete
+- README.md, ARCHITECTURE.md, CLAUDE.md written and committed
+- All 5 ADRs written in docs/decisions/
+- Full project scaffold committed (folder structure, Makefile, pyproject.toml, CI)
+- CHANGELOG.md initialized
+- GitHub repo live
+- Next: Saturday 10am — scaffold the application with Claude Code
+
+<!--
+Format for each entry:
+## [HH:MM] — What just shipped
+- Specific thing completed
+- Specific thing completed
+- Next: what is being built right now
+-->

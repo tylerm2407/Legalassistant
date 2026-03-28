@@ -10,20 +10,23 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import ChatBubble from "@/components/ChatBubble";
 import ActionSheet from "@/components/ActionSheet";
-import { chat } from "@/lib/api";
+import { chat, getConversation } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import type { Message } from "@/lib/types";
 
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hi, I'm Lex — your AI legal assistant. Tell me about your legal situation and I'll help you understand your rights, generate documents, and figure out next steps. What's going on?",
+    "Hi, I'm CaseMate — your AI legal assistant. Tell me about your legal situation and I'll help you understand your rights, generate documents, and figure out next steps. What's going on?",
   timestamp: new Date(),
 };
 
 export default function ChatScreen() {
+  const { conversationId: paramConvId } = useLocalSearchParams<{ conversationId?: string }>();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +52,24 @@ export default function ChatScreen() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (paramConvId) {
+      setConversationId(paramConvId);
+      getConversation(paramConvId)
+        .then((data) => {
+          if (data.conversation?.messages) {
+            setMessages(data.conversation.messages.map((m: any) => ({
+              role: m.role,
+              content: m.content,
+              timestamp: new Date(m.timestamp || Date.now()),
+              legalArea: m.legal_area,
+            })));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [paramConvId]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -142,9 +163,17 @@ export default function ChatScreen() {
       {isLoading && (
         <View style={styles.typingIndicator}>
           <ActivityIndicator size="small" color="#1e40af" />
-          <Text style={styles.typingText}>Lex is thinking...</Text>
+          <Text style={styles.typingText}>CaseMate is thinking...</Text>
         </View>
       )}
+
+      {/* History button */}
+      <TouchableOpacity
+        style={styles.historyButton}
+        onPress={() => router.push("/(app)/conversations" as any)}
+      >
+        <Text style={styles.historyButtonText}>📜 History</Text>
+      </TouchableOpacity>
 
       {/* Input bar */}
       <View style={styles.inputBar}>
@@ -218,6 +247,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#64748b",
     fontStyle: "italic",
+  },
+  historyButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#eff6ff",
+    alignSelf: "center",
+    borderRadius: 16,
+    marginBottom: 4,
+  },
+  historyButtonText: {
+    fontSize: 13,
+    color: "#1e40af",
+    fontWeight: "600",
   },
   inputBar: {
     flexDirection: "row",

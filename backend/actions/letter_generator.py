@@ -19,7 +19,7 @@ from backend.utils.retry import retry_anthropic
 
 _logger = get_logger(__name__)
 
-LETTER_PROMPT: str = """You are Lex, an AI legal assistant generating a demand letter.
+LETTER_PROMPT: str = """You are CaseMate, an AI legal assistant generating a demand letter.
 
 Generate a professional demand letter based on the user's situation and applicable laws.
 Return ONLY a JSON object with this exact structure:

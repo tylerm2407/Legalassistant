@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Button from "./ui/Button";
 import LegalProfileSidebar from "./LegalProfileSidebar";
+import ConversationHistory from "./ConversationHistory";
 import ActionGenerator from "./ActionGenerator";
 import type { LegalProfile, Message } from "@/lib/types";
 import { api } from "@/lib/api";
@@ -62,6 +63,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [lastLegalArea, setLastLegalArea] = useState<string>("");
+  const [showHistory, setShowHistory] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -122,24 +124,84 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     }
   }
 
+  function handleNewConversation() {
+    setConversationId(undefined);
+    setLastLegalArea("");
+    setMessages([
+      {
+        role: "assistant",
+        content: `Hi ${profile.display_name}! I'm Lex, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
+        timestamp: new Date(),
+      },
+    ]);
+  }
+
+  async function handleSelectConversation(id: string) {
+    try {
+      const conv = await api.getConversation(id);
+      setConversationId(conv.id);
+      setMessages(
+        conv.messages.map((m) => ({
+          role: m.role as "user" | "assistant" | "error",
+          content: m.content,
+          timestamp: new Date(m.timestamp),
+          legalArea: m.legal_area || undefined,
+        }))
+      );
+      setLastLegalArea(conv.legal_area || "");
+    } catch {
+      // silent
+    }
+  }
+
   return (
     <div className="flex h-screen bg-[#050505]">
-      {/* Sidebar */}
+      {/* Profile Sidebar */}
       <LegalProfileSidebar profile={profile} />
+
+      {/* Conversation History */}
+      {showHistory && (
+        <div className="w-[240px] shrink-0 border-r border-white/10 bg-white/[0.01]">
+          <ConversationHistory
+            activeConversationId={conversationId}
+            onSelectConversation={handleSelectConversation}
+            onNewConversation={handleNewConversation}
+          />
+        </div>
+      )}
 
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <header className="bg-white/[0.03] backdrop-blur-xl border-b border-white/10 px-6 py-3 flex items-center justify-between shrink-0">
-          <div>
-            <h1 className="text-lg font-semibold text-white">Lex</h1>
-            <p className="text-xs text-gray-500">AI Legal Assistant</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              title={showHistory ? "Hide history" : "Show history"}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-lg font-semibold text-white">Lex</h1>
+              <p className="text-xs text-gray-500">AI Legal Assistant</p>
+            </div>
           </div>
-          {lastLegalArea && (
-            <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full font-medium">
-              {lastLegalArea.replace(/_/g, " ")}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {lastLegalArea && (
+              <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full font-medium">
+                {lastLegalArea.replace(/_/g, " ")}
+              </span>
+            )}
+            <nav className="flex items-center gap-1 ml-3">
+              <a href="/rights" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Rights</a>
+              <a href="/workflows" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Workflows</a>
+              <a href="/deadlines" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Deadlines</a>
+              <a href="/attorneys" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Attorneys</a>
+            </nav>
+          </div>
         </header>
 
         {/* Messages */}

@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import { Tabs } from "expo-router";
-import { Text, StyleSheet } from "react-native";
+import { Text, StyleSheet, ActivityIndicator, View } from "react-native";
+import { supabase } from "@/lib/supabase";
 
 function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
   return (
@@ -10,6 +13,36 @@ function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
 }
 
 export default function AppLayout() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace("/(auth)/login");
+      }
+      setChecking(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          router.replace("/(auth)/login");
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  if (checking) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#ffffff" }}>
+        <ActivityIndicator size="large" color="#1e40af" />
+      </View>
+    );
+  }
+
   return (
     <Tabs
       screenOptions={{

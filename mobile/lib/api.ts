@@ -5,21 +5,60 @@ import type {
   RightsSummary,
   Checklist,
 } from "./types";
+import { supabase } from "./supabase";
 
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
+  }
+  return headers;
+}
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = 3,
+): Promise<Response> {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || (response.status >= 400 && response.status < 500)) {
+        return response;
+      }
+      if (attempt < retries - 1) {
+        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        continue;
+      }
+      return response;
+    } catch (err) {
+      if (attempt < retries - 1) {
+        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error("Request failed after retries");
+}
 
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const authHeaders = await getAuthHeaders();
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...authHeaders,
     ...(options.headers as Record<string, string>),
   };
 
-  const response = await fetch(url, { ...options, headers });
+  const response = await fetchWithRetry(url, { ...options, headers });
 
   if (!response.ok) {
     const errorBody = await response.text().catch(() => "Unknown error");
@@ -37,7 +76,6 @@ export async function chat(
   return request<ChatResponse>("/chat", {
     method: "POST",
     body: JSON.stringify({
-      user_id: userId,
       message,
       conversation_id: conversationId,
     }),
@@ -53,7 +91,13 @@ export async function createProfile(
 ): Promise<LegalProfile> {
   return request<LegalProfile>("/profile", {
     method: "POST",
-    body: JSON.stringify(profile),
+    body: JSON.stringify({
+      display_name: profile.display_name,
+      state: profile.state,
+      housing_situation: profile.housing_situation,
+      employment_type: profile.employment_type,
+      family_status: profile.family_status,
+    }),
   });
 }
 
@@ -65,9 +109,7 @@ export async function generateLetter(
   return request<DemandLetter>("/actions/letter", {
     method: "POST",
     body: JSON.stringify({
-      user_id: userId,
-      issue_type: issueType,
-      details,
+      context: `${issueType}: ${details}`,
     }),
   });
 }
@@ -79,8 +121,7 @@ export async function generateRights(
   return request<RightsSummary>("/actions/rights", {
     method: "POST",
     body: JSON.stringify({
-      user_id: userId,
-      issue_type: issueType,
+      context: issueType,
     }),
   });
 }
@@ -92,8 +133,7 @@ export async function generateChecklist(
   return request<Checklist>("/actions/checklist", {
     method: "POST",
     body: JSON.stringify({
-      user_id: userId,
-      issue_type: issueType,
+      context: issueType,
     }),
   });
 }
@@ -104,21 +144,24 @@ export async function uploadDocument(
   fileName: string,
   mimeType: string
 ): Promise<{ document_id: string; extracted_facts: string[] }> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = {};
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
+  }
+
   const formData = new FormData();
-  formData.append("user_id", userId);
   formData.append("file", {
     uri: fileUri,
     name: fileName,
     type: mimeType,
   } as unknown as Blob);
 
-  const url = `${API_BASE}/documents/upload`;
-  const response = await fetch(url, {
+  const url = `${API_BASE}/documents`;
+  const response = await fetchWithRetry(url, {
     method: "POST",
     body: formData,
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+    headers,
   });
 
   if (!response.ok) {

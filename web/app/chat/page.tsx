@@ -1,12 +1,10 @@
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import ChatInterface from "@/components/ChatInterface";
 import type { LegalProfile } from "@/lib/types";
 import { api } from "@/lib/api";
-
-const DEMO_USER_ID = "demo-sarah-chen-uuid";
+import { useAuth } from "@/lib/auth";
 
 export default function ChatPage() {
   return (
@@ -26,20 +24,20 @@ export default function ChatPage() {
 }
 
 function ChatPageInner() {
-  const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<LegalProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (authLoading || !user) return;
+
     async function loadProfile() {
       setLoading(true);
       setError("");
 
-      const userId = searchParams.get("userId") || DEMO_USER_ID;
-
       try {
-        const p = await api.getProfile(userId);
+        const p = await api.getProfile(user!.id);
         if (p) {
           setProfile(p);
         } else {
@@ -59,9 +57,9 @@ function ChatPageInner() {
     }
 
     loadProfile();
-  }, [searchParams]);
+  }, [user, authLoading]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="text-center">

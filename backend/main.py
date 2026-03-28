@@ -7,29 +7,71 @@ and action generation (demand letters, rights summaries, checklists).
 from __future__ import annotations
 
 import os
-import uuid
 
 import anthropic
 from anthropic.types import TextBlock
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from backend.actions.checklist_generator import generate_checklist
 from backend.actions.letter_generator import generate_demand_letter
 from backend.actions.rights_generator import generate_rights_summary
+from backend.deadlines.detector import detect_and_save_deadlines
+from backend.deadlines.tracker import (
+    DeadlineCreateRequest,
+    DeadlineUpdateRequest,
+    create_deadline,
+    delete_deadline,
+    list_deadlines,
+    update_deadline,
+)
 from backend.documents.analyzer import analyze_document
 from backend.documents.extractor import extract_text
+from backend.export.email_sender import send_document_email
+from backend.export.pdf_generator import (
+    generate_checklist_document,
+    generate_demand_letter_document,
+    generate_rights_document,
+    generate_text_document,
+)
+from backend.knowledge.rights_library import (
+    get_all_guides,
+    get_domains,
+    get_guide_by_id,
+    get_guides_by_domain,
+)
 from backend.legal.classifier import classify_legal_area
+from backend.memory.conversation_store import (
+    create_conversation,
+    delete_conversation,
+    get_conversation,
+    list_conversations,
+    save_conversation,
+)
 from backend.memory.injector import build_system_prompt
 from backend.memory.profile import get_profile, update_profile
 from backend.memory.updater import update_profile_from_conversation
 from backend.models.legal_profile import LegalProfile
+from backend.referrals.matcher import find_attorneys, get_referral_suggestions
 from backend.utils.auth import verify_supabase_jwt
 from backend.utils.client import get_anthropic_client
 from backend.utils.logger import configure_logging, get_logger
 from backend.utils.rate_limiter import rate_limit
 from backend.utils.retry import retry_anthropic
+from backend.workflows.engine import (
+    WorkflowStepUpdateRequest,
+    get_workflow,
+    list_workflows,
+    start_workflow,
+    update_workflow_step,
+)
+from backend.workflows.templates.definitions import (
+    get_all_templates,
+    get_template_by_id,
+    get_templates_by_domain,
+)
 
 configure_logging()
 _logger = get_logger(__name__)
@@ -51,7 +93,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in _allowed_origins],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -156,9 +198,8 @@ async def chat(
 ) -> ChatResponse:
     """Process a user message and return Lex's response.
 
-    Fetches the user's profile, builds a personalized system prompt,
-    calls Claude, and schedules a background task to extract new
-    legal facts from the conversation.
+    Supports multi-turn conversations by loading conversation history
+    and sending the last N messages as context to Claude.
 
     Args:
         request: The chat request containing the message.
@@ -183,23 +224,32 @@ async def chat(
     legal_area = classify_legal_area(request.message)
     system_prompt = build_system_prompt(profile, request.message)
 
-    conversation_id = request.conversation_id or str(uuid.uuid4())
+    # Load or create conversation
+    conversation = None
+    if request.conversation_id:
+        conversation = await get_conversation(request.conversation_id, user_id)
+
+    if conversation is None:
+        conversation = await create_conversation(user_id, legal_area=legal_area)
+
+    # Add user message to conversation
+    conversation.add_message("user", request.message, legal_area=legal_area)
+
+    # Build message history for Claude (last 20 messages)
+    max_context_messages = 20
+    api_messages = conversation.to_anthropic_messages()[-max_context_messages:]
 
     try:
         client = get_anthropic_client()
 
         @retry_anthropic
         async def _call_claude() -> str:
-            """Call the Claude API with the personalized system prompt.
-
-            Returns:
-                The assistant's response text.
-            """
+            """Call the Claude API with conversation history."""
             response = await client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
                 system=system_prompt,
-                messages=[{"role": "user", "content": request.message}],
+                messages=api_messages,
             )
             first_block = response.content[0] if response.content else None
             return first_block.text if isinstance(first_block, TextBlock) else ""
@@ -215,6 +265,13 @@ async def chat(
         )
         raise HTTPException(status_code=500, detail="AI service temporarily unavailable.") from exc
 
+    # Add assistant response to conversation and save
+    conversation.add_message("assistant", assistant_response, legal_area=legal_area)
+    if not conversation.legal_area:
+        conversation.legal_area = legal_area
+
+    background_tasks.add_task(save_conversation, conversation)
+
     # Schedule background profile update
     conversation_messages = [
         {"role": "user", "content": request.message},
@@ -226,16 +283,24 @@ async def chat(
         conversation_messages,
     )
 
+    # Schedule background deadline detection
+    background_tasks.add_task(
+        detect_and_save_deadlines,
+        user_id,
+        conversation_messages,
+        conversation.id,
+    )
+
     _logger.info(
         "chat_response",
         user_id=user_id,
         legal_area=legal_area,
-        conversation_id=conversation_id,
+        conversation_id=conversation.id,
         response_length=len(assistant_response),
     )
 
     return ChatResponse(
-        conversation_id=conversation_id,
+        conversation_id=conversation.id,
         response=assistant_response,
         legal_area=legal_area,
     )
@@ -308,6 +373,68 @@ async def get_user_profile(
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found.")
     return {"profile": profile.model_dump(mode="json")}
+
+
+@app.get("/api/conversations")
+async def list_user_conversations(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """List the authenticated user's conversations.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with a list of conversation summaries.
+    """
+    conversations = await list_conversations(user_id)
+    return {"conversations": conversations}
+
+
+@app.get("/api/conversations/{conversation_id}")
+async def get_user_conversation(
+    conversation_id: str,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Load a specific conversation by ID.
+
+    Args:
+        conversation_id: The conversation UUID.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the full conversation data.
+
+    Raises:
+        HTTPException: 404 if conversation not found or not owned by user.
+    """
+    conversation = await get_conversation(conversation_id, user_id)
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    return {"conversation": conversation.model_dump(mode="json")}
+
+
+@app.delete("/api/conversations/{conversation_id}")
+async def delete_user_conversation(
+    conversation_id: str,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, str]:
+    """Delete a conversation by ID.
+
+    Args:
+        conversation_id: The conversation UUID.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with status message.
+
+    Raises:
+        HTTPException: 404 if conversation not found or not owned by user.
+    """
+    deleted = await delete_conversation(conversation_id, user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    return {"status": "deleted"}
 
 
 @app.post("/api/actions/letter")
@@ -480,3 +607,457 @@ async def upload_document(
             error_message=str(exc),
         )
         raise HTTPException(status_code=500, detail="Failed to analyze document.") from exc
+
+
+# ---------- Deadline Endpoints ----------
+
+
+@app.post("/api/deadlines")
+async def create_user_deadline(
+    request: DeadlineCreateRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Create a new deadline manually.
+
+    Args:
+        request: The deadline creation data.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the created deadline.
+
+    Raises:
+        HTTPException: 500 if creation fails.
+    """
+    try:
+        deadline = await create_deadline(
+            user_id=user_id,
+            title=request.title,
+            date=request.date,
+            legal_area=request.legal_area,
+            notes=request.notes,
+        )
+        return {"deadline": deadline.model_dump(mode="json")}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/api/deadlines")
+async def list_user_deadlines(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """List the authenticated user's deadlines.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with a list of deadlines.
+    """
+    deadlines = await list_deadlines(user_id)
+    return {"deadlines": [d.model_dump(mode="json") for d in deadlines]}
+
+
+@app.patch("/api/deadlines/{deadline_id}")
+async def update_user_deadline(
+    deadline_id: str,
+    request: DeadlineUpdateRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Update a deadline.
+
+    Args:
+        deadline_id: The deadline UUID.
+        request: The update data.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the updated deadline.
+
+    Raises:
+        HTTPException: 404 if deadline not found.
+    """
+    try:
+        deadline = await update_deadline(deadline_id, user_id, request)
+        if not deadline:
+            raise HTTPException(status_code=404, detail="Deadline not found.")
+        return {"deadline": deadline.model_dump(mode="json")}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.delete("/api/deadlines/{deadline_id}")
+async def delete_user_deadline(
+    deadline_id: str,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, str]:
+    """Delete a deadline.
+
+    Args:
+        deadline_id: The deadline UUID.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with status message.
+
+    Raises:
+        HTTPException: 404 if deadline not found.
+    """
+    deleted = await delete_deadline(deadline_id, user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Deadline not found.")
+    return {"status": "deleted"}
+
+
+# ---------- Rights Library Endpoints ----------
+
+
+@app.get("/api/rights/domains")
+async def get_rights_domains(
+    _user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """List available legal rights domains with guide counts.
+
+    Args:
+        _user_id: Authenticated user ID from JWT (side-effect only).
+
+    Returns:
+        Dict with a list of domain summaries.
+    """
+    return {"domains": get_domains()}
+
+
+@app.get("/api/rights/guides")
+async def get_rights_guides_list(
+    domain: str | None = None,
+    _user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """List rights guides, optionally filtered by domain.
+
+    Args:
+        domain: Optional legal domain to filter by.
+        _user_id: Authenticated user ID from JWT (side-effect only).
+
+    Returns:
+        Dict with a list of rights guides.
+    """
+    guides = get_guides_by_domain(domain) if domain else get_all_guides()
+    return {"guides": [g.model_dump() for g in guides]}
+
+
+@app.get("/api/rights/guides/{guide_id}")
+async def get_rights_guide(
+    guide_id: str,
+    _user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Get a specific rights guide by ID.
+
+    Args:
+        guide_id: The unique guide identifier.
+        _user_id: Authenticated user ID from JWT (side-effect only).
+
+    Returns:
+        Dict with the rights guide data.
+
+    Raises:
+        HTTPException: 404 if guide not found.
+    """
+    guide = get_guide_by_id(guide_id)
+    if not guide:
+        raise HTTPException(status_code=404, detail="Guide not found.")
+    return {"guide": guide.model_dump()}
+
+
+# ---------- Workflow Endpoints ----------
+
+
+class WorkflowStartRequest(BaseModel):
+    """Request body for starting a workflow.
+
+    Attributes:
+        template_id: The workflow template to start.
+    """
+
+    template_id: str
+
+
+@app.get("/api/workflows/templates")
+async def list_workflow_templates(
+    domain: str | None = None,
+    _user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """List available workflow templates.
+
+    Args:
+        domain: Optional legal domain filter.
+        _user_id: Authenticated user ID from JWT (side-effect only).
+
+    Returns:
+        Dict with a list of workflow templates.
+    """
+    templates = get_templates_by_domain(domain) if domain else get_all_templates()
+    return {"templates": [t.model_dump() for t in templates]}
+
+
+@app.post("/api/workflows")
+async def start_user_workflow(
+    request: WorkflowStartRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Start a new workflow from a template.
+
+    Args:
+        request: The workflow start request with template_id.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the created workflow instance.
+
+    Raises:
+        HTTPException: 404 if template not found.
+        HTTPException: 500 if creation fails.
+    """
+    template = get_template_by_id(request.template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Workflow template not found.")
+
+    try:
+        instance = await start_workflow(user_id, template)
+        return {"workflow": instance.model_dump(mode="json")}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/api/workflows")
+async def list_user_workflows(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """List the authenticated user's active workflows.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with a list of workflow summaries.
+    """
+    workflows = await list_workflows(user_id)
+    return {"workflows": workflows}
+
+
+@app.get("/api/workflows/{workflow_id}")
+async def get_user_workflow(
+    workflow_id: str,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Load a specific workflow by ID.
+
+    Args:
+        workflow_id: The workflow instance UUID.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the full workflow data.
+
+    Raises:
+        HTTPException: 404 if workflow not found.
+    """
+    workflow = await get_workflow(workflow_id, user_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found.")
+    return {"workflow": workflow.model_dump(mode="json")}
+
+
+@app.patch("/api/workflows/{workflow_id}/steps")
+async def update_user_workflow_step(
+    workflow_id: str,
+    request: WorkflowStepUpdateRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Update a step's status in a workflow.
+
+    Args:
+        workflow_id: The workflow instance UUID.
+        request: The step update data.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the updated workflow.
+
+    Raises:
+        HTTPException: 404 if workflow not found.
+        HTTPException: 500 if update fails.
+    """
+    try:
+        workflow = await update_workflow_step(workflow_id, user_id, request)
+        if not workflow:
+            raise HTTPException(status_code=404, detail="Workflow not found.")
+        return {"workflow": workflow.model_dump(mode="json")}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# ---------- Export Endpoints ----------
+
+
+class ExportDocumentRequest(BaseModel):
+    """Request body for document export.
+
+    Attributes:
+        type: Document type (letter, rights, checklist, custom).
+        content: Document content fields.
+    """
+
+    type: str
+    content: dict[str, object]
+
+
+class ExportEmailRequest(BaseModel):
+    """Request body for email export.
+
+    Attributes:
+        type: Document type.
+        content: Document content fields.
+        email: Recipient email address.
+    """
+
+    type: str
+    content: dict[str, object]
+    email: str = Field(..., max_length=320)
+
+
+@app.post("/api/export/document")
+async def export_document(
+    request: ExportDocumentRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> Response:
+    """Generate and download a document.
+
+    Args:
+        request: The export request with document type and content.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        The generated document as a downloadable file.
+
+    Raises:
+        HTTPException: 400 if document type is unknown.
+    """
+    profile = await get_profile(user_id)
+    user_name = profile.display_name if profile else ""
+    content = request.content
+
+    if request.type == "letter":
+        doc_bytes = generate_demand_letter_document(
+            letter_text=str(content.get("letter_text", "")),
+            legal_citations=list(content.get("legal_citations", [])),  # type: ignore[arg-type]
+            user_name=user_name,
+        )
+        filename = "lex_demand_letter.txt"
+    elif request.type == "rights":
+        doc_bytes = generate_rights_document(
+            summary_text=str(content.get("summary_text", "")),
+            key_rights=list(content.get("key_rights", [])),  # type: ignore[arg-type]
+            user_name=user_name,
+        )
+        filename = "lex_rights_summary.txt"
+    elif request.type == "checklist":
+        doc_bytes = generate_checklist_document(
+            items=list(content.get("items", [])),  # type: ignore[arg-type]
+            deadlines=list(content.get("deadlines", [])),  # type: ignore[arg-type]
+            user_name=user_name,
+        )
+        filename = "lex_checklist.txt"
+    elif request.type == "custom":
+        doc_bytes = generate_text_document(
+            title=str(content.get("title", "Legal Document")),
+            content=str(content.get("body", "")),
+            user_name=user_name,
+            sections=content.get("sections"),  # type: ignore[arg-type]
+        )
+        filename = "lex_document.txt"
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown document type: {request.type}")
+
+    return Response(
+        content=doc_bytes,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/api/export/email")
+async def export_email(
+    request: ExportEmailRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Generate a document and send it via email.
+
+    Args:
+        request: The export request with document type, content, and email.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with send status.
+
+    Raises:
+        HTTPException: 500 if email sending fails.
+    """
+    profile = await get_profile(user_id)
+    user_name = profile.display_name if profile else ""
+
+    doc_bytes = generate_text_document(
+        title=str(request.content.get("title", "Legal Document")),
+        content=str(request.content.get("body", "")),
+        user_name=user_name,
+    )
+
+    sent = await send_document_email(
+        to_email=request.email,
+        subject=f"Lex Legal Document - {request.type}",
+        body="Please find your legal document attached.\n\nGenerated by Lex AI Legal Assistant.",
+        attachment_bytes=doc_bytes,
+        attachment_filename="lex_document.txt",
+    )
+
+    if not sent:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to send email. Check email configuration.",
+        )
+    return {"status": "sent", "email": request.email}
+
+
+# ---------- Attorney Referral Endpoints ----------
+
+
+@app.get("/api/attorneys/search")
+async def search_attorneys(
+    state: str,
+    legal_area: str | None = None,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Search for attorneys by state and legal area.
+
+    Args:
+        state: Two-letter state code.
+        legal_area: Optional legal domain filter.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with attorney referral suggestions.
+    """
+    if legal_area:
+        suggestions = await get_referral_suggestions(state, legal_area)
+        return {"suggestions": [s.model_dump() for s in suggestions]}
+
+    attorneys = await find_attorneys(state)
+    return {
+        "suggestions": [
+            {
+                "attorney": a.model_dump(),
+                "match_reason": f"Licensed in {a.state}",
+                "relevance_score": 50,
+            }
+            for a in attorneys
+        ]
+    }

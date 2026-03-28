@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -33,6 +34,7 @@ interface FormData {
 
 export default function OnboardingFlow() {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -73,7 +75,12 @@ export default function OnboardingFlow() {
     setSubmitting(true);
     setError("");
     try {
-      const userId = crypto.randomUUID();
+      const userId = user?.id;
+      if (!userId) {
+        setError("You must be signed in. Redirecting...");
+        router.push("/auth");
+        return;
+      }
       const housing = form.housingDetails
         ? `${form.housingSituation} — ${form.housingDetails}`
         : form.housingSituation;

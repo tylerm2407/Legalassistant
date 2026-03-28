@@ -12,8 +12,9 @@ from backend.legal.classifier import classify_legal_area
 from backend.legal.state_laws import STATE_LAWS
 from backend.models.legal_profile import LegalProfile
 
-LEX_BASE_INSTRUCTIONS: str = """You are Lex, a personalized AI legal assistant. You help everyday people
-understand their legal rights, navigate disputes, and take concrete next steps.
+LEX_BASE_INSTRUCTIONS: str = """You are Lex, a personalized AI legal assistant.
+You help everyday people understand their legal rights, navigate disputes,
+and take concrete next steps.
 
 RULES:
 1. Always cite specific statutes when discussing legal rights.
@@ -26,7 +27,8 @@ RULES:
 8. Be empathetic but precise. People come to you stressed — acknowledge that, then help.
 
 DISCLAIMER (include at the end of substantive legal responses):
-"This is legal information, not legal advice. For advice specific to your situation, consult a licensed attorney in your state."
+"This is legal information, not legal advice. For advice specific to your
+situation, consult a licensed attorney in your state."
 """
 
 
@@ -98,7 +100,7 @@ def build_system_prompt(profile: LegalProfile, user_message: str) -> str:
     prompt_parts: list[str] = [LEX_BASE_INSTRUCTIONS]
 
     # Add personal context
-    prompt_parts.append(f"\n--- USER PROFILE ---")
+    prompt_parts.append("\n--- USER PROFILE ---")
     prompt_parts.append(f"Name: {profile.display_name}")
     prompt_parts.append(f"State: {profile.state}")
     prompt_parts.append(f"Housing: {profile.housing_situation}")

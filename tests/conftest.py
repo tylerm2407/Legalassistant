@@ -8,11 +8,9 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-import pytest_asyncio
 
 from backend.models.legal_profile import IssueStatus, LegalIssue, LegalProfile
 
@@ -30,7 +28,10 @@ def mock_profile() -> LegalProfile:
         active_issues=[
             LegalIssue(
                 issue_type="landlord_tenant",
-                summary="Landlord has not returned $2,400 security deposit after move-out 45 days ago",
+                summary=(
+                    "Landlord has not returned $2,400 security deposit"
+                    " after move-out 45 days ago"
+                ),
                 status=IssueStatus.OPEN,
                 started_at=datetime(2026, 2, 1),
                 updated_at=datetime(2026, 3, 15),
@@ -107,7 +108,12 @@ def mock_supabase():
     # Default: select returns None (no profile found)
     select_chain = MagicMock()
     select_chain.execute.return_value = MagicMock(data=None)
-    mock_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value = select_chain
+    (
+        mock_client.table.return_value
+        .select.return_value
+        .eq.return_value
+        .maybe_single.return_value
+    ) = select_chain
 
     # Default: upsert returns empty list
     upsert_chain = MagicMock()

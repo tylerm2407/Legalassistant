@@ -7,13 +7,14 @@ applicable statute citations, tailored to their state and situation.
 from __future__ import annotations
 
 import json
-import os
 
 import anthropic
+from anthropic.types import TextBlock
 
 from backend.legal.state_laws import STATE_LAWS
 from backend.models.action_output import RightsSummary
 from backend.models.legal_profile import LegalProfile
+from backend.utils.client import get_anthropic_client
 from backend.utils.logger import get_logger
 from backend.utils.retry import retry_anthropic
 
@@ -21,7 +22,8 @@ _logger = get_logger(__name__)
 
 RIGHTS_PROMPT: str = """You are Lex, an AI legal assistant generating a rights summary.
 
-Generate a clear, plain-English summary of the user's legal rights based on their situation and state.
+Generate a clear, plain-English summary of the user's legal rights
+based on their situation and state.
 Return ONLY a JSON object with this exact structure:
 {
     "text": "Full narrative explanation of the user's rights in plain English, 3-5 paragraphs",
@@ -63,7 +65,7 @@ async def generate_rights_summary(
         anthropic.APIError: If the Claude API call fails after all retries.
         RuntimeError: If the response cannot be parsed as valid JSON.
     """
-    client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+    client = get_anthropic_client()
 
     state_code = profile.state[:2].upper() if len(profile.state) >= 2 else profile.state.upper()
     state_laws = STATE_LAWS.get(state_code, {})
@@ -93,7 +95,8 @@ async def generate_rights_summary(
         ],
     )
 
-    response_text = response.content[0].text if response.content else ""
+    first_block = response.content[0] if response.content else None
+    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
     _logger.info(
         "rights_summary_generated",
         user_id=profile.user_id,

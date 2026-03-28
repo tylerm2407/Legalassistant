@@ -124,10 +124,10 @@ export default function OnboardingFlow() {
       case 1:
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-white">
               Let&apos;s get to know you
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               Lex uses this information to give you personalized guidance.
             </p>
             <Input
@@ -137,13 +137,13 @@ export default function OnboardingFlow() {
               onChange={(e) => update("displayName", e.target.value)}
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 State
               </label>
               <select
                 value={form.state}
                 onChange={(e) => update("state", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
               >
                 <option value="">Select your state</option>
                 {US_STATES.map((s) => (
@@ -159,10 +159,10 @@ export default function OnboardingFlow() {
       case 2:
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-white">
               Housing Situation
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               This helps Lex understand tenant/homeowner rights that apply to
               you.
             </p>
@@ -170,10 +170,10 @@ export default function OnboardingFlow() {
               {["Renter", "Homeowner", "Other"].map((opt) => (
                 <label
                   key={opt}
-                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                     form.housingSituation === opt.toLowerCase()
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
+                      : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
                   }`}
                 >
                   <input
@@ -182,9 +182,9 @@ export default function OnboardingFlow() {
                     value={opt.toLowerCase()}
                     checked={form.housingSituation === opt.toLowerCase()}
                     onChange={(e) => update("housingSituation", e.target.value)}
-                    className="text-blue-600"
+                    className="text-blue-500"
                   />
-                  <span className="text-sm text-gray-800">{opt}</span>
+                  <span className="text-sm text-gray-200">{opt}</span>
                 </label>
               ))}
             </div>
@@ -200,10 +200,10 @@ export default function OnboardingFlow() {
       case 3:
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-white">
               Employment Type
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               Employment status affects your rights in many legal areas.
             </p>
             <div className="space-y-2">
@@ -211,10 +211,10 @@ export default function OnboardingFlow() {
                 (opt) => (
                   <label
                     key={opt}
-                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                       form.employmentType === opt.toLowerCase()
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
+                        : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
                     }`}
                   >
                     <input
@@ -225,9 +225,9 @@ export default function OnboardingFlow() {
                       onChange={(e) =>
                         update("employmentType", e.target.value)
                       }
-                      className="text-blue-600"
+                      className="text-blue-500"
                     />
-                    <span className="text-sm text-gray-800">{opt}</span>
+                    <span className="text-sm text-gray-200">{opt}</span>
                   </label>
                 )
               )}
@@ -244,10 +244,10 @@ export default function OnboardingFlow() {
       case 4:
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-white">
               Family Status
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               Family situation can affect custody, benefits, and housing rights.
             </p>
             <div className="space-y-2">
@@ -255,10 +255,10 @@ export default function OnboardingFlow() {
                 (opt) => (
                   <label
                     key={opt}
-                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                       form.familyStatus === opt.toLowerCase()
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
+                        : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
                     }`}
                   >
                     <input
@@ -267,9 +267,9 @@ export default function OnboardingFlow() {
                       value={opt.toLowerCase()}
                       checked={form.familyStatus === opt.toLowerCase()}
                       onChange={(e) => update("familyStatus", e.target.value)}
-                      className="text-blue-600"
+                      className="text-blue-500"
                     />
-                    <span className="text-sm text-gray-800">{opt}</span>
+                    <span className="text-sm text-gray-200">{opt}</span>
                   </label>
                 )
               )}
@@ -288,10 +288,10 @@ export default function OnboardingFlow() {
       case 5:
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-white">
               Current Legal Issue
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               Optionally describe a legal issue you&apos;re dealing with. You can
               always add this later.
             </p>
@@ -300,7 +300,7 @@ export default function OnboardingFlow() {
               onChange={(e) => update("currentIssue", e.target.value)}
               rows={5}
               placeholder="e.g. My landlord hasn't returned my security deposit after 45 days..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 resize-none placeholder:text-gray-600"
             />
           </div>
         );
@@ -311,32 +311,35 @@ export default function OnboardingFlow() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Progress bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-gray-400">
               Step {step} of {TOTAL_STEPS}
             </span>
             <span className="text-sm text-gray-500">
               {Math.round((step / TOTAL_STEPS) * 100)}%
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-white/10 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-blue-600 to-violet-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
             />
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Your information is stored securely and used only to personalize your legal guidance.
+          </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-6">
           {renderStep()}
 
           {error && (
-            <p className="mt-4 text-sm text-red-600 bg-red-50 rounded-lg p-3">
+            <p className="mt-4 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
               {error}
             </p>
           )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -24,6 +24,20 @@ const US_STATES = [
 ];
 
 export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <ProfilePageInner />
+    </Suspense>
+  );
+}
+
+function ProfilePageInner() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<LegalProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,23 +107,23 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 max-w-md text-center">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+        <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-8 max-w-md text-center">
+          <h2 className="text-lg font-semibold text-white mb-2">
             Profile Not Found
           </h2>
-          <p className="text-sm text-gray-600 mb-4">{error}</p>
+          <p className="text-sm text-gray-400 mb-4">{error}</p>
           <a
             href="/onboarding"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 shadow-glow-md transition-all"
           >
             Start Onboarding
           </a>
@@ -119,20 +133,20 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#050505]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white/[0.03] backdrop-blur-xl border-b border-white/10">
         <div className="container-wide py-4 flex items-center justify-between">
           <div>
-            <a href="/" className="text-xl font-bold text-blue-600">
+            <a href="/" className="text-xl font-bold text-blue-400">
               Lex
             </a>
-            <span className="text-gray-400 mx-2">/</span>
-            <span className="text-sm text-gray-600">Profile</span>
+            <span className="text-gray-600 mx-2">/</span>
+            <span className="text-sm text-gray-400">Profile</span>
           </div>
           <a
             href={`/chat?userId=${userId}`}
-            className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
             Back to Chat
           </a>
@@ -143,7 +157,7 @@ export default function ProfilePage() {
         {/* Profile Form */}
         <Card>
           <Card.Header>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-white">
               Your Profile
             </h2>
             <p className="text-sm text-gray-500">
@@ -160,13 +174,13 @@ export default function ProfilePage() {
                 onChange={(e) => setDisplayName(e.target.value)}
               />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   State
                 </label>
                 <select
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
                 >
                   <option value="">Select state</option>
                   {US_STATES.map((s) => (
@@ -197,10 +211,10 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 {error && (
-                  <p className="text-sm text-red-600">{error}</p>
+                  <p className="text-sm text-red-400">{error}</p>
                 )}
                 {success && (
-                  <p className="text-sm text-green-600">{success}</p>
+                  <p className="text-sm text-green-400">{success}</p>
                 )}
               </div>
               <Button onClick={handleSave} disabled={saving}>
@@ -213,7 +227,7 @@ export default function ProfilePage() {
         {/* Active Issues */}
         <Card>
           <Card.Header>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-white">
               Active Issues
             </h2>
           </Card.Header>
@@ -225,7 +239,7 @@ export default function ProfilePage() {
         {/* Documents */}
         <Card>
           <Card.Header>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-white">
               Documents
             </h2>
           </Card.Header>
@@ -235,10 +249,10 @@ export default function ProfilePage() {
                 {profile.documents.map((doc, i) => (
                   <li
                     key={i}
-                    className="flex items-center gap-2 text-sm text-gray-700 p-2 bg-gray-50 rounded-lg"
+                    className="flex items-center gap-2 text-sm text-gray-300 p-2 bg-white/[0.03] rounded-lg border border-white/[0.06]"
                   >
                     <svg
-                      className="w-4 h-4 text-gray-400 shrink-0"
+                      className="w-4 h-4 text-gray-500 shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -263,15 +277,15 @@ export default function ProfilePage() {
         {profile.legal_facts.length > 0 && (
           <Card>
             <Card.Header>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-white">
                 Known Legal Facts
               </h2>
             </Card.Header>
             <Card.Body>
               <ul className="space-y-1.5">
                 {profile.legal_facts.map((fact, i) => (
-                  <li key={i} className="text-sm text-gray-700 flex gap-2">
-                    <span className="text-blue-500 shrink-0">&#8226;</span>
+                  <li key={i} className="text-sm text-gray-300 flex gap-2">
+                    <span className="text-blue-400 shrink-0">&#8226;</span>
                     {fact}
                   </li>
                 ))}

@@ -16,9 +16,11 @@ import pytest
 from backend.models.action_output import Checklist, DemandLetter, RightsSummary
 from backend.models.legal_profile import LegalProfile
 
-
 DEMAND_LETTER_JSON = json.dumps({
-    "text": "Dear Mr. Peterson,\n\nI am writing to demand the return of my $2,400 security deposit...",
+    "text": (
+        "Dear Mr. Peterson,\n\nI am writing to demand"
+        " the return of my $2,400 security deposit..."
+    ),
     "citations": ["M.G.L. c. 186, § 15B", "42 U.S.C. § 3601"],
     "recipient": "James Peterson",
     "subject": "Demand for Return of Security Deposit",

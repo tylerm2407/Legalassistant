@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ChatInterface from "@/components/ChatInterface";
 import type { LegalProfile } from "@/lib/types";
@@ -9,6 +9,23 @@ import { api } from "@/lib/api";
 const DEMO_USER_ID = "demo-sarah-chen-uuid";
 
 export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-sm text-gray-400">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <ChatPageInner />
+    </Suspense>
+  );
+}
+
+function ChatPageInner() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<LegalProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,10 +63,10 @@ export default function ChatPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-gray-600">Loading your profile...</p>
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-gray-400">Loading your profile...</p>
         </div>
       </div>
     );
@@ -57,25 +74,25 @@ export default function ChatPage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 max-w-md text-center">
-          <div className="text-red-500 text-3xl mb-4">!</div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+        <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-8 max-w-md text-center">
+          <div className="text-red-400 text-3xl mb-4">!</div>
+          <h2 className="text-lg font-semibold text-white mb-2">
             Unable to Load Profile
           </h2>
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="text-sm text-gray-400 mb-6">
             {error || "Something went wrong."}
           </p>
           <div className="flex items-center justify-center gap-3">
             <a
               href="/onboarding"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 shadow-glow-md transition-all"
             >
               Start Onboarding
             </a>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-white/15 text-gray-300 text-sm font-medium rounded-lg hover:bg-white/5 hover:border-white/25 transition-all"
             >
               Retry
             </button>

@@ -52,7 +52,12 @@ class Conversation(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    def add_message(self, role: Literal["user", "assistant", "error"], content: str, legal_area: str | None = None) -> Message:
+    def add_message(
+        self,
+        role: Literal["user", "assistant", "error"],
+        content: str,
+        legal_area: str | None = None,
+    ) -> Message:
         """Append a new message to the conversation and update the timestamp.
 
         Args:

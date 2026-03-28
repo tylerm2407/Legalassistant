@@ -9,17 +9,19 @@ must never crash the main request flow.
 from __future__ import annotations
 
 import json
-import os
 
 import anthropic
+from anthropic.types import TextBlock
 
 from backend.memory.profile import get_profile, update_profile
+from backend.utils.client import get_anthropic_client
 from backend.utils.logger import get_logger
 from backend.utils.retry import retry_anthropic
 
 _logger = get_logger(__name__)
 
-EXTRACTION_PROMPT: str = """Analyze the following conversation and extract any NEW legal facts about the user.
+EXTRACTION_PROMPT: str = """Analyze the following conversation and extract
+any NEW legal facts about the user.
 
 Return ONLY a JSON object with this exact structure:
 {
@@ -27,7 +29,8 @@ Return ONLY a JSON object with this exact structure:
 }
 
 Rules:
-- Only include facts that are specific and legally relevant (dates, amounts, events, relationships, document mentions).
+- Only include facts that are specific and legally relevant
+  (dates, amounts, events, relationships, document mentions).
 - Do NOT include general legal information or advice that was given.
 - Do NOT include facts that are vague or speculative.
 - If there are no new facts, return {"new_facts": []}.
@@ -50,16 +53,17 @@ async def _extract_facts(conversation: list[dict[str, str]]) -> list[str]:
     Raises:
         anthropic.APIError: If the API call fails after all retries.
     """
-    client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+    client = get_anthropic_client()
 
     response = await client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
         system=EXTRACTION_PROMPT,
-        messages=conversation,
+        messages=conversation,  # type: ignore[arg-type]
     )
 
-    response_text = response.content[0].text if response.content else ""
+    first_block = response.content[0] if response.content else None
+    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
 
     try:
         parsed = json.loads(response_text)

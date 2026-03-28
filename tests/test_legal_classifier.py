@@ -6,8 +6,6 @@ message before the Claude API call.
 
 from __future__ import annotations
 
-import pytest
-
 from backend.legal.classifier import classify_legal_area
 
 

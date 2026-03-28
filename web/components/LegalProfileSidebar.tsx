@@ -17,22 +17,22 @@ interface LegalProfileSidebarProps {
 
 export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProps) {
   return (
-    <aside className="w-[300px] shrink-0 border-r border-gray-200 bg-white h-full overflow-y-auto scrollbar-thin">
+    <aside className="w-[300px] shrink-0 border-r border-white/10 bg-white/[0.02] h-full overflow-y-auto scrollbar-thin">
       <div className="p-4 space-y-6">
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full" />
-            <span className="text-xs text-green-600 font-medium">
+            <span className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+            <span className="text-xs text-green-400 font-medium">
               Memory Active
             </span>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-white">
             {profile.display_name}
           </h2>
-          <Badge variant="default" size="sm">
+          <span className="jurisdiction-badge">
             {profile.state}
-          </Badge>
+          </span>
         </div>
 
         {/* Your Situation */}
@@ -43,15 +43,15 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
           <dl className="space-y-2 text-sm">
             <div>
               <dt className="text-gray-500">Housing</dt>
-              <dd className="text-gray-800">{profile.housing_situation}</dd>
+              <dd className="text-gray-300">{profile.housing_situation}</dd>
             </div>
             <div>
               <dt className="text-gray-500">Employment</dt>
-              <dd className="text-gray-800">{profile.employment_type}</dd>
+              <dd className="text-gray-300">{profile.employment_type}</dd>
             </div>
             <div>
               <dt className="text-gray-500">Family</dt>
-              <dd className="text-gray-800">{profile.family_status}</dd>
+              <dd className="text-gray-300">{profile.family_status}</dd>
             </div>
           </dl>
         </section>
@@ -62,23 +62,23 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
             Active Issues
           </h3>
           {profile.active_issues.length === 0 ? (
-            <p className="text-sm text-gray-400">No active issues</p>
+            <p className="text-sm text-gray-500">No active issues</p>
           ) : (
             <ul className="space-y-2">
               {profile.active_issues.map((issue, i) => (
                 <li
                   key={i}
-                  className="p-2 bg-gray-50 rounded-lg border border-gray-100"
+                  className="p-2 bg-white/[0.03] rounded-lg border border-white/[0.06] hover:border-white/15 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-700 capitalize">
+                    <span className="text-xs font-medium text-gray-300 capitalize">
                       {issue.issue_type.replace(/_/g, " ")}
                     </span>
                     <Badge variant={statusVariant[issue.status]} size="sm">
                       {issue.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-gray-600 line-clamp-2">
+                  <p className="text-xs text-gray-400 line-clamp-2">
                     {issue.summary}
                   </p>
                 </li>
@@ -93,14 +93,14 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
             Known Facts
           </h3>
           {profile.legal_facts.length === 0 ? (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-500">
               Facts will appear as you chat
             </p>
           ) : (
             <ul className="space-y-1">
               {profile.legal_facts.map((fact, i) => (
-                <li key={i} className="text-xs text-gray-600 flex gap-1.5">
-                  <span className="text-gray-400 shrink-0">&#8226;</span>
+                <li key={i} className="text-xs text-gray-400 flex gap-1.5">
+                  <span className="text-gray-500 shrink-0">&#8226;</span>
                   {fact}
                 </li>
               ))}
@@ -114,16 +114,16 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
             Documents
           </h3>
           {profile.documents.length === 0 ? (
-            <p className="text-sm text-gray-400">No documents uploaded</p>
+            <p className="text-sm text-gray-500">No documents uploaded</p>
           ) : (
             <ul className="space-y-1">
               {profile.documents.map((doc, i) => (
                 <li
                   key={i}
-                  className="text-xs text-gray-600 flex items-center gap-1.5"
+                  className="text-xs text-gray-400 flex items-center gap-1.5"
                 >
                   <svg
-                    className="w-3.5 h-3.5 text-gray-400 shrink-0"
+                    className="w-3.5 h-3.5 text-gray-500 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

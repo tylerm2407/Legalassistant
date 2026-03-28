@@ -114,14 +114,14 @@ export default function DocumentUpload({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
           isDragging
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 hover:border-gray-400"
+            ? "border-blue-500 bg-blue-500/5 shadow-glow-md"
+            : "border-white/15 hover:border-white/25 hover:bg-white/[0.02]"
         }`}
       >
         <svg
-          className="w-10 h-10 text-gray-400 mx-auto mb-3"
+          className="w-10 h-10 text-gray-500 mx-auto mb-3"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -133,7 +133,7 @@ export default function DocumentUpload({
             d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 3.75 3.75 0 013.577 5.487A3.75 3.75 0 0117.25 19.5H6.75z"
           />
         </svg>
-        <p className="text-sm text-gray-600 mb-1">
+        <p className="text-sm text-gray-400 mb-1">
           Drag and drop a document here, or
         </p>
         <input
@@ -151,7 +151,7 @@ export default function DocumentUpload({
         >
           Browse Files
         </Button>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-gray-500 mt-2">
           PDF, images, or text files up to 10MB
         </p>
       </div>
@@ -160,12 +160,12 @@ export default function DocumentUpload({
       {uploading && (
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-600">Uploading...</span>
+            <span className="text-xs text-gray-400">Uploading...</span>
             <span className="text-xs text-gray-500">{progress}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
+          <div className="w-full bg-white/10 rounded-full h-1.5">
             <div
-              className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-blue-600 to-violet-500 h-1.5 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -174,7 +174,7 @@ export default function DocumentUpload({
 
       {/* Error */}
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-lg p-3">
+        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
           {error}
         </p>
       )}
@@ -183,7 +183,7 @@ export default function DocumentUpload({
       {result && (
         <Card>
           <Card.Header>
-            <h3 className="text-sm font-semibold text-gray-900">
+            <h3 className="text-sm font-semibold text-white">
               Document Analysis: {result.filename}
             </h3>
           </Card.Header>
@@ -194,7 +194,7 @@ export default function DocumentUpload({
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
                   Summary
                 </p>
-                <p className="text-sm text-gray-700">{result.summary}</p>
+                <p className="text-sm text-gray-300">{result.summary}</p>
               </div>
 
               {/* Key Facts */}
@@ -207,9 +207,9 @@ export default function DocumentUpload({
                     {result.key_facts.map((fact, i) => (
                       <li
                         key={i}
-                        className="text-sm text-gray-700 flex gap-2"
+                        className="text-sm text-gray-300 flex gap-2"
                       >
-                        <span className="text-blue-500 shrink-0">&#8226;</span>
+                        <span className="text-blue-400 shrink-0">&#8226;</span>
                         {fact}
                       </li>
                     ))}
@@ -220,14 +220,14 @@ export default function DocumentUpload({
               {/* Red Flags */}
               {result.red_flags.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-1">
                     Red Flags
                   </p>
                   <ul className="space-y-1">
                     {result.red_flags.map((flag, i) => (
                       <li
                         key={i}
-                        className="text-sm text-red-700 flex gap-2"
+                        className="text-sm text-red-400 flex gap-2"
                       >
                         <span className="shrink-0">&#9888;</span>
                         {flag}
@@ -237,6 +237,9 @@ export default function DocumentUpload({
                 </div>
               )}
             </div>
+            <p className="trust-disclaimer">
+              Documents are analyzed locally and not shared with third parties.
+            </p>
           </Card.Body>
         </Card>
       )}

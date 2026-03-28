@@ -10,7 +10,6 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-import pytest_asyncio
 
 from backend.models.legal_profile import LegalProfile
 
@@ -19,8 +18,20 @@ from backend.models.legal_profile import LegalProfile
 def sample_conversation() -> list[dict[str, str]]:
     """A short conversation with extractable legal facts."""
     return [
-        {"role": "user", "content": "My landlord James Peterson hasn't returned my $2,400 deposit. I moved out on January 15."},
-        {"role": "assistant", "content": "Under Massachusetts law, your landlord was required to return your deposit within 30 days."},
+        {
+            "role": "user",
+            "content": (
+                "My landlord James Peterson hasn't returned my"
+                " $2,400 deposit. I moved out on January 15."
+            ),
+        },
+        {
+            "role": "assistant",
+            "content": (
+                "Under Massachusetts law, your landlord was required"
+                " to return your deposit within 30 days."
+            ),
+        },
     ]
 
 
@@ -63,7 +74,7 @@ class TestUpdateProfileExtractsNewFacts:
                 "backend.memory.updater.get_profile",
                 new_callable=AsyncMock,
                 return_value=sample_profile,
-            ) as mock_get,
+            ),
             patch(
                 "backend.memory.updater.update_profile",
                 new_callable=AsyncMock,

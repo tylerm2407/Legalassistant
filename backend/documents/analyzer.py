@@ -8,11 +8,12 @@ key facts, red flags, and a plain-English summary.
 from __future__ import annotations
 
 import json
-import os
 
 import anthropic
+from anthropic.types import TextBlock
 
 from backend.models.legal_profile import LegalProfile
+from backend.utils.client import get_anthropic_client
 from backend.utils.logger import get_logger
 from backend.utils.retry import retry_anthropic
 
@@ -60,7 +61,7 @@ async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object
         anthropic.APIError: If the Claude API call fails after all retries.
         RuntimeError: If the response cannot be parsed as valid JSON.
     """
-    client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+    client = get_anthropic_client()
 
     profile_context = profile.to_context_string()
 
@@ -79,7 +80,8 @@ async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object
         ],
     )
 
-    response_text = response.content[0].text if response.content else ""
+    first_block = response.content[0] if response.content else None
+    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
     _logger.info(
         "document_analyzed",
         user_id=profile.user_id,

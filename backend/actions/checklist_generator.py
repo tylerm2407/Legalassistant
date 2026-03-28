@@ -7,13 +7,14 @@ to the user's state and legal situation.
 from __future__ import annotations
 
 import json
-import os
 
 import anthropic
+from anthropic.types import TextBlock
 
 from backend.legal.state_laws import STATE_LAWS
 from backend.models.action_output import Checklist
 from backend.models.legal_profile import LegalProfile
+from backend.utils.client import get_anthropic_client
 from backend.utils.logger import get_logger
 from backend.utils.retry import retry_anthropic
 
@@ -34,7 +35,8 @@ Rules:
 - Include deadlines where applicable (statutory deadlines, filing windows, etc.).
 - The deadlines list must be the same length as items, using null for items without deadlines.
 - priority_order is a list of indices into items, sorted from most urgent to least.
-- Include 5-10 items covering: immediate actions, evidence gathering, filing/communication steps, and follow-up.
+- Include 5-10 items covering: immediate actions, evidence gathering,
+  filing/communication steps, and follow-up.
 - Note which items require a lawyer vs. which the user can do themselves.
 - Reference specific statutes where deadlines come from statutory requirements.
 """
@@ -63,7 +65,7 @@ async def generate_checklist(
         anthropic.APIError: If the Claude API call fails after all retries.
         RuntimeError: If the response cannot be parsed as valid JSON.
     """
-    client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+    client = get_anthropic_client()
 
     state_code = profile.state[:2].upper() if len(profile.state) >= 2 else profile.state.upper()
     state_laws = STATE_LAWS.get(state_code, {})
@@ -93,7 +95,8 @@ async def generate_checklist(
         ],
     )
 
-    response_text = response.content[0].text if response.content else ""
+    first_block = response.content[0] if response.content else None
+    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
     _logger.info(
         "checklist_generated",
         user_id=profile.user_id,

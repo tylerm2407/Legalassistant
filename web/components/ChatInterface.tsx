@@ -15,10 +15,10 @@ function MessageBubble({ message }: { message: Message }) {
       <div
         className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
           isUser
-            ? "bg-blue-600 text-white"
+            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-glow-sm"
             : isError
-            ? "bg-red-50 text-red-700 border border-red-200"
-            : "bg-white text-gray-800 border border-gray-200 shadow-sm"
+            ? "bg-red-500/10 text-red-400 border border-red-500/20"
+            : "bg-white/[0.03] backdrop-blur text-gray-200 border border-white/10"
         }`}
       >
         {message.content}
@@ -35,11 +35,11 @@ function MessageBubble({ message }: { message: Message }) {
 function TypingIndicator() {
   return (
     <div className="flex justify-start">
-      <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
+      <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3">
         <div className="flex gap-1">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.1s]" />
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.1s]" />
+          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
         </div>
       </div>
     </div>
@@ -123,20 +123,20 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#050505]">
       {/* Sidebar */}
       <LegalProfileSidebar profile={profile} />
 
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
+        <header className="bg-white/[0.03] backdrop-blur-xl border-b border-white/10 px-6 py-3 flex items-center justify-between shrink-0">
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">Lex</h1>
+            <h1 className="text-lg font-semibold text-white">Lex</h1>
             <p className="text-xs text-gray-500">AI Legal Assistant</p>
           </div>
           {lastLegalArea && (
-            <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">
+            <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full font-medium">
               {lastLegalArea.replace(/_/g, " ")}
             </span>
           )}
@@ -157,7 +157,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
         )}
 
         {/* Input */}
-        <div className="bg-white border-t border-gray-200 px-6 py-4 shrink-0">
+        <div className="bg-white/[0.03] backdrop-blur-xl border-t border-white/10 px-6 py-4 shrink-0">
           <div className="flex items-end gap-3 max-w-4xl mx-auto">
             <textarea
               value={input}
@@ -165,7 +165,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               onKeyDown={handleKeyDown}
               placeholder="Describe your legal question..."
               rows={1}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 px-4 py-2.5 bg-white/[0.03] text-white border border-white/10 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:border-blue-500/50 focus:ring-blue-500/20 focus:shadow-glow-sm placeholder:text-gray-600"
             />
             <Button
               onClick={handleSend}
@@ -175,9 +175,11 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               Send
             </Button>
           </div>
-          <p className="text-xs text-gray-400 mt-2 text-center">
-            Lex is an AI assistant, not a lawyer. For legal advice, consult a
-            licensed attorney.
+          <p className="text-xs text-gray-500 mt-2 text-center flex items-center justify-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+            AI assistant — not legal advice. Your data is encrypted and private.
           </p>
         </div>
       </div>

@@ -9,12 +9,12 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class IssueStatus(str, Enum):
+class IssueStatus(StrEnum):
     """Status values for a user's active legal issue."""
 
     OPEN = "open"

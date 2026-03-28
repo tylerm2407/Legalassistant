@@ -7,10 +7,7 @@ is worthless.
 
 from __future__ import annotations
 
-import pytest
-
-from backend.legal.state_laws import STATE_LAWS
-from backend.memory.injector import LEX_BASE_INSTRUCTIONS, build_system_prompt
+from backend.memory.injector import build_system_prompt
 from backend.models.legal_profile import LegalProfile
 
 

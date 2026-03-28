@@ -13,6 +13,7 @@ import {
 import ChatBubble from "@/components/ChatBubble";
 import ActionSheet from "@/components/ActionSheet";
 import { chat } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 import type { Message } from "@/lib/types";
 
 const WELCOME_MESSAGE: Message = {
@@ -31,7 +32,23 @@ export default function ChatScreen() {
   const [currentLegalArea, setCurrentLegalArea] = useState("general");
   const flatListRef = useRef<FlatList<Message>>(null);
 
-  const userId = "user_placeholder";
+  const [userId, setUserId] = useState<string>("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) {
+        setUserId(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUserId(session?.user?.id || "");
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const scrollToBottom = () => {
     setTimeout(() => {

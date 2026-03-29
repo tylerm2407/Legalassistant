@@ -91,3 +91,72 @@ For production, set `CORS_ALLOWED_ORIGINS` to only your production domain(s).
 ## File Upload Limits
 
 Document uploads (`POST /api/documents`) enforce a 25 MB size limit (`MAX_UPLOAD_BYTES` in `backend/main.py`). Files exceeding this return `413 Payload Too Large`.
+
+## Threat Model
+
+| Threat | Vector | Mitigation | Status |
+|--------|--------|------------|--------|
+| Prompt injection via profile fields | Malicious text in housing_situation, employment_type, or legal_facts | JSON serialization + data/instruction boundary + system prompt rules | Implemented |
+| JWT token theft | XSS or network interception | httpOnly cookies (Supabase default), HTTPS-only, short token expiry | Implemented |
+| Unauthorized profile access | Direct API calls with another user's ID | Application-level check + Supabase RLS on all user tables | Implemented |
+| Rate limit bypass | Multiple accounts or IP rotation | Per-user rate limiting (not per-IP), fail-open with monitoring | Partial |
+| Document upload malware | Malicious PDF/image files | File size limit (25MB), content-type validation, no server-side execution | Implemented |
+| SQL injection | Profile or chat input | Supabase client uses parameterized queries, no raw SQL | Implemented |
+| CSRF | State-changing API calls | Bearer token auth (not cookie-based for API), CORS restrictions | Implemented |
+| Subscription bypass | Direct API access without valid subscription | Subscription gate middleware checks tier on protected endpoints | Implemented |
+
+## Data Classification
+
+| Data Type | Classification | Storage | Encryption | Retention |
+|-----------|---------------|---------|------------|-----------|
+| Legal profile (state, housing, employment) | PII | Supabase Postgres | At-rest (Supabase managed) | Until account deletion |
+| Legal facts (extracted from conversations) | Sensitive PII | Supabase Postgres | At-rest (Supabase managed) | Until account deletion |
+| Conversation history | Sensitive PII | Supabase Postgres | At-rest (Supabase managed) | User-deletable |
+| Uploaded documents | Sensitive PII | Supabase Storage | At-rest (Supabase managed) | User-deletable |
+| JWT tokens | Authentication | Client-side (httpOnly cookie) | In-transit (HTTPS) | Short-lived (1 hour) |
+| API keys (Anthropic, Stripe) | Secret | Environment variables | At-rest (platform managed) | N/A |
+| Email addresses | PII | Supabase Auth | At-rest (Supabase managed) | Until account deletion |
+
+## PII Logging Policy
+
+CaseMate handles sensitive legal information. Logging policy:
+
+- **NEVER logged:** Conversation content, legal facts, profile details, document text, API keys, JWT tokens
+- **Always logged:** user_id (opaque UUID), request_id, endpoint path, response status, duration_ms, error type (not message)
+- **Conditionally logged:** Error messages (sanitized — no PII), rate limit events (user_id + endpoint only)
+
+Implementation: `backend/utils/logger.py` uses structlog with a custom processor that strips sensitive fields before output. All log events use structured key-value format — never string interpolation of user data.
+
+Verification: `grep -r "log\." backend/ | grep -v "user_id\|request_id\|error\|duration\|status"` should return zero matches containing profile data.
+
+## Security Headers
+
+All responses include these headers via `SecurityHeadersMiddleware` in `backend/main.py`:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| Content-Security-Policy | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co` | Prevents XSS and unauthorized resource loading |
+| Strict-Transport-Security | `max-age=63072000; includeSubDomains; preload` | Forces HTTPS for 2 years |
+| X-Frame-Options | `DENY` | Prevents clickjacking |
+| X-Content-Type-Options | `nosniff` | Prevents MIME sniffing |
+| Referrer-Policy | `strict-origin-when-cross-origin` | Limits referrer leakage |
+| Permissions-Policy | `camera=(), microphone=(), geolocation=()` | Disables unnecessary browser features |
+
+## Responsible AI Disclosure
+
+CaseMate uses Claude (Anthropic) for legal guidance. Important disclosures:
+
+1. **Not a lawyer:** CaseMate explicitly states it is not a licensed attorney in every system prompt and in the UI.
+2. **State-specific context:** Legal guidance is personalized to the user's state, but users are reminded that laws change and professional consultation is recommended for complex matters.
+3. **No legal advice:** CaseMate provides legal information and guidance, not legal advice. The distinction is maintained throughout the product.
+4. **Human escalation:** The attorney referral system ensures users can find licensed professionals when their situation requires it.
+5. **Data minimization:** Only legal facts relevant to the user's active issues are extracted and stored. Users can delete their data at any time.
+6. **Bias awareness:** Claude's training data may contain biases. CaseMate mitigates this by grounding responses in specific statute citations rather than general legal opinions.
+
+## Vulnerability Reporting
+
+If you discover a security vulnerability:
+1. **Do NOT** open a public GitHub issue
+2. Email security@casematelaw.com with details
+3. Include: description, reproduction steps, potential impact
+4. We will acknowledge within 48 hours and provide a fix timeline within 7 days

@@ -47,7 +47,7 @@ from backend.knowledge.rights_library import (
     get_guide_by_id,
     get_guides_by_domain,
 )
-from backend.legal.classifier import classify_legal_area, classify_with_confidence
+from backend.legal.classifier import classify_with_confidence
 from backend.memory.conversation_store import (
     create_conversation,
     delete_conversation,
@@ -271,7 +271,8 @@ async def chat(
     """Process a user message and return CaseMate's response.
 
     Supports multi-turn conversations by loading conversation history
-    and sending the last N messages as context to Claude.
+    and applying token budget management to keep the context within
+    the model's window. Uses circuit breaker for Anthropic API resilience.
 
     Args:
         request: The chat request containing the message.
@@ -286,14 +287,22 @@ async def chat(
     Raises:
         HTTPException: 404 if the user profile is not found.
         HTTPException: 500 if the Claude API call fails.
+        HTTPException: 503 if the circuit breaker is open.
     """
+    metrics = MetricsCollector.get_instance()
+    chat_start = time.monotonic()
     _logger.info("chat_request", user_id=user_id)
 
     profile = await get_profile(user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found. Complete onboarding first.")
 
-    legal_area = classify_legal_area(request.message)
+    # Classify with confidence scoring for observability
+    classification = classify_with_confidence(request.message)
+    legal_area = classification.domain
+    metrics.increment_label("legal_area_classified", legal_area)
+    metrics.increment_label("classifier_confidence_bucket", f"{classification.confidence:.1f}")
+
     system_prompt = build_system_prompt(profile, request.message)
 
     # Load or create conversation
@@ -307,16 +316,28 @@ async def chat(
     # Add user message to conversation
     conversation.add_message("user", request.message, legal_area=legal_area)
 
-    # Build message history for Claude (last 20 messages)
-    max_context_messages = 20
-    api_messages = conversation.to_anthropic_messages()[-max_context_messages:]
+    # Apply token budget management to conversation history
+    all_messages = conversation.to_anthropic_messages()
+    system_tokens = estimate_tokens(system_prompt)
+    budget_result = _token_budget.apply(all_messages, system_prompt_tokens=system_tokens)
+    api_messages = budget_result.messages
+
+    if budget_result.was_truncated:
+        _logger.info(
+            "token_budget_truncated",
+            user_id=user_id,
+            original_messages=budget_result.original_count,
+            final_messages=budget_result.final_count,
+            summary_prepended=budget_result.summary_prepended,
+        )
 
     try:
         client = get_anthropic_client()
 
+        @anthropic_breaker
         @retry_anthropic
         async def _call_claude() -> str:
-            """Call the Claude API with conversation history."""
+            """Call the Claude API with circuit breaker + retry protection."""
             response = await client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
@@ -328,6 +349,18 @@ async def chat(
 
         assistant_response = await _call_claude()
 
+    except CircuitBreakerOpenError as exc:
+        _logger.warning(
+            "circuit_breaker_open",
+            user_id=user_id,
+            service=exc.service_name,
+            retry_after=exc.retry_after,
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="AI service temporarily unavailable. Please try again shortly.",
+            headers={"Retry-After": str(int(exc.retry_after))},
+        ) from exc
     except anthropic.APIError as exc:
         _logger.error(
             "claude_api_error",
@@ -336,6 +369,11 @@ async def chat(
             error_message=str(exc),
         )
         raise HTTPException(status_code=500, detail="AI service temporarily unavailable.") from exc
+
+    # Record chat latency metric
+    chat_latency = time.monotonic() - chat_start
+    metrics.observe_latency("chat_latency_seconds", chat_latency)
+    metrics.increment("chat_requests_total")
 
     # Add assistant response to conversation and save
     conversation.add_message("assistant", assistant_response, legal_area=legal_area)
@@ -369,12 +407,144 @@ async def chat(
         legal_area=legal_area,
         conversation_id=conversation.id,
         response_length=len(assistant_response),
+        classifier_confidence=classification.confidence,
+        token_budget_truncated=budget_result.was_truncated,
+        chat_latency_ms=round(chat_latency * 1000, 2),
     )
 
     return ChatResponse(
         conversation_id=conversation.id,
         response=assistant_response,
         legal_area=legal_area,
+    )
+
+
+@app.get("/api/chat/{conversation_id}/stream")
+async def chat_stream(
+    conversation_id: str,
+    message: str,
+    background_tasks: BackgroundTasks,
+    user_id: str = Depends(verify_supabase_jwt),
+    _rate: None = Depends(_chat_rate_limit),
+) -> StreamingResponse:
+    """Stream CaseMate's response via Server-Sent Events (SSE).
+
+    Provides real-time token-by-token streaming for a more responsive UX.
+    Each SSE event contains a JSON payload with the event type and data:
+      - type: "token" — a new text chunk from the response
+      - type: "done" — streaming complete, includes full response metadata
+      - type: "error" — an error occurred during streaming
+
+    Args:
+        conversation_id: The conversation UUID to continue.
+        message: The user's message (passed as query parameter).
+        background_tasks: FastAPI background task manager.
+        user_id: Authenticated user ID from JWT.
+        _rate: Rate limit check (side-effect only).
+
+    Returns:
+        StreamingResponse with text/event-stream content type.
+
+    Raises:
+        HTTPException: 404 if the user profile or conversation is not found.
+        HTTPException: 503 if the circuit breaker is open.
+    """
+    profile = await get_profile(user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found.")
+
+    conversation = await get_conversation(conversation_id, user_id)
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+
+    classification = classify_with_confidence(message)
+    legal_area = classification.domain
+    system_prompt = build_system_prompt(profile, message)
+
+    conversation.add_message("user", message, legal_area=legal_area)
+
+    all_messages = conversation.to_anthropic_messages()
+    system_tokens = estimate_tokens(system_prompt)
+    budget_result = _token_budget.apply(all_messages, system_prompt_tokens=system_tokens)
+    api_messages = budget_result.messages
+
+    async def _generate_sse() -> AsyncGenerator[str, None]:
+        """Generate Server-Sent Events from the Claude streaming API.
+
+        Yields SSE-formatted strings with token chunks and metadata.
+        """
+        metrics = MetricsCollector.get_instance()
+        stream_start = time.monotonic()
+        full_response_parts: list[str] = []
+
+        try:
+            client = get_anthropic_client()
+            async with client.messages.stream(
+                model="claude-sonnet-4-20250514",
+                max_tokens=4096,
+                system=system_prompt,
+                messages=api_messages,  # type: ignore[arg-type]
+            ) as stream:
+                async for text in stream.text_stream:
+                    full_response_parts.append(text)
+                    event_data = json.dumps({"type": "token", "content": text})
+                    yield f"data: {event_data}\n\n"
+
+            assistant_response = "".join(full_response_parts)
+            stream_latency = time.monotonic() - stream_start
+            metrics.observe_latency("chat_stream_latency_seconds", stream_latency)
+            metrics.increment("chat_stream_requests_total")
+
+            # Add assistant response and schedule background tasks
+            conversation.add_message("assistant", assistant_response, legal_area=legal_area)
+            if not conversation.legal_area:
+                conversation.legal_area = legal_area
+
+            background_tasks.add_task(save_conversation, conversation)
+            conversation_messages = [
+                {"role": "user", "content": message},
+                {"role": "assistant", "content": assistant_response},
+            ]
+            background_tasks.add_task(
+                update_profile_from_conversation, user_id, conversation_messages
+            )
+            background_tasks.add_task(
+                detect_and_save_deadlines, user_id, conversation_messages, conversation.id
+            )
+
+            done_data = json.dumps({
+                "type": "done",
+                "conversation_id": conversation_id,
+                "legal_area": legal_area,
+                "response_length": len(assistant_response),
+                "latency_ms": round(stream_latency * 1000, 2),
+            })
+            yield f"data: {done_data}\n\n"
+
+        except CircuitBreakerOpenError as exc:
+            error_data = json.dumps({
+                "type": "error",
+                "message": "AI service temporarily unavailable.",
+                "retry_after": int(exc.retry_after),
+            })
+            yield f"data: {error_data}\n\n"
+
+        except anthropic.APIError as exc:
+            _logger.error("stream_api_error", user_id=user_id, error=str(exc))
+            error_data = json.dumps({
+                "type": "error",
+                "message": "AI service error. Please try again.",
+            })
+            yield f"data: {error_data}\n\n"
+
+    return StreamingResponse(
+        _generate_sse(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )
 
 

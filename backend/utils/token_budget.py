@@ -1,0 +1,262 @@
+"""Token budget manager for context window optimization.
+
+Manages the Claude API's context window by estimating token counts,
+truncating old messages intelligently, and generating conversation
+summaries when the history exceeds the budget. This prevents token
+limit errors and keeps API costs predictable.
+
+Strategy:
+  - Estimate tokens using a fast character-based heuristic (4 chars ≈ 1 token).
+  - When conversation history exceeds the budget, summarize older messages
+    into a condensed context block and prepend it to the recent messages.
+  - Always preserve the most recent N messages verbatim for conversational
+    continuity.
+  - System prompt tokens are accounted for separately to prevent overflow.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from backend.utils.logger import get_logger
+
+_logger = get_logger(__name__)
+
+# Claude claude-sonnet-4-6 context window: 200K tokens
+# We budget conservatively to leave room for the response
+MODEL_CONTEXT_LIMIT: int = 200_000
+RESPONSE_RESERVE: int = 4_096
+SYSTEM_PROMPT_BUDGET: int = 8_000
+CONVERSATION_BUDGET: int = MODEL_CONTEXT_LIMIT - RESPONSE_RESERVE - SYSTEM_PROMPT_BUDGET
+
+# Minimum recent messages to always keep verbatim (never summarize these)
+MIN_RECENT_MESSAGES: int = 6
+
+# Approximate token-to-character ratio for English text
+CHARS_PER_TOKEN: float = 4.0
+
+
+def estimate_tokens(text: str) -> int:
+    """Estimate token count for a text string using character heuristic.
+
+    Uses an approximation of 4 characters per token, which is accurate
+    within ~10% for English legal text. This avoids the latency of
+    calling a tokenizer on every request.
+
+    Args:
+        text: The input text to estimate tokens for.
+
+    Returns:
+        Estimated token count (always at least 1 for non-empty text).
+    """
+    if not text:
+        return 0
+    return max(1, int(len(text) / CHARS_PER_TOKEN))
+
+
+def estimate_messages_tokens(messages: list[dict[str, str]]) -> int:
+    """Estimate total token count for a list of Anthropic API messages.
+
+    Accounts for per-message overhead (role prefix, formatting) at
+    approximately 4 tokens per message boundary.
+
+    Args:
+        messages: List of message dicts with 'role' and 'content' keys.
+
+    Returns:
+        Estimated total token count across all messages.
+    """
+    overhead_per_message = 4  # role tag + formatting tokens
+    total = 0
+    for msg in messages:
+        total += estimate_tokens(msg.get("content", "")) + overhead_per_message
+    return total
+
+
+@dataclass
+class TokenBudgetResult:
+    """Result of applying the token budget to a conversation.
+
+    Attributes:
+        messages: The optimized message list ready for the API call.
+        total_tokens: Estimated total tokens in the optimized messages.
+        was_truncated: Whether any messages were removed or summarized.
+        summary_prepended: Whether a conversation summary was added.
+        original_count: Number of messages before optimization.
+        final_count: Number of messages after optimization.
+    """
+
+    messages: list[dict[str, str]]
+    total_tokens: int
+    was_truncated: bool
+    summary_prepended: bool
+    original_count: int
+    final_count: int
+
+
+@dataclass
+class ConversationSummarizer:
+    """Generates condensed summaries of conversation history.
+
+    When a conversation exceeds the token budget, older messages are
+    compressed into a summary that preserves key legal facts, decisions,
+    and context without consuming excessive tokens.
+
+    Attributes:
+        max_summary_tokens: Maximum tokens for the generated summary.
+    """
+
+    max_summary_tokens: int = 500
+
+    def summarize(self, messages: list[dict[str, str]]) -> str:
+        """Create a condensed summary of conversation messages.
+
+        Extracts key information from each message and creates a
+        structured summary that preserves:
+        - Legal topics discussed
+        - Key facts mentioned by the user
+        - Advice given by the assistant
+        - Any action items or next steps
+
+        Args:
+            messages: The older messages to summarize.
+
+        Returns:
+            A condensed summary string suitable for prepending to
+            the conversation context.
+        """
+        if not messages:
+            return ""
+
+        user_points: list[str] = []
+        assistant_points: list[str] = []
+
+        for msg in messages:
+            content = msg.get("content", "")
+            # Extract first meaningful sentence as a summary point
+            first_sentence = content.split(".")[0].strip()
+            if len(first_sentence) > 150:
+                first_sentence = first_sentence[:147] + "..."
+
+            if msg.get("role") == "user" and first_sentence:
+                user_points.append(first_sentence)
+            elif msg.get("role") == "assistant" and first_sentence:
+                assistant_points.append(first_sentence)
+
+        parts: list[str] = ["[CONVERSATION SUMMARY — earlier messages condensed]"]
+        if user_points:
+            parts.append("User discussed: " + "; ".join(user_points[-5:]))
+        if assistant_points:
+            parts.append("CaseMate advised on: " + "; ".join(assistant_points[-3:]))
+
+        return "\n".join(parts)
+
+
+@dataclass
+class TokenBudgetManager:
+    """Manages token allocation across system prompt and conversation history.
+
+    Ensures that the combined system prompt + conversation history +
+    response reserve fits within the model's context window. When the
+    history is too long, it truncates and optionally summarizes older
+    messages while preserving the most recent exchanges.
+
+    Attributes:
+        conversation_budget: Max tokens for conversation messages.
+        min_recent_messages: Always keep this many recent messages verbatim.
+        summarizer: The summarizer instance for compressing old messages.
+    """
+
+    conversation_budget: int = CONVERSATION_BUDGET
+    min_recent_messages: int = MIN_RECENT_MESSAGES
+    summarizer: ConversationSummarizer = field(default_factory=ConversationSummarizer)
+
+    def apply(
+        self,
+        messages: list[dict[str, str]],
+        system_prompt_tokens: int = 0,
+    ) -> TokenBudgetResult:
+        """Apply the token budget to a list of conversation messages.
+
+        If the messages fit within budget, returns them unchanged.
+        If they exceed the budget:
+          1. Keeps the most recent min_recent_messages verbatim.
+          2. Summarizes older messages into a condensed context block.
+          3. Prepends the summary as a system-context user message.
+
+        Args:
+            messages: The full conversation message history.
+            system_prompt_tokens: Tokens already consumed by the system prompt.
+
+        Returns:
+            TokenBudgetResult with the optimized message list and metadata.
+        """
+        original_count = len(messages)
+        available_budget = self.conversation_budget - system_prompt_tokens
+        total_tokens = estimate_messages_tokens(messages)
+
+        # If within budget, return unchanged
+        if total_tokens <= available_budget:
+            return TokenBudgetResult(
+                messages=messages,
+                total_tokens=total_tokens,
+                was_truncated=False,
+                summary_prepended=False,
+                original_count=original_count,
+                final_count=original_count,
+            )
+
+        _logger.info(
+            "token_budget_exceeded",
+            total_tokens=total_tokens,
+            budget=available_budget,
+            message_count=original_count,
+        )
+
+        # Split into old messages (to summarize) and recent (to keep)
+        if len(messages) <= self.min_recent_messages:
+            # Can't summarize — just truncate from the start
+            recent = messages[-self.min_recent_messages :]
+            return TokenBudgetResult(
+                messages=recent,
+                total_tokens=estimate_messages_tokens(recent),
+                was_truncated=True,
+                summary_prepended=False,
+                original_count=original_count,
+                final_count=len(recent),
+            )
+
+        recent_messages = messages[-self.min_recent_messages :]
+        older_messages = messages[: -self.min_recent_messages]
+
+        # Generate summary of older messages
+        summary_text = self.summarizer.summarize(older_messages)
+        summary_message: dict[str, str] = {
+            "role": "user",
+            "content": summary_text,
+        }
+
+        optimized = [summary_message, *recent_messages]
+        final_tokens = estimate_messages_tokens(optimized)
+
+        # If still over budget, progressively drop summary detail
+        while final_tokens > available_budget and len(optimized) > 2:
+            optimized.pop(1)  # Remove oldest after summary
+            final_tokens = estimate_messages_tokens(optimized)
+
+        _logger.info(
+            "token_budget_applied",
+            original_tokens=total_tokens,
+            final_tokens=final_tokens,
+            messages_summarized=len(older_messages),
+            messages_kept=len(optimized),
+        )
+
+        return TokenBudgetResult(
+            messages=optimized,
+            total_tokens=final_tokens,
+            was_truncated=True,
+            summary_prepended=True,
+            original_count=original_count,
+            final_count=len(optimized),
+        )

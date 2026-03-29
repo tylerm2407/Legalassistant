@@ -334,14 +334,47 @@ Verify key README claims directly from the codebase:
 
 ## Deployment
 
-| Component | Platform | Configuration |
-|-----------|----------|---------------|
-| Frontend | Vercel | Auto-deploys from `main` branch. Framework preset: Next.js. |
-| Backend | Railway | Dockerfile-based deploy. Env vars configured in Railway dashboard. |
-| Database | Supabase | Managed Postgres with RLS policies in `supabase/` directory. |
-| Payments | Stripe | Webhook endpoint at `/api/payments/webhook`. |
+CaseMate ships with a complete CI/CD pipeline and multi-platform deployment infrastructure.
 
-Environment variables for production are configured in each platform's dashboard. See `.env.example` for the complete list with descriptions.
+| Component | Platform | Configuration | CI/CD |
+|-----------|----------|---------------|-------|
+| Frontend | Vercel | `web/vercel.json`, `web/Dockerfile` | Auto-deploy on push to `main` via Vercel CLI |
+| Backend | Railway | `railway.toml`, `Dockerfile` | Auto-deploy on push to `main` via Railway CLI |
+| Mobile (iOS) | App Store Connect | `mobile/eas.json` | EAS Build + Submit via `.github/workflows/mobile.yml` |
+| Mobile (Android) | Google Play Console | `mobile/eas.json` | EAS Build + Submit via `.github/workflows/mobile.yml` |
+| Database | Supabase | `supabase/migrations/` | Manual migration via `supabase db push` |
+| Cache | Redis | `docker-compose.prod.yml` | Provisioned via Railway Redis plugin |
+| Payments | Stripe | Webhook at `/api/payments/webhook` | — |
+
+### CI/CD Pipeline (`.github/workflows/ci.yml`)
+
+```
+Push to main → Backend (lint + typecheck + test) ─┐
+             → Frontend (lint + test + build) ─────┼→ Docker build → Deploy staging → Deploy production
+             → Mobile (typecheck + EAS validate) ──┘
+```
+
+### Deployment Commands
+
+```bash
+make deploy              # Deploy backend + frontend to production
+make deploy-backend      # Deploy backend to Railway
+make deploy-frontend     # Deploy frontend to Vercel
+make deploy-mobile       # Build + submit mobile via EAS
+make docker-up           # Start all services via Docker Compose
+```
+
+### Docker
+
+```bash
+# Development (backend + redis + web)
+docker compose up --build
+
+# Production (+ nginx reverse proxy with SSL, resource limits, log rotation)
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Environment variables for production: see `.env.production.example`. Full deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ---
 

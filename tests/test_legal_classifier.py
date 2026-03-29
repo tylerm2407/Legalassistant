@@ -9,10 +9,15 @@ behavior.
 from __future__ import annotations
 
 from backend.legal.classifier import (
+    CONFIDENCE_THRESHOLD,
     PHRASE_BOOST,
+    VALID_DOMAINS,
+    ClassificationResult,
+    _compute_confidence,
     _keyword_weight,
     _longest_match_length,
     classify_legal_area,
+    classify_with_confidence,
 )
 
 
@@ -154,3 +159,64 @@ class TestWeightedScoring:
         # "false advertising" (3x) + "hidden fee" (3x) = 6 consumer_protection
         result = classify_legal_area("this company uses false advertising and hidden fee tactics")
         assert result == "consumer_protection"
+
+
+class TestConfidenceScoring:
+    """Test the confidence scoring and classify_with_confidence API."""
+
+    def test_returns_classification_result(self) -> None:
+        result = classify_with_confidence("my landlord kept my security deposit")
+        assert isinstance(result, ClassificationResult)
+        assert result.domain == "landlord_tenant"
+        assert result.method == "keyword"
+        assert 0.0 <= result.confidence <= 1.0
+
+    def test_high_confidence_for_clear_signal(self) -> None:
+        result = classify_with_confidence("my landlord kept my security deposit and won't return it")
+        assert result.confidence > CONFIDENCE_THRESHOLD
+
+    def test_zero_confidence_for_general(self) -> None:
+        result = classify_with_confidence("hello how are you today")
+        assert result.domain == "general"
+        assert result.confidence == 0.0
+
+    def test_scores_dict_populated(self) -> None:
+        result = classify_with_confidence("my landlord won't fix the broken repair")
+        assert "landlord_tenant" in result.scores
+        assert result.scores["landlord_tenant"] > 0
+
+    def test_compute_confidence_single_domain(self) -> None:
+        # Only one domain matched → high confidence
+        scores = {"landlord_tenant": 5}
+        conf = _compute_confidence(scores)
+        assert conf >= 0.8
+
+    def test_compute_confidence_competing_domains(self) -> None:
+        # Two domains with similar scores → lower confidence
+        scores = {"landlord_tenant": 3, "small_claims": 3}
+        conf = _compute_confidence(scores)
+        assert conf < 0.6
+
+    def test_compute_confidence_empty_scores(self) -> None:
+        assert _compute_confidence({}) == 0.0
+
+    def test_compute_confidence_dominant_winner(self) -> None:
+        scores = {"landlord_tenant": 10, "employment_rights": 1}
+        conf = _compute_confidence(scores)
+        assert conf > 0.7
+
+    def test_valid_domains_constant(self) -> None:
+        assert "landlord_tenant" in VALID_DOMAINS
+        assert "general" in VALID_DOMAINS
+        assert len(VALID_DOMAINS) == 11  # 10 domains + general
+
+    def test_classify_with_confidence_matches_classify(self) -> None:
+        """classify_with_confidence and classify_legal_area should agree."""
+        questions = [
+            "my landlord kept my deposit",
+            "I got fired without notice",
+            "the product is defective",
+            "hello world",
+        ]
+        for q in questions:
+            assert classify_with_confidence(q).domain == classify_legal_area(q)

@@ -8,14 +8,53 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Full CI/CD deployment pipeline** with staging and production environments
+  - Backend deploys to Railway via `railway up` CLI (not placeholder echo)
+  - Frontend deploys to Vercel via `vercel deploy --prod` CLI
+  - Docker image build validation with GitHub Actions cache
+  - Post-deploy health checks on both backend and frontend
+  - Environment-based deployment gates (staging → production)
+- **Mobile CI/CD pipeline** (`.github/workflows/mobile.yml`)
+  - TypeScript typecheck on every PR
+  - EAS Build (preview on PR, production on push to main)
+  - EAS Submit to App Store Connect and Google Play Console
+  - Triggered only on `mobile/` or `shared/` file changes
+- **EAS build configuration** (`mobile/eas.json`)
+  - Development profile (simulator/APK for local testing)
+  - Preview profile (internal distribution for QA)
+  - Production profile (App Store / Google Play submission)
+  - Auto-increment build numbers for production
+- **Production Docker Compose** (`docker-compose.prod.yml`)
+  - Nginx reverse proxy with SSL termination and security headers
+  - Resource limits (CPU/memory) on all services
+  - Redis with AOF persistence and 128MB memory cap
+  - Health checks and JSON log rotation
+- **Nginx reverse proxy configuration** (`nginx/nginx.conf`)
+  - SSL/TLS termination with HTTP→HTTPS redirect
+  - API rate limiting (10 req/s per IP with burst)
+  - Security headers (HSTS, X-Frame-Options, X-Content-Type-Options)
+  - SSE support for streaming chat responses
+  - Static asset caching for Next.js bundles
+- **Production environment template** (`.env.production.example`)
+  - All required production variables with descriptions
+  - Sentry DSN for error tracking
+  - SMTP configuration for email export
+- **Makefile deployment targets**: `deploy-backend`, `deploy-frontend`, `deploy-mobile`, `deploy`, `docker-build`, `docker-up`, `docker-down`, `test-web`, `test-all`
+- Backend resilience utilities: circuit breaker, OpenTelemetry telemetry, token budget optimizer
 - Standalone waitlist app with Supabase auth account creation
 - MASTER_PROMPT.md optimized for Yconic rubric alignment
 - LICENSE (MIT), SECURITY.md, and ADRs 016–020 committed
 - Documentation verification section with reproducible commands
 - API usage examples (curl + Python) in docs/API.md
 - Troubleshooting FAQ in CONTRIBUTING.md
+- Comprehensive deployment documentation (docs/DEPLOYMENT.md) with architecture diagrams, rollback procedures, and security checklist
 
 ### Changed
+- CI/CD pipeline upgraded from placeholder deploy to real Railway + Vercel CLI deployment
+- CI/CD now includes Redis service for integration testing
+- CI/CD now validates Docker image builds before deployment
+- Deployment docs rewritten with full multi-platform guide (Railway, Vercel, EAS, Docker)
+- Makefile expanded from 8 to 15 targets (added Docker, deploy, and test-web commands)
 - README badges updated to match actual test counts (246 backend, 139 frontend)
 - Model version references corrected to `claude-sonnet-4-20250514` throughout
 - Backend version bumped from 0.1.0 to 0.3.0 to match CHANGELOG

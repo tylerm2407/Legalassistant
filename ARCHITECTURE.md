@@ -825,7 +825,7 @@ graph LR
 
 ```mermaid
 flowchart TD
-    PUSH["Push to main"] --> LINT["Backend: lint + typecheck + test<br/>(484 tests, 92% coverage)"]
+    PUSH["Push to main"] --> LINT["Backend: lint + typecheck + test<br/>(497+ tests, 90% coverage)"]
     PUSH --> WEB["Frontend: lint + test + build<br/>(143 tests)"]
     PUSH --> E2E["E2E: Playwright against staging"]
     PUSH --> MOBILE["Mobile: typecheck + EAS validate"]
@@ -904,8 +904,8 @@ This endpoint is unauthenticated and used for uptime monitoring and deployment r
 ### Backend Testing
 
 - **Framework:** pytest with pytest-cov for coverage reporting
-- **Test count:** 484 tests across 31 test modules (including 13 integration tests)
-- **Coverage:** 92% line coverage (90% CI-enforced threshold)
+- **Test count:** 497+ tests across 36 test modules (including 13 integration tests)
+- **Coverage:** 90% line coverage (90% CI-enforced threshold)
 
 | Test Module | Focus | Priority |
 |-------------|-------|----------|

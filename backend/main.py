@@ -93,6 +93,7 @@ from backend.utils.audit_log import AuditEventType, record_audit_event
 from backend.utils.auth import verify_supabase_jwt
 from backend.utils.circuit_breaker import CircuitBreakerOpenError, anthropic_breaker
 from backend.utils.client import get_anthropic_client
+from backend.utils.llm_router import get_llm_router
 from backend.utils.openai_client import get_openai_client
 from backend.utils.lifecycle import get_lifecycle_manager, lifecycle_middleware
 from backend.utils.logger import configure_logging, get_logger
@@ -498,6 +499,27 @@ async def health_check() -> dict[str, object]:
     }
 
 
+@app.get("/api/llm/status", tags=["Health & Monitoring"])
+async def llm_router_status(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Return the current LLM router status with per-provider metrics.
+
+    Shows which providers are healthy, their circuit breaker states,
+    call counts, failure rates, and average latencies. Useful for
+    debugging degraded responses and monitoring failover events.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with per-provider metrics including circuit breaker state,
+        call counts, failure counts, and average latency.
+    """
+    router = get_llm_router()
+    return {"llm_router": router.metrics}
+
+
 @app.get("/metrics", tags=["Health & Monitoring"])
 async def metrics_endpoint() -> Response:
     """Expose in-process metrics for Prometheus scraping or monitoring.
@@ -615,22 +637,21 @@ async def chat(
         )
 
     try:
-        oai_client = get_openai_client()
-        oai_messages: list[dict[str, str]] = [
-            {"role": "system", "content": system_prompt},
-            *api_messages,
-        ]
+        router = get_llm_router()
+        llm_response = await router.chat(system_prompt, api_messages)
+        assistant_response = llm_response.content
 
-        oai_response = await oai_client.chat.completions.create(
-            model="gpt-4o",
-            max_tokens=4096,
-            messages=oai_messages,  # type: ignore[arg-type]
-        )
-        assistant_response = oai_response.choices[0].message.content or ""
+        if llm_response.was_fallback:
+            _logger.info(
+                "chat_used_fallback_provider",
+                user_id=user_id,
+                provider=llm_response.provider,
+                model=llm_response.model,
+            )
 
-    except openai.APIError as exc:
+    except Exception as exc:
         _logger.error(
-            "openai_api_error",
+            "llm_router_error",
             user_id=user_id,
             error_type=type(exc).__name__,
             error_message=str(exc),
@@ -762,7 +783,10 @@ async def chat_stream(
     api_messages = budget_result.messages
 
     async def _generate_sse() -> AsyncGenerator[str, None]:
-        """Generate Server-Sent Events from the OpenAI streaming API.
+        """Generate SSE from the LLM router with automatic failover.
+
+        Uses the LLM router to stream from the primary provider (OpenAI).
+        If the primary fails, falls back to Anthropic streaming transparently.
 
         Yields SSE-formatted strings with token chunks and metadata.
         """
@@ -771,25 +795,23 @@ async def chat_stream(
         full_response_parts: list[str] = []
 
         try:
-            oai_client = get_openai_client()
-            oai_messages: list[dict[str, str]] = [
-                {"role": "system", "content": system_prompt},
-                *api_messages,
-            ]
+            router = get_llm_router()
+            provider_name, stream_obj = await router.stream(system_prompt, api_messages)
 
-            stream = await oai_client.chat.completions.create(
-                model="gpt-4o",
-                max_tokens=4096,
-                messages=oai_messages,  # type: ignore[arg-type]
-                stream=True,
-            )
-
-            async for chunk in stream:
-                delta = chunk.choices[0].delta if chunk.choices else None
-                if delta and delta.content:
-                    full_response_parts.append(delta.content)
-                    event_data = json.dumps({"type": "token", "content": delta.content})
-                    yield f"data: {event_data}\n\n"
+            if provider_name == "openai":
+                async for chunk in stream_obj:
+                    delta = chunk.choices[0].delta if chunk.choices else None
+                    if delta and delta.content:
+                        full_response_parts.append(delta.content)
+                        event_data = json.dumps({"type": "token", "content": delta.content})
+                        yield f"data: {event_data}\n\n"
+            else:
+                # Anthropic fallback streaming
+                async with stream_obj as anthropic_stream:
+                    async for text in anthropic_stream.text_stream:
+                        full_response_parts.append(text)
+                        event_data = json.dumps({"type": "token", "content": text})
+                        yield f"data: {event_data}\n\n"
 
             assistant_response = "".join(full_response_parts)
             stream_latency = time.monotonic() - stream_start
@@ -819,12 +841,13 @@ async def chat_stream(
                     "conversation_id": conversation_id,
                     "legal_area": legal_area,
                     "response_length": len(assistant_response),
+                    "provider": provider_name,
                     "latency_ms": round(stream_latency * 1000, 2),
                 }
             )
             yield f"data: {done_data}\n\n"
 
-        except openai.APIError as exc:
+        except Exception as exc:
             _logger.error("stream_api_error", user_id=user_id, error=str(exc))
             error_data = json.dumps(
                 {

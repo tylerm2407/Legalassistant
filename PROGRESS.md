@@ -7,14 +7,28 @@
 
 ## Current status
 
-**Phase:** Production Deployment Ready — 627 tests (484 backend + 143 frontend), 92% backend coverage, full CI/CD pipeline, multi-platform deployment, integration + smoke tests
+**Phase:** Production Deployment Ready — 627 tests (484 backend + 143 frontend), 90% backend coverage, full CI/CD pipeline, multi-platform deployment, integration + smoke tests
 
 ---
 
-## [2026-03-29 — Current] MVP Finalization Sprint
+## [2026-03-29 15:30] — Multi-Provider LLM Router
+
+### Phase 9: Dual-Model Architecture (COMPLETE)
+- Multi-provider LLM router with automatic failover (OpenAI GPT-4o primary → Anthropic Claude fallback)
+- Independent circuit breakers per provider (3-failure threshold, 30s recovery)
+- Per-provider metrics and observability endpoint (`GET /api/llm/status`)
+- SSE streaming with transparent provider failover
+- 13 unit tests for router (primary success, failover, metrics, singleton)
+- ADR 025: Multi-provider LLM router decision documented
+- README updated: architecture diagram, tech stack, API reference, feature table
+- Documentation accuracy pass: test counts, coverage badge, file counts corrected
+
+---
+
+## [2026-03-29 — Earlier] MVP Finalization Sprint
 
 ### Phase 1: Backend Test Coverage (COMPLETE)
-- Coverage: 40% → 92% (484 tests, threshold: 90%)
+- Coverage: 40% → 90% (484 tests, threshold: 90%)
 - New test files: test_legal_areas.py, test_profile_crud.py, test_document_extractor.py, test_integration.py
 - Property-based testing with Hypothesis for edge case discovery
 - 13 end-to-end integration tests covering full API pipelines

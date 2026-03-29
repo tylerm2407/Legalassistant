@@ -8,7 +8,7 @@ The average US lawyer charges $349/hour. The average American earns $52,000/year
 CaseMate closes that gap with AI that remembers your situation, knows your state's laws, and gives specific, actionable legal guidance for $20/month.
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/tylerm2407/Legalassistant/ci.yml?branch=main&label=CI)](https://github.com/tylerm2407/Legalassistant/actions)
-[![Test Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)](tests/)
+[![Test Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](tests/)
 [![Backend Tests](https://img.shields.io/badge/backend_tests-484-blue)](tests/)
 [![Frontend Tests](https://img.shields.io/badge/frontend_tests-143-blue)](web/__tests__/)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-6B57FF?logo=claude)](https://claude.ai/code)
@@ -70,6 +70,7 @@ flowchart TD
 | **PDF Export and Email** | Generate branded PDFs of letters, summaries, and checklists. Send directly via email. | Complete |
 | **SSE Streaming Chat** | Real-time chat via Server-Sent Events with two-phase send strategy. GET `/api/chat/{id}/stream` endpoint. | Complete |
 | **Hybrid Classifier** | Keyword-first classification with LLM fallback for ambiguous queries. ~0ms fast path, ~1s fallback. | Complete |
+| **Multi-Provider LLM Router** | Dual-model architecture with automatic failover: OpenAI GPT-4o (primary) + Anthropic Claude (fallback). Independent circuit breakers per provider, per-provider metrics, and transparent failover for zero-downtime AI. | Complete |
 | **Prompt Caching** | Anthropic prompt caching with static/dynamic content split via `cache_control` for reduced latency and cost. | Complete |
 | **Stripe Subscription Lifecycle** | Complete webhook handling (checkout, invoice, cancellation), subscription gate middleware, and free tier fallback. | Complete |
 | **Real OCR Pipeline** | Document text extraction via pytesseract + Pillow for image-based legal documents. | Complete |
@@ -101,7 +102,7 @@ graph TB
     end
 
     subgraph "External Services"
-        CLAUDE["Anthropic Claude API\nclaude-sonnet-4-20250514"]
+        CLAUDE["OpenAI GPT-4o (chat)\nAnthropic Claude (classification)"]
         SUPA["Supabase\nPostgres + Auth + Storage"]
         STRIPE["Stripe\nSubscription billing"]
         MC["Mailchimp\nWaitlist management"]
@@ -138,7 +139,7 @@ For the full technical deep dive -- data flow diagrams, database schema, memory 
 | Frontend | Next.js 14, TypeScript, Tailwind CSS | SSR, App Router, type-safe UI |
 | Mobile | Expo, React Native, Expo Router | Cross-platform iOS/Android from shared TypeScript |
 | Backend | FastAPI, Python 3.12 | Async API, background tasks, SSE streaming |
-| AI | Anthropic Claude (claude-sonnet-4-20250514) | Legal reasoning with structured context injection |
+| AI | OpenAI GPT-4o (chat) + Anthropic Claude (classification) | Dual-model architecture: GPT-4o for legal reasoning, Claude for domain classification |
 | Database | Supabase (PostgreSQL) | Structured profiles, conversations, documents, RLS |
 | Auth | Supabase Auth (JWT) | User authentication with Row Level Security |
 | File Storage | Supabase Storage | Document uploads tied to user auth |
@@ -252,10 +253,10 @@ casemate/
 │   └── components/                # ChatInterface, ProfileSidebar, ActionGenerator, etc.
 ├── mobile/                        # Expo React Native app (Expo Router)
 ├── shared/                        # Shared TypeScript types
-├── tests/                         # Backend test suite (484 tests across 31 files)
+├── tests/                         # Backend test suite (484 tests across 34 files)
 ├── web/__tests__/                 # Frontend test suite (143 tests across 21 files)
 ├── supabase/                      # Database schema + RLS policies
-├── docs/decisions/                # 24 Architecture Decision Records
+├── docs/decisions/                # 25 Architecture Decision Records
 └── scripts/                       # Demo seed scripts
 ```
 
@@ -266,6 +267,7 @@ casemate/
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/health` | Health check with version info |
+| `GET` | `/api/llm/status` | LLM router status with per-provider circuit breaker metrics |
 | `POST` | `/api/chat` | Send a legal question, receive a personalized response |
 | `GET` | `/api/chat/{id}/stream` | SSE stream of chat response chunks |
 | `POST` | `/api/profile` | Create or update legal profile |
@@ -369,7 +371,8 @@ Verify key README claims directly from the codebase:
 | Zero lint errors | `make lint` → All checks passed |
 | Zero type errors | `mypy backend/` → Success: no issues found |
 | Memory injection | Run demo, ask landlord question as MA renter → response cites M.G.L. |
-| Model version | `grep "claude-sonnet" backend/main.py` → claude-sonnet-4-20250514 |
+| Chat model | `grep "gpt-4o" backend/main.py` → gpt-4o (OpenAI) |
+| Classifier model | `grep "claude-sonnet" backend/legal/classifier.py` → claude-sonnet-4-20250514 (Anthropic) |
 
 ---
 
@@ -379,7 +382,7 @@ Every feature listed is implemented, tested, and deployable. No placeholders. No
 
 | Dimension | Evidence | Verification |
 |-----------|----------|-------------|
-| **Backend Tests** | 484 pytest tests, 92% coverage | `make test` |
+| **Backend Tests** | 484 pytest tests, 90% coverage | `make test` |
 | **Frontend Tests** | 143 Jest tests across 21 files | `cd web && npm test` |
 | **Integration Tests** | 13 end-to-end pipeline tests | `pytest tests/test_integration.py -v` |
 | **Smoke Tests** | 7 live deployment checks | `python scripts/smoke_test.py <url>` |
@@ -489,6 +492,7 @@ All architectural decisions are documented with context, options considered, and
 | [022](docs/decisions/022-sse-streaming-over-websocket-for-chat.md) | SSE streaming over WebSocket | Unidirectional SSE fits chat. Works through CDNs and proxies. |
 | [023](docs/decisions/023-supabase-unified-platform.md) | Supabase as unified platform | Auth + DB + Storage + Realtime. One SDK, one security model. |
 | [024](docs/decisions/024-prompt-injection-defense-structured-context.md) | Prompt injection defense | Structured context isolation. Zero-latency, deterministic, auditable. |
+| [025](docs/decisions/025-multi-provider-llm-router.md) | Multi-provider LLM router | Dual-model failover: OpenAI GPT-4o primary, Anthropic Claude fallback, independent circuit breakers. |
 
 ---
 
@@ -536,7 +540,7 @@ Comprehensive documentation for every CaseMate subsystem lives in `docs/`:
 
 ### Decision Records
 
-24 Architecture Decision Records in [docs/decisions/](docs/decisions/) — see the [ADR table](#architecture-decision-records) below.
+25 Architecture Decision Records in [docs/decisions/](docs/decisions/) — see the [ADR table](#architecture-decision-records) below.
 
 ---
 

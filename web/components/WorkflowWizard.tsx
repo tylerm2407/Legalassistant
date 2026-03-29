@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
 import { useTranslation } from "@/lib/i18n";
+import { api } from "@/lib/api";
 
 /**
  * A single step within a guided legal workflow.
@@ -40,7 +41,7 @@ interface WorkflowWizardProps {
   title: string;
   steps: WorkflowStep[];
   initialStep: number;
-  onStepComplete: (workflowId: string, stepIndex: number) => void;
+  onStepComplete?: (workflowId: string, stepIndex: number) => void;
 }
 
 /**
@@ -48,40 +49,37 @@ interface WorkflowWizardProps {
  *
  * Walks users through multi-step legal procedures (e.g., filing small claims,
  * recovering a security deposit) with detailed instructions, required documents,
- * tips, and deadlines for each step. Progress is persisted to Supabase so users
- * can resume where they left off.
+ * tips, and deadlines for each step. Progress is persisted via the onStepComplete
+ * callback which writes to localStorage.
  *
  * @param props - Component props
- * @param props.workflowId - Workflow instance ID for persisting step progress
+ * @param props.workflowId - Workflow instance ID
  * @param props.title - Workflow title displayed at the top
  * @param props.steps - Ordered array of workflow steps
  * @param props.initialStep - Step index to start from (supports resuming)
+ * @param props.onStepComplete - Callback to persist step completion
  */
-export default function WorkflowWizard({ workflowId, title, steps, initialStep }: WorkflowWizardProps) {
+export default function WorkflowWizard({ workflowId, title, steps, initialStep, onStepComplete }: WorkflowWizardProps) {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepStatuses, setStepStatuses] = useState<string[]>(steps.map((s: WorkflowStep) => s.status));
-  const [updating, setUpdating] = useState(false);
   const { t } = useTranslation();
 
   const step = steps[currentStep];
+  const allComplete = stepStatuses.every((s) => s === "completed");
 
-  async function completeStep() {
-    setUpdating(true);
-    try {
-      await api.updateWorkflowStep(workflowId, currentStep, "completed");
-      const newStatuses = [...stepStatuses];
-      newStatuses[currentStep] = "completed";
-      if (currentStep + 1 < steps.length) {
-        newStatuses[currentStep + 1] = "in_progress";
-      }
-      setStepStatuses(newStatuses);
-      if (currentStep + 1 < steps.length) {
-        setCurrentStep(currentStep + 1);
-      }
-    } catch {
-      // silent
-    } finally {
-      setUpdating(false);
+  function completeStep() {
+    const newStatuses = [...stepStatuses];
+    newStatuses[currentStep] = "completed";
+    if (currentStep + 1 < steps.length) {
+      newStatuses[currentStep + 1] = "in_progress";
+    }
+    setStepStatuses(newStatuses);
+    api.updateWorkflowStep(workflowId, currentStep, "completed");
+    if (onStepComplete) {
+      onStepComplete(workflowId, currentStep);
+    }
+    if (currentStep + 1 < steps.length) {
+      setCurrentStep(currentStep + 1);
     }
   }
 
@@ -108,6 +106,15 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
       <p className="text-xs text-gray-500">
         {t("step")} {currentStep + 1} {t("of")} {steps.length}
       </p>
+
+      {/* All complete banner */}
+      {allComplete && (
+        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-center">
+          <p className="text-sm font-semibold text-green-400">
+            All steps completed! You can review any step by clicking the progress bar above.
+          </p>
+        </div>
+      )}
 
       {/* Current step */}
       <Card>
@@ -189,9 +196,8 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
             <Button
               size="sm"
               onClick={completeStep}
-              disabled={updating}
             >
-              {updating ? t("saving") : t("markCompleteBtn")}
+              {t("markCompleteBtn")}
             </Button>
           )}
           {currentStep < steps.length - 1 && (

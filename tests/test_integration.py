@@ -12,7 +12,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from anthropic.types import TextBlock
 from fastapi.testclient import TestClient
 
 from backend.legal.classifier import classify_legal_area
@@ -104,8 +103,13 @@ def test_openapi_docs_available(integration_client: TestClient) -> None:
 
 def test_full_chat_pipeline(integration_client: TestClient, _sample_profile: LegalProfile) -> None:
     """Complete chat flow: profile lookup -> classify -> prompt build -> response."""
-    mock_claude_response = MagicMock()
-    mock_claude_response.content = [TextBlock(type="text", text="Based on Massachusetts law...")]
+    mock_oai_response = MagicMock()
+    mock_choice = MagicMock()
+    mock_choice.message.content = (
+        "Under Massachusetts law, specifically M.G.L. c.186 §15B, "
+        "your landlord must return your security deposit within 30 days."
+    )
+    mock_oai_response.choices = [mock_choice]
 
     mock_conversation = MagicMock()
     mock_conversation.id = "conv_integration_001"
@@ -130,11 +134,12 @@ def test_full_chat_pipeline(integration_client: TestClient, _sample_profile: Leg
         patch("backend.main.detect_and_save_deadlines", new_callable=AsyncMock),
         patch("backend.main.record_audit_event", new_callable=AsyncMock),
         patch("backend.main.increment_free_message_count", new_callable=AsyncMock),
-        patch("backend.main.get_anthropic_client") as mock_get_client,
+        patch("backend.main.get_openai_client") as mock_get_client,
     ):
         mock_client = MagicMock()
-        mock_client.messages = MagicMock()
-        mock_client.messages.create = AsyncMock(return_value=mock_claude_response)
+        mock_client.chat = MagicMock()
+        mock_client.chat.completions = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_oai_response)
         mock_get_client.return_value = mock_client
 
         resp = integration_client.post(
@@ -145,7 +150,11 @@ def test_full_chat_pipeline(integration_client: TestClient, _sample_profile: Leg
         assert resp.status_code == 200
         data = resp.json()
         assert data["conversation_id"] == "conv_integration_001"
-        assert "Based on Massachusetts law" in data["response"]
+        response_text = data["response"].lower()
+        assert "massachusetts" in response_text, "Response should mention the user's state"
+        assert any(
+            term in response_text for term in ["law", "statute", "deposit", "landlord", "m.g.l."]
+        ), "Response should contain legal content"
         assert data["legal_area"] == "landlord_tenant"
 
 

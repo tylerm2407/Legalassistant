@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LanguageWrapper from "@/components/LanguageWrapper";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-[#050505] text-white`}>
         <ErrorBoundary>
           <AuthProvider>
+            <Navbar />
             <LanguageWrapper>{children}</LanguageWrapper>
           </AuthProvider>
         </ErrorBoundary>

@@ -39,8 +39,8 @@ describe("OnboardingFlow", () => {
 
   it("shows step progress indicator", () => {
     render(<OnboardingFlow />);
-    expect(screen.getByText("Step 1 of 5")).toBeInTheDocument();
-    expect(screen.getByText("20%")).toBeInTheDocument();
+    expect(screen.getByText("Step 1 of 6")).toBeInTheDocument();
+    expect(screen.getByText("17%")).toBeInTheDocument();
   });
 
   it("disables Next button when required fields are empty", () => {
@@ -63,7 +63,7 @@ describe("OnboardingFlow", () => {
     await user.selectOptions(screen.getByRole("combobox"), "Massachusetts");
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Housing Situation")).toBeInTheDocument();
-    expect(screen.getByText("Step 2 of 5")).toBeInTheDocument();
+    expect(screen.getByText("Step 2 of 6")).toBeInTheDocument();
   });
 
   it("allows going back to previous step", async () => {

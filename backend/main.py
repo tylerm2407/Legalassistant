@@ -56,6 +56,15 @@ from backend.memory.injector import build_system_prompt
 from backend.memory.profile import get_profile, update_profile
 from backend.memory.updater import update_profile_from_conversation
 from backend.models.legal_profile import LegalProfile
+from backend.models.responses import HealthResponse
+from backend.payments.stripe_webhooks import handle_webhook
+from backend.payments.subscription import (
+    CheckoutSessionResponse,
+    SubscriptionStatus,
+    cancel_subscription,
+    create_checkout_session,
+    get_subscription_status,
+)
 from backend.referrals.matcher import find_attorneys, get_referral_suggestions
 from backend.utils.auth import verify_supabase_jwt
 from backend.utils.client import get_anthropic_client
@@ -119,7 +128,12 @@ async def attach_user_id_to_state(request: Request, call_next: Callable) -> Resp
 
             payload = pyjwt.decode(token, options={"verify_signature": False})
             request.state.user_id = payload.get("sub", "anonymous")
-        except Exception:
+        except Exception as exc:
+            _logger.warning(
+                "jwt_decode_fallback_to_anonymous",
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
             request.state.user_id = "anonymous"
     else:
         request.state.user_id = "anonymous"
@@ -184,6 +198,20 @@ class ActionRequest(BaseModel):
     context: str = Field(..., max_length=5_000)
 
 
+class CreateCheckoutRequest(BaseModel):
+    """Request body for creating a Stripe checkout session.
+
+    Attributes:
+        price_id: The Stripe price ID for the subscription plan.
+        success_url: URL to redirect to after successful payment.
+        cancel_url: URL to redirect to if the user cancels checkout.
+    """
+
+    price_id: str = Field(..., max_length=200)
+    success_url: str = Field(..., max_length=2000)
+    cancel_url: str = Field(..., max_length=2000)
+
+
 # ---------- Rate limit dependencies ----------
 
 _chat_rate_limit = rate_limit(max_requests=10, window_seconds=60)
@@ -199,13 +227,13 @@ MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
+async def health_check() -> HealthResponse:
     """Health check endpoint for uptime monitoring.
 
     Returns:
-        Dict with status 'ok' and the current service version.
+        HealthResponse with status 'ok' and the current service version.
     """
-    return {"status": "ok", "version": "0.1.0"}
+    return HealthResponse(status="ok", version="0.1.0")
 
 
 @app.post("/api/chat", response_model=ChatResponse)
@@ -1111,3 +1139,88 @@ async def search_attorneys(
             for a in attorneys
         ]
     }
+
+
+# ---------- Payment Endpoints ----------
+
+
+@app.post("/api/payments/create-checkout-session")
+async def create_checkout(
+    request: CreateCheckoutRequest,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> CheckoutSessionResponse:
+    """Create a Stripe checkout session for subscription signup.
+
+    Args:
+        request: The checkout request with price ID and redirect URLs.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        CheckoutSessionResponse with the session ID and hosted checkout URL.
+
+    Raises:
+        HTTPException: 500 if Stripe API call fails.
+    """
+    return await create_checkout_session(
+        user_id=user_id,
+        price_id=request.price_id,
+        success_url=request.success_url,
+        cancel_url=request.cancel_url,
+    )
+
+
+@app.post("/api/payments/webhook")
+async def stripe_webhook(request: Request) -> dict[str, str]:
+    """Handle incoming Stripe webhook events.
+
+    Reads the raw request body and Stripe-Signature header, then delegates
+    to the webhook handler for signature verification and event processing.
+
+    Args:
+        request: The raw FastAPI request object.
+
+    Returns:
+        Dict with status 'ok' on successful processing.
+
+    Raises:
+        HTTPException: 400 if webhook signature verification fails.
+    """
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    return await handle_webhook(payload, sig_header)
+
+
+@app.get("/api/payments/subscription")
+async def get_user_subscription(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> SubscriptionStatus:
+    """Get the authenticated user's subscription status.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        SubscriptionStatus with the current subscription state.
+    """
+    return await get_subscription_status(user_id)
+
+
+@app.post("/api/payments/cancel")
+async def cancel_user_subscription(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> SubscriptionStatus:
+    """Cancel the authenticated user's subscription.
+
+    Cancels at period end so the user retains access until the current
+    billing period expires.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        SubscriptionStatus reflecting the canceled state.
+
+    Raises:
+        HTTPException: 400 if the user has no active subscription.
+    """
+    return await cancel_subscription(user_id)

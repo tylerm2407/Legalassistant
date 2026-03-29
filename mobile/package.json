@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
-    "expo": "^55.0.10-canary-20260328-2049187",
+    "expo": "~55.0.0",
     "expo-document-picker": "~11.10.0",
     "expo-image-picker": "~14.7.0",
     "expo-router": "^3.5.24",

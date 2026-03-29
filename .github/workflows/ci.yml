@@ -60,3 +60,21 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
           NEXT_PUBLIC_SUPABASE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlc3QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxNzMwMDAwMDAwfQ.test-ci-build-key
           NEXT_PUBLIC_API_URL: http://localhost:8000
+
+  deploy:
+    name: Deploy (staging)
+    needs: [lint-and-test, web-build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t casemate-backend .
+
+      - name: Deploy to Railway
+        if: env.RAILWAY_TOKEN != ''
+        run: echo "Railway deployment would run here"
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

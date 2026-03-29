@@ -1,0 +1,17 @@
+# railway.toml — Railway deployment configuration for CaseMate backend
+#
+# Railway reads this file to determine how to build and deploy the service.
+# The backend is built from the root Dockerfile and exposes /health for
+# liveness checks.
+#
+# Docs: https://docs.railway.app/reference/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

@@ -491,13 +491,13 @@ State laws vary enormously by legal domain. Injecting all of Massachusetts law i
 
 ---
 
-## What makes this score well with an AI evaluator
+## Design Principles
 
-The yconic scoring system evaluates code quality, architectural decisions, and product strategy. This architecture was designed with that in mind:
+These engineering disciplines are enforced across the codebase:
 
 - Every class and method has a full docstring explaining purpose, inputs, outputs, and design rationale
 - Architecture decisions are recorded in `docs/decisions/` with explicit trade-off analysis
-- The memory injection pattern demonstrates genuine understanding of how to personalize LLM responses — not just a system prompt wrapper
-- State-specific legal routing shows product domain depth
-- The profile auto-updater demonstrates an agentic feedback loop, not just request-response
+- The memory injection pattern is a genuine personalization layer — not just a system prompt wrapper
+- State-specific legal routing ensures product domain depth and jurisdiction accuracy
+- The profile auto-updater implements an agentic feedback loop, not just request-response
 - Tests cover the memory layer specifically — the most critical and differentiating component

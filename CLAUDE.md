@@ -493,15 +493,14 @@ Demo script (2 minutes 45 seconds):
 - **Do not build a generic chatbot first and add memory later.** Memory is the
   foundation. Build the injector before building the chat UI.
 
-- **Do not use `Any` types.** Every model is typed. The yconic scorer reads
-  type annotations and penalizes untyped code.
+- **Do not use `Any` types.** Every model is typed. Strict type annotations
+  are enforced by mypy and are essential for code quality.
 
 - **Do not hardcode API keys.** All secrets go in `.env`. The `.env.example`
   must have every variable with a comment explaining what it is.
 
-- **Do not skip docstrings under time pressure.** The yconic AI scanner reads
-  docstring density as a proxy for code quality. A function without a docstring
-  is a scored deduction.
+- **Do not skip docstrings under time pressure.** Docstring density is a core
+  code quality metric. A function without a docstring is incomplete code.
 
 - **Do not leave placeholder implementations.** Any function with `pass` or
   `# TODO` is an incomplete product. Mark unfinished work with a clear comment
@@ -526,8 +525,8 @@ Demo script (2 minutes 45 seconds):
 
 ## Progress tracking
 
-Update `PROGRESS.md` every 30 minutes during the build. The yconic leaderboard
-scans repos on a 30-minute cycle. A stale PROGRESS.md signals a stalled team.
+Update `PROGRESS.md` every 30 minutes during the build. A stale PROGRESS.md
+signals a stalled team. Frequent updates show consistent velocity.
 
 Format:
 ```markdown

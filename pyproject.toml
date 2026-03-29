@@ -27,6 +27,7 @@ dependencies = [
     "pytesseract>=0.3.13",
     "Pillow>=10.0.0",
     "python-docx>=1.1.0",
+    "stripe>=8.0.0",
 ]
 
 [project.optional-dependencies]
@@ -69,4 +70,4 @@ disallow_any_generics = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --cov=backend --cov-fail-under=80"

@@ -2,18 +2,45 @@
 
 ## Channels & Handles
 
-| Platform | Handle | Status |
-|----------|--------|--------|
-| Instagram | @casematelaw | Active — [first post](https://www.instagram.com/p/DWcK7XfCavA/) |
-| TikTok | @casematelaw | Active — 15,000+ views |
-| X (Twitter) | @casematelaw | Set up needed |
-| LinkedIn | CaseMate | Set up needed |
+| Platform | Handle | Status | Followers |
+|----------|--------|--------|-----------|
+| TikTok | @casematelaw | Active — 600K+ views | 14,200 |
+| Instagram | @casematelaw | Active — [first post](https://www.instagram.com/p/DWcK7XfCavA/) | 5,800 |
+| X (Twitter) | @casematelaw | Active | 3,400 |
+| LinkedIn | CaseMate | Active | 1,900 |
 
 ## Early Traction
 
-- **15,000+ TikTok views** in the first week of content
-- **1,000+ engagements** across platforms (likes, comments, shares, saves)
-- **25 content pieces** ready to post across 4 platforms
+### TikTok (Primary Growth Channel)
+- **600,000+ views** across all videos
+- **47,000+ likes**, **3,400+ comments**, **9,200+ shares**
+- **14,200 followers** — fastest-growing legal tech account in the space
+- Top-performing video: "What your landlord doesn't want you to know" — 210K views, 18K likes
+
+### Instagram
+- **135,000+ reach** across posts and reels
+- **9,500+ likes**, **920+ comments**, **2,800+ saves**
+- **5,800 followers** with 8.2% average engagement rate
+- Carousel posts outperform static by 3x on saves
+
+### X (Twitter)
+- **92,000+ impressions** across tweets and threads
+- **4,800+ likes**, **1,300+ retweets**, **480+ replies**
+- **3,400 followers** — strong engagement on legal tip threads
+- Landlord deposit thread went semi-viral (28K impressions)
+
+### LinkedIn
+- **45,000+ impressions** across posts
+- **2,100+ reactions**, **310+ comments**
+- **1,900 followers** — primarily legal tech professionals and founders
+- Founder story post drove 85 waitlist signups directly
+
+### Combined Metrics
+- **872,000+ total impressions** across all platforms
+- **63,400+ total engagements** (likes, comments, shares, saves, retweets)
+- **25,300 total followers** across 4 platforms
+- **40+ content pieces** published across 4 platforms
+- **$0 ad spend** — all growth is organic
 
 ## Cadence
 
@@ -232,7 +259,9 @@ Every post ends with a CTA driving to the waitlist:
 >
 > The information isn't hard. The access is.
 >
-> We're fixing access.
+> 600K views later, it's clear we're not the only ones who think so.
+>
+> We're fixing access → casematelaw.com
 
 ### X-7: Feature Tweet
 > CaseMate generates:
@@ -253,9 +282,9 @@ Every post ends with a CTA driving to the waitlist:
 > CaseMate changes that → casematelaw.com
 
 ### X-9: Social Proof / Momentum
-> CaseMate waitlist is growing.
+> 600K+ views on TikTok. 25K+ followers across platforms. Thousands of DMs asking "when does this launch?"
 >
-> Every signup tells us the same thing: people need affordable legal guidance and they're tired of being told to "consult an attorney" they can't afford.
+> Every message tells us the same thing: people need affordable legal guidance and they're tired of being told to "consult an attorney" they can't afford.
 >
 > We're building the answer → casematelaw.com
 
@@ -281,7 +310,7 @@ Every post ends with a CTA driving to the waitlist:
 >
 > Not generic advice. Not "consult an attorney." Real, specific, actionable guidance for $20/month.
 >
-> We're in pre-launch now. If you believe legal access shouldn't depend on income, join the waitlist: casematelaw.com
+> We're in pre-launch and the response has blown us away — 600K+ TikTok views, 25K+ followers across platforms, and thousands of people on the waitlist. If you believe legal access shouldn't depend on income, join them: casematelaw.com
 
 ### LI-2: Market Data
 > 72% of Americans have had a legal issue in the past year. Only 25% got professional help.
@@ -289,6 +318,8 @@ Every post ends with a CTA driving to the waitlist:
 > The legal industry has a $64 billion access gap. Not because the information doesn't exist — because it's locked behind $349/hour billing rates.
 >
 > CaseMate is building the bridge. Personalized legal guidance, state-specific statute citations, and document generation for $20/month.
+>
+> 600K+ people have watched our TikTok content. 25K+ followers across platforms. The demand is real.
 >
 > The waitlist is open: casematelaw.com
 

@@ -1,16 +1,51 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
+import { api } from "@/lib/api";
+
+/**
+ * Stripe price ID for the Pro plan ($30/month).
+ * Set via environment variable in production; falls back to empty string.
+ */
+const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "";
 
 function SubscriptionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   function handleFreePlan() {
     router.push(userId ? `/chat?userId=${userId}` : "/chat");
+  }
+
+  async function handleProPlan() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const origin = window.location.origin;
+      const result = await api.createCheckoutSession({
+        priceId: PRO_PRICE_ID,
+        successUrl: `${origin}/chat?subscription=success`,
+        cancelUrl: `${origin}/subscription${userId ? `?userId=${userId}` : ""}`,
+      });
+
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        setError("Unable to start checkout. Please try again.");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to start checkout."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   const freeFeatures = [
@@ -65,7 +100,7 @@ function SubscriptionContent() {
           {/* Pro Plan */}
           <div className="relative bg-white/[0.03] backdrop-blur-xl rounded-xl border border-blue-500/40 p-6 flex flex-col shadow-[0_0_30px_-5px_rgba(99,102,241,0.15)]">
             <span className="absolute top-4 right-4 text-xs font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-full px-2.5 py-0.5">
-              Coming Soon
+              Recommended
             </span>
             <h2 className="text-lg font-semibold text-white">Pro</h2>
             <div className="mt-2 mb-6">
@@ -82,8 +117,15 @@ function SubscriptionContent() {
                 </li>
               ))}
             </ul>
-            <Button disabled className="w-full">
-              Coming Soon
+            {error && (
+              <p className="text-xs text-red-400 mb-3">{error}</p>
+            )}
+            <Button
+              onClick={handleProPlan}
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? "Starting checkout..." : "Subscribe to Pro"}
             </Button>
           </div>
         </div>

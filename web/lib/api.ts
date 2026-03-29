@@ -685,4 +685,36 @@ export const api = {
     });
     if (!res.ok) throw new Error(`Email export failed: ${res.status}`);
   },
+
+  /**
+   * Creates a Stripe checkout session for Pro subscription signup.
+   *
+   * Calls the backend to generate a hosted checkout page URL. The user is
+   * redirected to Stripe's checkout to enter payment details.
+   *
+   * @param params - Checkout parameters
+   * @param params.priceId - The Stripe price ID for the Pro plan
+   * @param params.successUrl - URL to redirect to after successful payment
+   * @param params.cancelUrl - URL to redirect to if the user cancels
+   * @returns Object with session_id and checkout url
+   * @throws {Error} If session creation fails
+   */
+  async createCheckoutSession(params: {
+    priceId: string;
+    successUrl: string;
+    cancelUrl: string;
+  }): Promise<{ session_id: string; url: string }> {
+    const headers = await getAuthHeaders();
+    const res = await fetchWithRetry(`${API_BASE}/payments/create-checkout-session`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        price_id: params.priceId,
+        success_url: params.successUrl,
+        cancel_url: params.cancelUrl,
+      }),
+    });
+    if (!res.ok) throw new Error(`Checkout session creation failed: ${res.status}`);
+    return res.json();
+  },
 };

@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {
+    root: ".",
+  },
   async rewrites() {
     if (process.env.NEXT_PUBLIC_API_URL) return [];
     return [

@@ -1,7 +1,18 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 import LegalProfileSidebar from "@/components/LegalProfileSidebar";
 import type { LegalProfile } from "@/lib/types";
+
+// Mock Supabase client used by realtime subscription
+jest.mock("@/lib/supabase", () => ({
+  supabase: {
+    channel: () => ({
+      on: () => ({ subscribe: () => ({}) }),
+    }),
+    removeChannel: jest.fn(),
+  },
+}));
 
 const mockProfile: LegalProfile = {
   user_id: "user-123",
@@ -90,5 +101,11 @@ describe("LegalProfileSidebar", () => {
     expect(screen.getByText("No active issues")).toBeInTheDocument();
     expect(screen.getByText("Facts will appear as you chat")).toBeInTheDocument();
     expect(screen.getByText("No documents uploaded")).toBeInTheDocument();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = render(<LegalProfileSidebar profile={mockProfile} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import ChatInterface from "@/components/ChatInterface";
 import type { LegalProfile } from "@/lib/types";
 
@@ -106,5 +107,11 @@ describe("ChatInterface", () => {
   it("shows disclaimer text", () => {
     render(<ChatInterface profile={mockProfile} />);
     expect(screen.getByText(/AI assistant — not legal advice/)).toBeInTheDocument();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = render(<ChatInterface profile={mockProfile} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

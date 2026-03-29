@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import ActionGenerator from "@/components/ActionGenerator";
 
 // Mock the api module
@@ -112,5 +113,11 @@ describe("ActionGenerator", () => {
 
     // Clean up
     resolvePromise!({ letter_text: "test", legal_citations: [] });
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = render(<ActionGenerator userId="user-123" />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

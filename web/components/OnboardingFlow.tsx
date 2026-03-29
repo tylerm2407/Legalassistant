@@ -174,10 +174,11 @@ export default function OnboardingFlow() {
               onChange={(e) => update("displayName", e.target.value)}
             />
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="onboarding-state" className="block text-sm font-medium text-gray-300 mb-1">
                 State
               </label>
               <select
+                id="onboarding-state"
                 value={form.state}
                 onChange={(e) => update("state", e.target.value)}
                 className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"

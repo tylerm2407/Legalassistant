@@ -98,15 +98,18 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [lastLegalArea, setLastLegalArea] = useState<string>("");
   const [showHistory, setShowHistory] = useState(true);
+  const [streamingContent, setStreamingContent] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortStreamRef = useRef<(() => void) | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, streamingContent]);
 
   async function handleSend() {
     const question = input.trim();
-    if (!question || isLoading) return;
+    if (!question || isLoading || isStreaming) return;
 
     const userMessage: Message = {
       role: "user",
@@ -116,45 +119,116 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setIsLoading(true);
 
-    try {
-      const response = await api.chat({
-        userId: profile.user_id,
-        question,
-        conversationId,
-      });
+    // Phase 1: New conversation — use POST to get conversation_id
+    if (!conversationId) {
+      setIsLoading(true);
+      try {
+        const response = await api.chat({
+          userId: profile.user_id,
+          question,
+          conversationId,
+        });
 
-      setConversationId(response.conversation_id);
-      setLastLegalArea(response.legal_area);
+        setConversationId(response.conversation_id);
+        setLastLegalArea(response.legal_area);
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: response.answer,
-        timestamp: new Date(),
-        legalArea: response.legal_area,
-      };
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: response.answer,
+          timestamp: new Date(),
+          legalArea: response.legal_area,
+        };
 
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      const errorMessage: Message = {
-        role: "error",
-        content:
-          err instanceof Error
-            ? err.message
-            : "Something went wrong. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
+        setMessages((prev) => [...prev, assistantMessage]);
+      } catch (err) {
+        const errorMessage: Message = {
+          role: "error",
+          content:
+            err instanceof Error
+              ? err.message
+              : "Something went wrong. Please try again.",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
     }
+
+    // Phase 2: Existing conversation — use SSE streaming
+    setIsStreaming(true);
+    setStreamingContent("");
+
+    const cleanup = api.streamChat({
+      conversationId,
+      message: question,
+      onToken: (chunk) => {
+        setStreamingContent((prev) => prev + chunk);
+      },
+      onDone: (meta) => {
+        setStreamingContent((current) => {
+          const finalContent = current;
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant" as const,
+              content: finalContent,
+              timestamp: new Date(),
+              legalArea: meta.legal_area,
+            },
+          ]);
+          return "";
+        });
+        setLastLegalArea(meta.legal_area);
+        setIsStreaming(false);
+        abortStreamRef.current = null;
+      },
+      onError: (message) => {
+        setStreamingContent("");
+        setIsStreaming(false);
+        abortStreamRef.current = null;
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "error" as const,
+            content: message,
+            timestamp: new Date(),
+          },
+        ]);
+      },
+    });
+
+    abortStreamRef.current = cleanup;
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!isStreaming) handleSend();
+    }
+  }
+
+  function handleStopStream() {
+    if (abortStreamRef.current) {
+      abortStreamRef.current();
+      abortStreamRef.current = null;
+      // Flush whatever we have so far as a message
+      setStreamingContent((current) => {
+        if (current) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant" as const,
+              content: current + "\n\n[Stopped]",
+              timestamp: new Date(),
+            },
+          ]);
+        }
+        return "";
+      });
+      setIsStreaming(false);
     }
   }
 
@@ -244,6 +318,14 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             <MessageBubble key={i} message={msg} />
           ))}
           {isLoading && <TypingIndicator />}
+          {isStreaming && streamingContent && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] px-4 py-3 rounded-2xl text-sm bg-white/[0.03] backdrop-blur text-gray-200 border border-white/10">
+                {streamingContent}
+                <span className="inline-block w-1.5 h-4 bg-blue-400 ml-0.5 animate-pulse" />
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -263,13 +345,22 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               rows={1}
               className="flex-1 px-4 py-2.5 bg-white/[0.03] text-white border border-white/10 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:border-blue-500/50 focus:ring-blue-500/20 focus:shadow-glow-sm placeholder:text-gray-600"
             />
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              size="md"
-            >
-              Send
-            </Button>
+            {isStreaming ? (
+              <Button
+                onClick={handleStopStream}
+                size="md"
+              >
+                Stop
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                size="md"
+              >
+                Send
+              </Button>
+            )}
           </div>
           <p className="text-xs text-gray-500 mt-2 text-center flex items-center justify-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -121,6 +121,92 @@ export const api = {
   },
 
   /**
+   * Streams CaseMate's response via Server-Sent Events for real-time token display.
+   *
+   * Uses the GET /api/chat/{id}/stream endpoint with an AbortController for
+   * cancellation support. Calls back with each token chunk as it arrives.
+   *
+   * @param params - Stream request parameters
+   * @param params.conversationId - The conversation ID to continue
+   * @param params.message - The user's legal question
+   * @param params.onToken - Callback invoked with each text chunk as it streams
+   * @param params.onDone - Callback invoked when streaming completes with metadata
+   * @param params.onError - Callback invoked if an error occurs during streaming
+   * @returns Cleanup function that aborts the stream when called
+   */
+  streamChat(params: {
+    conversationId: string;
+    message: string;
+    onToken: (chunk: string) => void;
+    onDone: (meta: { legal_area: string; conversation_id: string }) => void;
+    onError: (message: string) => void;
+  }): () => void {
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const url = `${API_BASE}/chat/${params.conversationId}/stream?message=${encodeURIComponent(params.message)}`;
+        const res = await fetch(url, {
+          headers,
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          params.onError(`Stream failed: ${res.status}`);
+          return;
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) {
+          params.onError("No response body");
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const jsonStr = line.slice(6).trim();
+            if (!jsonStr) continue;
+
+            try {
+              const event = JSON.parse(jsonStr);
+              if (event.type === "token") {
+                params.onToken(event.content);
+              } else if (event.type === "done") {
+                params.onDone({
+                  legal_area: event.legal_area || "",
+                  conversation_id: event.conversation_id || params.conversationId,
+                });
+              } else if (event.type === "error") {
+                params.onError(event.message || "Stream error");
+              }
+            } catch {
+              // Ignore malformed SSE events
+            }
+          }
+        }
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          params.onError(err instanceof Error ? err.message : "Stream failed");
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  },
+
+  /**
    * Fetches the user's legal profile from Supabase via the backend.
    *
    * @param userId - The authenticated user's Supabase ID

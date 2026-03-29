@@ -103,19 +103,27 @@ def test_openapi_docs_available(integration_client: TestClient) -> None:
 
 def test_full_chat_pipeline(integration_client: TestClient, _sample_profile: LegalProfile) -> None:
     """Complete chat flow: profile lookup -> classify -> prompt build -> response."""
-    mock_oai_response = MagicMock()
-    mock_choice = MagicMock()
-    mock_choice.message.content = (
-        "Under Massachusetts law, specifically M.G.L. c.186 §15B, "
-        "your landlord must return your security deposit within 30 days."
+    from backend.utils.llm_router import LLMResponse
+
+    mock_llm_response = LLMResponse(
+        content=(
+            "Under Massachusetts law, specifically M.G.L. c.186 §15B, "
+            "your landlord must return your security deposit within 30 days."
+        ),
+        provider="anthropic",
+        model="claude-sonnet-4-20250514",
+        latency_ms=250.0,
+        was_fallback=False,
     )
-    mock_oai_response.choices = [mock_choice]
 
     mock_conversation = MagicMock()
     mock_conversation.id = "conv_integration_001"
     mock_conversation.legal_area = None
     mock_conversation.to_anthropic_messages.return_value = []
     mock_conversation.add_message = MagicMock()
+
+    mock_router = MagicMock()
+    mock_router.chat = AsyncMock(return_value=mock_llm_response)
 
     with (
         patch("backend.main.get_profile", new_callable=AsyncMock, return_value=_sample_profile),
@@ -134,14 +142,8 @@ def test_full_chat_pipeline(integration_client: TestClient, _sample_profile: Leg
         patch("backend.main.detect_and_save_deadlines", new_callable=AsyncMock),
         patch("backend.main.record_audit_event", new_callable=AsyncMock),
         patch("backend.main.increment_free_message_count", new_callable=AsyncMock),
-        patch("backend.main.get_openai_client") as mock_get_client,
+        patch("backend.main.get_llm_router", return_value=mock_router),
     ):
-        mock_client = MagicMock()
-        mock_client.chat = MagicMock()
-        mock_client.chat.completions = MagicMock()
-        mock_client.chat.completions.create = AsyncMock(return_value=mock_oai_response)
-        mock_get_client.return_value = mock_client
-
         resp = integration_client.post(
             "/api/chat",
             json={"message": "Can my landlord keep my security deposit?"},

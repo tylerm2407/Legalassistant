@@ -8,7 +8,7 @@ to the user's specific legal situation, state, and history.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -38,8 +38,8 @@ class LegalIssue(BaseModel):
     issue_type: str
     summary: str
     status: IssueStatus = IssueStatus.OPEN
-    started_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     notes: list[str] = Field(default_factory=list)
 
 
@@ -73,7 +73,7 @@ class LegalProfile(BaseModel):
     active_issues: list[LegalIssue] = Field(default_factory=list)
     legal_facts: list[str] = Field(default_factory=list)
     documents: list[str] = Field(default_factory=list)
-    member_since: datetime = Field(default_factory=datetime.utcnow)
+    member_since: datetime = Field(default_factory=lambda: datetime.now(UTC))
     conversation_count: int = 0
 
     def to_context_string(self) -> str:

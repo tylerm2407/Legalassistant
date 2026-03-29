@@ -7,7 +7,7 @@ auto-detected from conversations or manually created by users.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -50,7 +50,7 @@ class Deadline(BaseModel):
     source_conversation_id: str | None = None
     status: DeadlineStatus = DeadlineStatus.ACTIVE
     notes: str = ""
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class DeadlineCreateRequest(BaseModel):

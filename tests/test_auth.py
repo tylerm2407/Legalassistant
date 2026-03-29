@@ -20,7 +20,7 @@ from backend.utils.auth import verify_supabase_jwt
 # ---------- Test App ----------
 
 _test_app = FastAPI()
-JWT_SECRET = "test-jwt-secret-for-unit-tests"
+JWT_SECRET = "test-jwt-secret-for-unit-tests-ok"
 TEST_USER_ID = "user_auth_test_001"
 
 
@@ -134,7 +134,7 @@ def test_wrong_audience_returns_401(auth_client):
 
 def test_wrong_secret_returns_401(auth_client):
     """A JWT signed with a different secret returns 401."""
-    token = _make_token(secret="wrong-secret")
+    token = _make_token(secret="wrong-secret-padding-for-length!!")
     with patch.dict(os.environ, {"SUPABASE_JWT_SECRET": JWT_SECRET}):
         response = auth_client.get(
             "/protected",

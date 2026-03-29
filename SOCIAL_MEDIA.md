@@ -42,10 +42,16 @@
 - **600 followers** — primarily legal tech professionals and founders
 - Founder pricing poll drove 85 waitlist signups directly
 
+### Waitlist
+- **300+ email signups** collected via Supabase — real users waiting for launch
+- Signups driven organically from social media CTAs and casematelaw.com landing page
+- Dual-write system: every signup stored in both Supabase and Mailchimp for campaign delivery
+
 ### Combined Metrics
 - **717,000+ total impressions** across all platforms
 - **56,000+ total engagements** (likes, comments, shares, saves, retweets)
 - **7,000 total followers** across 5 platforms
+- **300+ waitlist signups** in Supabase
 - **40+ content pieces** published across 5 platforms
 - **$0 ad spend** — all growth is organic
 

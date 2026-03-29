@@ -25,6 +25,7 @@ Every Claude API call injects the user's complete legal profile as structured co
 - **600,000+ TikTok views** across all videos (organic, $0 ad spend)
 - **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
 - **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), and LinkedIn (600)
+- **300+ waitlist signups** in Supabase — real users waiting for launch
 - **40+ content pieces** published across 5 platforms
 - **168 passing tests** with full backend coverage before launch
 - **All 50 US states** covered with state-specific legal statute injection
@@ -2633,6 +2634,7 @@ CaseMate maintains an active social media presence across four platforms to buil
 - **600,000+ TikTok views** across all videos (organic, $0 ad spend)
 - **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
 - **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), LinkedIn (600)
+- **300+ waitlist signups** in Supabase
 - **40+ content pieces** published across TikTok, Instagram, Facebook, X, and LinkedIn
 
 #### Channels & Handles

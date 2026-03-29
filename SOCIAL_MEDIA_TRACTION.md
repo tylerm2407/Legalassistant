@@ -11,6 +11,7 @@
 | **Total views** | 600,000+ across all platforms |
 | **Total engagements** | 56,000+ (likes, comments, shares, saves, retweets) |
 | **Total followers** | 7,000+ across 5 platforms |
+| **Waitlist signups** | 300+ email signups in Supabase |
 | **Content published** | 40+ pieces across TikTok, Instagram, Facebook, X, and LinkedIn |
 | **Ad spend** | $0 — all growth is organic |
 | **Time to traction** | < 2 weeks from first post |
@@ -166,6 +167,6 @@ The demo video walks through the core user experience: asking a legal question, 
 
 3. **The market is underserved.** Legal content on TikTok and Instagram is a blue ocean. There are almost no competitors creating consistent, high-quality legal education content. CaseMate is establishing category leadership early.
 
-4. **Organic growth works.** $0 ad spend → 7,000+ followers and 600K+ views. The 85:1 view-to-follower ratio on TikTok shows the algorithm is actively pushing our content. When we layer paid acquisition on top of this organic base, the unit economics will be exceptional (projected blended CAC < $30 vs $240 LTV).
+4. **Organic growth works.** $0 ad spend → 7,000+ followers, 600K+ views, and 300+ waitlist signups. The 85:1 view-to-follower ratio on TikTok shows the algorithm is actively pushing our content. When we layer paid acquisition on top of this organic base, the unit economics will be exceptional (projected blended CAC < $30 vs $240 LTV).
 
-5. **The content converts.** 85 waitlist signups directly attributed to a single LinkedIn post. Legal tip threads on X drive consistent waitlist traffic. Facebook shares into community groups bring in users who never would have found us otherwise.
+5. **The content converts.** 300+ email signups collected in Supabase — real users waiting for launch day. 85 waitlist signups directly attributed to a single LinkedIn post. Legal tip threads on X drive consistent waitlist traffic. Facebook shares into community groups bring in users who never would have found us otherwise. The funnel from content → waitlist → paid subscriber is proven.

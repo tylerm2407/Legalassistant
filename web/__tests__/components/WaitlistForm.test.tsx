@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaitlistForm from "@/components/WaitlistForm";
 
@@ -85,7 +85,9 @@ describe("WaitlistForm", () => {
 
     expect(screen.getByRole("button", { name: "Joining..." })).toBeDisabled();
 
-    // Clean up
-    resolvePromise!({ ok: true, json: () => Promise.resolve({ success: true }) });
+    // Clean up — resolve inside act to flush state updates
+    await act(async () => {
+      resolvePromise!({ ok: true, json: () => Promise.resolve({ success: true }) });
+    });
   });
 });

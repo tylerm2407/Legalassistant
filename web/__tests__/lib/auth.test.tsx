@@ -51,22 +51,26 @@ describe("AuthProvider", () => {
     mockPathname.mockReturnValue("/");
   });
 
-  it("provides initial loading state", () => {
-    render(
-      <AuthProvider>
-        <AuthConsumer />
-      </AuthProvider>
-    );
-    // Initially loading is true before getSession resolves
+  it("provides initial loading state", async () => {
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <AuthConsumer />
+        </AuthProvider>
+      );
+    });
+    // After getSession resolves, user should be none
     expect(screen.getByTestId("user")).toHaveTextContent("none");
   });
 
   it("sets user to null when no session", async () => {
-    render(
-      <AuthProvider>
-        <AuthConsumer />
-      </AuthProvider>
-    );
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <AuthConsumer />
+        </AuthProvider>
+      );
+    });
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("false");
     });
@@ -74,11 +78,13 @@ describe("AuthProvider", () => {
   });
 
   it("updates user when auth state changes", async () => {
-    render(
-      <AuthProvider>
-        <AuthConsumer />
-      </AuthProvider>
-    );
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <AuthConsumer />
+        </AuthProvider>
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("false");
@@ -95,12 +101,14 @@ describe("AuthProvider", () => {
     expect(screen.getByTestId("session")).toHaveTextContent("active");
   });
 
-  it("renders children", () => {
-    render(
-      <AuthProvider>
-        <div>App Content</div>
-      </AuthProvider>
-    );
+  it("renders children", async () => {
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <div>App Content</div>
+        </AuthProvider>
+      );
+    });
     expect(screen.getByText("App Content")).toBeInTheDocument();
   });
 });

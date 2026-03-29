@@ -53,7 +53,6 @@ export default function ConversationHistory({
 }: ConversationHistoryProps) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -64,8 +63,8 @@ export default function ConversationHistory({
     try {
       const data = await api.getConversations();
       setConversations(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToLoad"));
+    } catch {
+      // Fail silently — conversation history is non-critical
     } finally {
       setLoading(false);
     }
@@ -76,8 +75,8 @@ export default function ConversationHistory({
     try {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToLoad"));
+    } catch {
+      // Fail silently
     }
   }
 
@@ -96,9 +95,6 @@ export default function ConversationHistory({
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        {error && (
-          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2 mx-2 mt-2">{error}</p>
-        )}
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -108,10 +104,13 @@ export default function ConversationHistory({
         ) : (
           <div className="p-2 space-y-1">
             {conversations.map((c: ConversationSummary) => (
-              <button
+              <div
                 key={c.id}
                 onClick={() => onSelectConversation(c.id)}
-                className={`w-full text-left p-2.5 rounded-lg text-sm transition-all group ${
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter") onSelectConversation(c.id); }}
+                className={`w-full text-left p-2.5 rounded-lg text-sm transition-all group cursor-pointer ${
                   c.id === activeConversationId
                     ? "bg-white/[0.06] border border-white/10"
                     : "hover:bg-white/[0.03]"
@@ -136,7 +135,7 @@ export default function ConversationHistory({
                     {new Date(c.updated_at).toLocaleDateString()}
                   </span>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import ActionGenerator from "@/components/ActionGenerator";
@@ -111,8 +111,10 @@ describe("ActionGenerator", () => {
 
     expect(screen.getByText("Generating...")).toBeInTheDocument();
 
-    // Clean up
-    resolvePromise!({ letter_text: "test", legal_citations: [] });
+    // Clean up — resolve the pending promise inside act to flush state updates
+    await act(async () => {
+      resolvePromise!({ letter_text: "test", legal_citations: [] });
+    });
   });
 
   it("has no accessibility violations", async () => {

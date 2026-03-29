@@ -18,14 +18,14 @@ jest.mock("@supabase/supabase-js", () => ({
 import { createClient } from "@supabase/supabase-js";
 
 describe("supabase client", () => {
-  it("creates client with environment variables", () => {
-    // Set env vars before importing
+  it("creates client lazily when a property is accessed", () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_KEY = "test-key";
 
-    // Re-import to trigger module execution
     jest.isolateModules(() => {
-      require("@/lib/supabase");
+      const mod = require("@/lib/supabase");
+      // Trigger lazy initialization by accessing a property on the proxy
+      mod.supabase.auth;
     });
 
     expect(createClient).toHaveBeenCalled();

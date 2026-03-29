@@ -212,9 +212,9 @@ CaseMate has two clearly defined scopes — what ships at the hackathon and what
 | | **v1 Demo (Hackathon Deliverable)** | **Full Build (Post-Hackathon)** |
 |---|------|------|
 | **Screens** | 3 core screens: Chat + Profile Sidebar + Demand Letter Generator | 12 screens across web, mobile, and waitlist |
-| **Backend** | Memory injection, profile CRUD, chat, action generation (~10 endpoints) | 30 endpoints covering deadlines, workflows, referrals, export, payments |
+| **Backend** | Memory injection, profile CRUD, chat, action generation (~10 endpoints) | 33 endpoints covering deadlines, workflows, referrals, export, payments, streaming, monitoring |
 | **Platforms** | Web (Next.js) | Web + iOS + Android (Expo) + standalone waitlist |
-| **Tests** | Core memory layer coverage (~100 tests) | 462 tests across 33 files, 91%+ coverage |
+| **Tests** | Core memory layer coverage (~100 tests) | 484 tests across 34 files, 91%+ coverage |
 | **State laws** | All 50 states (research completed in parallel by Owen) | All 50 states + federal defaults + ongoing statute updates |
 | **Demo** | Sarah Chen profile → personalized chat → demand letter generation | Full user lifecycle: onboarding → chat → documents → actions → deadlines → export |
 
@@ -586,7 +586,15 @@ casemate/
 │       ├── logger.py                 ← structlog JSON logging
 │       ├── rate_limiter.py           ← Redis sliding-window rate limiter
 │       ├── retry.py                  ← Tenacity retry decorator for Anthropic API
-│       └── type_helpers.py           ← Typed helper functions for Supabase/Anthropic returns
+│       ├── type_helpers.py           ← Typed helper functions for Supabase/Anthropic returns
+│       ├── audit_log.py              ← Audit logging for sensitive operations
+│       ├── circuit_breaker.py        ← Circuit breaker pattern for API resilience
+│       ├── concurrency.py            ← Concurrency utilities and thread safety
+│       ├── content_store.py          ← Content storage and retrieval
+│       ├── idempotency.py            ← Idempotency key handling
+│       ├── lifecycle.py              ← Application lifecycle (startup/shutdown) hooks
+│       ├── telemetry.py              ← Telemetry and observability
+│       └── token_budget.py           ← Token budget tracking and management
 │
 ├── web/                              ← Next.js 14 frontend (dark theme)
 │   ├── next.config.mjs               ← API proxy rewrites to backend
@@ -635,10 +643,13 @@ casemate/
 │   │   ├── supabase.ts              ← Supabase client setup
 │   │   ├── types.ts                  ← Frontend type definitions
 │   │   └── shared-types/             ← Shared type re-exports (7 files)
-│   └── __tests__/                    ← 19 Jest test files
-│       ├── components/               ← 12 component tests
-│       ├── components/ui/            ← 4 UI component tests
-│       └── lib/                      ← 3 library tests (api, auth, supabase)
+│   ├── __tests__/                    ← 19 Jest test files
+│   │   ├── components/               ← 12 component tests
+│   │   ├── components/ui/            ← 4 UI component tests
+│   │   └── lib/                      ← 3 library tests (api, auth, supabase)
+│   ├── e2e/
+│   │   └── smoke.spec.ts             ← Playwright E2E smoke test
+│   └── playwright.config.ts          ← Playwright configuration
 │
 ├── mobile/                           ← Expo React Native app
 │   ├── app.json                      ← Expo configuration
@@ -683,7 +694,7 @@ casemate/
 │   ├── 001_user_profiles_rls.sql
 │   └── 002_conversations_deadlines_workflows_attorneys.sql
 │
-├── docs/                             ← 23 docs + 20 Architecture Decision Records
+├── docs/                             ← 26 docs + 24 Architecture Decision Records
 │   ├── API.md                        ← Full API route documentation
 │   ├── DATABASE.md                   ← Database schema and design
 │   ├── MEMORY_SYSTEM.md              ← Memory injection pattern
@@ -706,6 +717,9 @@ casemate/
 │   ├── LEGAL_KNOWLEDGE_BASE.md       ← 50-state law database & classifier
 │   ├── RIGHTS_LIBRARY.md             ← Know Your Rights guides
 │   ├── EXTENDING.md                  ← How to extend CaseMate
+│   ├── GLOSSARY.md                   ← Term definitions and glossary
+│   ├── RUNBOOK.md                    ← Operational runbook
+│   ├── VERIFICATION.md              ← Verification procedures
 │   ├── email-campaigns.md            ← Mailchimp email campaign templates
 │   └── decisions/                    ← 20 Architecture Decision Records
 │       ├── 001-memory-as-differentiator.md
@@ -727,12 +741,16 @@ casemate/
 │       ├── 017-mobile-architecture-expo.md
 │       ├── 018-deployment-architecture.md
 │       ├── 019-comprehensive-documentation-standards.md
-│       └── 020-backend-test-coverage-threshold.md
+│       ├── 020-backend-test-coverage-threshold.md
+│       ├── 021-hybrid-classifier-keyword-first-llm-fallback.md
+│       ├── 022-sse-streaming-over-websocket-for-chat.md
+│       ├── 023-supabase-unified-platform.md
+│       └── 024-prompt-injection-defense-structured-context.md
 │
 ├── scripts/
 │   └── seed_demo.py                  ← Seed Sarah Chen demo profile
 │
-└── tests/                            ← 33 backend test files (462 tests)
+└── tests/                            ← 34 backend test files (484 tests)
     ├── conftest.py                   ← Shared fixtures (mock_profile, mock_anthropic, mock_supabase)
     ├── test_memory_injector.py       ← Core memory injection tests
     ├── test_profile_crud.py          ← Profile CRUD operations
@@ -762,7 +780,12 @@ casemate/
     ├── test_idempotency.py           ← Idempotency key handling
     ├── test_lifecycle.py             ← App startup/shutdown hooks
     ├── test_content_store.py         ← Content storage
-    └── test_audit_log.py             ← Audit logging
+    ├── test_audit_log.py             ← Audit logging
+    ├── test_circuit_breaker.py       ← Circuit breaker pattern
+    ├── test_integration.py           ← Cross-module integration tests
+    ├── test_property_based.py        ← Hypothesis property-based tests
+    ├── test_telemetry.py             ← Telemetry and observability
+    └── test_token_budget.py          ← Token budget tracking
 ```
 
 ---
@@ -907,7 +930,7 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 
 | Method | Path | Auth | Rate Limit | Description |
 | ------ | ---- | ---- | ---------- | ----------- |
-| GET | `/health` | None | None | Returns `{"status": "ok", "version": "0.4.0"}` |
+| GET | `/health` | None | None | Returns `{"status": "ok", "version": "0.5.0"}` |
 
 ### Chat
 
@@ -953,8 +976,8 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 | Method | Path | Auth | Rate Limit | Description |
 | ------ | ---- | ---- | ---------- | ----------- |
 | GET | `/api/conversations` | JWT | None | List conversations (max 50, newest first) |
-| GET | `/api/conversations/{id}` | JWT | None | Get conversation with messages |
-| DELETE | `/api/conversations/{id}` | JWT | None | Delete conversation |
+| GET | `/api/conversations/{conversation_id}` | JWT | None | Get conversation with messages |
+| DELETE | `/api/conversations/{conversation_id}` | JWT | None | Delete conversation |
 
 ### Actions
 
@@ -1001,8 +1024,8 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 | ------ | ---- | ---- | ---------- | ----------- |
 | POST | `/api/deadlines` | JWT | None | Create deadline |
 | GET | `/api/deadlines` | JWT | None | List deadlines (ordered by date ASC) |
-| PATCH | `/api/deadlines/{id}` | JWT | None | Update deadline |
-| DELETE | `/api/deadlines/{id}` | JWT | None | Delete deadline |
+| PATCH | `/api/deadlines/{deadline_id}` | JWT | None | Update deadline |
+| DELETE | `/api/deadlines/{deadline_id}` | JWT | None | Delete deadline |
 
 **Create Request:**
 
@@ -1022,7 +1045,7 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 | ------ | ---- | ---- | ---------- | ----------- |
 | GET | `/api/rights/domains` | JWT | None | List legal domains with guide counts |
 | GET | `/api/rights/guides` | JWT | None | List guides (optional `?domain=` filter) |
-| GET | `/api/rights/guides/{id}` | JWT | None | Get specific guide |
+| GET | `/api/rights/guides/{guide_id}` | JWT | None | Get specific guide |
 
 ### Workflows
 
@@ -1031,8 +1054,8 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 | GET | `/api/workflows/templates` | JWT | None | List templates (optional `?domain=` filter) |
 | POST | `/api/workflows` | JWT | None | Start workflow from template |
 | GET | `/api/workflows` | JWT | None | List user's active workflows |
-| GET | `/api/workflows/{id}` | JWT | None | Get workflow with step progress |
-| PATCH | `/api/workflows/{id}/steps` | JWT | None | Update step status |
+| GET | `/api/workflows/{workflow_id}` | JWT | None | Get workflow with step progress |
+| PATCH | `/api/workflows/{workflow_id}/steps` | JWT | None | Update step status |
 
 **Start Request:** `{ "template_id": "string" }`
 
@@ -1074,7 +1097,20 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 | GET | `/api/payments/subscription` | JWT | None | Get user's subscription status |
 | POST | `/api/payments/cancel` | JWT | None | Cancel user's subscription |
 
-**Total: 30 endpoints** (1 health + 29 API)
+### Streaming & Monitoring
+
+| Method | Path | Auth | Rate Limit | Description |
+| ------ | ---- | ---- | ---------- | ----------- |
+| GET | `/api/chat/{conversation_id}/stream` | JWT | None | SSE streaming chat responses |
+| GET | `/metrics` | None | None | Prometheus metrics export |
+
+### Audit
+
+| Method | Path | Auth | Rate Limit | Description |
+| ------ | ---- | ---- | ---------- | ----------- |
+| GET | `/api/audit/verify` | JWT | None | Verify audit chain integrity |
+
+**Total: 33 endpoints** (1 health + 1 metrics + 31 API)
 
 ---
 
@@ -1197,8 +1233,8 @@ Hidden screens (accessible via navigation, not tabs): `rights`, `rights-guide`, 
 
 - **Framework:** pytest with `pytest-asyncio` (auto mode)
 - **Coverage:** `pytest-cov` with term-missing report
-- **33 backend test files** + **21 frontend test files** covering all modules
-- **462 backend tests**, 100% pass rate, **91%+ line coverage**
+- **34 backend test files** + **20 frontend test files** covering all modules
+- **484 backend tests**, 100% pass rate, **91%+ line coverage**
 - All tests run without real API calls or database connections
 - **Coverage target:** 90%+ line coverage on core modules (memory/, legal/, actions/)
 - **CI integration:** `make verify` runs `ruff check` + `ruff format --check` + full test suite before every commit
@@ -1212,7 +1248,7 @@ Four shared fixtures: `mock_profile` (Sarah Chen power-user profile with 8 facts
 
 All tests run without real API calls or database connections. Anthropic is patched at the client level; Supabase is patched at the singleton getter. No external dependencies required to run the full test suite.
 
-### Backend Test Files (33 files, 462 tests)
+### Backend Test Files (34 files, 484 tests)
 
 | File | Tests |
 | ---- | ----- |
@@ -1245,6 +1281,11 @@ All tests run without real API calls or database connections. Anthropic is patch
 | `test_lifecycle.py` | Application lifecycle (startup/shutdown) hooks |
 | `test_content_store.py` | Content storage and retrieval |
 | `test_audit_log.py` | Audit logging for sensitive operations |
+| `test_circuit_breaker.py` | Circuit breaker pattern for API resilience |
+| `test_integration.py` | Cross-module integration tests |
+| `test_property_based.py` | Hypothesis property-based tests |
+| `test_telemetry.py` | Telemetry and observability |
+| `test_token_budget.py` | Token budget tracking and management |
 
 ### Frontend Test Files (19 files in `web/__tests__/`)
 

@@ -10,6 +10,10 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
+from backend.utils.logger import get_logger
+
+_logger = get_logger(__name__)
+
 
 class RightsGuide(BaseModel):
     """A structured legal rights guide for a specific scenario.
@@ -925,7 +929,9 @@ def get_guides_by_domain(domain: str) -> list[RightsGuide]:
     Returns:
         List of RightsGuide objects matching the domain.
     """
-    return [g for g in RIGHTS_GUIDES if g.domain == domain]
+    guides = [g for g in RIGHTS_GUIDES if g.domain == domain]
+    _logger.info("rights_guides_queried", domain=domain, count=len(guides))
+    return guides
 
 
 def get_guide_by_id(guide_id: str) -> RightsGuide | None:
@@ -937,6 +943,7 @@ def get_guide_by_id(guide_id: str) -> RightsGuide | None:
     Returns:
         The matching RightsGuide, or None if not found.
     """
+    _logger.info("rights_guide_fetched", guide_id=guide_id)
     return next((g for g in RIGHTS_GUIDES if g.id == guide_id), None)
 
 

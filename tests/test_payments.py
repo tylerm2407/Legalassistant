@@ -332,3 +332,281 @@ class TestSubscriptionCancellation:
                 cancel_at_period_end=True,
             )
             assert isinstance(result, SubscriptionStatus)
+
+
+class TestInvoicePaid:
+    """Tests for _handle_invoice_paid via the webhook dispatcher."""
+
+    @pytest.mark.asyncio
+    async def test_invoice_paid_with_valid_subscription(self) -> None:
+        """Invoice paid updates subscription to active and syncs period end."""
+        mock_event = {
+            "id": "evt_inv_paid_1",
+            "type": "invoice.paid",
+            "data": {
+                "object": {
+                    "subscription": "sub_inv_123",
+                    "customer": "cus_inv_456",
+                    "lines": {
+                        "data": [
+                            {
+                                "period": {
+                                    "end": 1717200000,
+                                }
+                            }
+                        ]
+                    },
+                }
+            },
+        }
+
+        mock_client = _mock_supabase_client()
+
+        with (
+            patch(
+                "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+                return_value=mock_event,
+            ),
+            patch(
+                "backend.payments.stripe_webhooks._get_supabase",
+                return_value=mock_client,
+            ),
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+            mock_client.table.assert_called_with("subscriptions")
+            mock_client.update.assert_called_once()
+            update_args = mock_client.update.call_args[0][0]
+            assert update_args["status"] == "active"
+            assert update_args["current_period_end"] == 1717200000
+
+    @pytest.mark.asyncio
+    async def test_invoice_paid_no_subscription_does_not_crash(self) -> None:
+        """Invoice paid with no subscription_id logs and returns ok."""
+        mock_event = {
+            "id": "evt_inv_paid_nosub",
+            "type": "invoice.paid",
+            "data": {
+                "object": {
+                    "subscription": "",
+                    "customer": "cus_inv_789",
+                }
+            },
+        }
+
+        with patch(
+            "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+            return_value=mock_event,
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+
+    @pytest.mark.asyncio
+    async def test_invoice_paid_without_line_items(self) -> None:
+        """Invoice paid without line items still sets status to active."""
+        mock_event = {
+            "id": "evt_inv_paid_nolines",
+            "type": "invoice.paid",
+            "data": {
+                "object": {
+                    "subscription": "sub_inv_nolines",
+                    "customer": "cus_inv_nolines",
+                }
+            },
+        }
+
+        mock_client = _mock_supabase_client()
+
+        with (
+            patch(
+                "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+                return_value=mock_event,
+            ),
+            patch(
+                "backend.payments.stripe_webhooks._get_supabase",
+                return_value=mock_client,
+            ),
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+            update_args = mock_client.update.call_args[0][0]
+            assert update_args["status"] == "active"
+            assert "current_period_end" not in update_args
+
+
+class TestInvoicePaymentFailed:
+    """Tests for _handle_invoice_payment_failed via the webhook dispatcher."""
+
+    @pytest.mark.asyncio
+    async def test_invoice_payment_failed_marks_past_due(self) -> None:
+        """Failed invoice payment marks subscription as past_due."""
+        mock_event = {
+            "id": "evt_inv_fail_1",
+            "type": "invoice.payment_failed",
+            "data": {
+                "object": {
+                    "subscription": "sub_fail_123",
+                    "customer": "cus_fail_456",
+                }
+            },
+        }
+
+        mock_client = _mock_supabase_client()
+
+        with (
+            patch(
+                "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+                return_value=mock_event,
+            ),
+            patch(
+                "backend.payments.stripe_webhooks._get_supabase",
+                return_value=mock_client,
+            ),
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+            mock_client.table.assert_called_with("subscriptions")
+            mock_client.update.assert_called_once_with({"status": "past_due"})
+
+    @pytest.mark.asyncio
+    async def test_invoice_payment_failed_no_subscription(self) -> None:
+        """Failed invoice with no subscription_id logs and returns ok."""
+        mock_event = {
+            "id": "evt_inv_fail_nosub",
+            "type": "invoice.payment_failed",
+            "data": {
+                "object": {
+                    "subscription": "",
+                    "customer": "cus_fail_789",
+                }
+            },
+        }
+
+        with patch(
+            "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+            return_value=mock_event,
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+
+
+class TestWebhookEventRouting:
+    """Tests for webhook event type routing and edge cases."""
+
+    @pytest.mark.asyncio
+    async def test_unknown_event_type_returns_ok(self) -> None:
+        """Unknown event types are logged but do not raise exceptions."""
+        mock_event = {
+            "id": "evt_unknown",
+            "type": "payment_intent.created",
+            "data": {
+                "object": {
+                    "id": "pi_test_123",
+                }
+            },
+        }
+
+        with patch(
+            "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+            return_value=mock_event,
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+
+    @pytest.mark.asyncio
+    async def test_checkout_completed_routes_correctly(self) -> None:
+        """checkout.session.completed routes to _handle_checkout_completed."""
+        mock_event = {
+            "id": "evt_route_checkout",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "customer": "cus_route_1",
+                    "subscription": "sub_route_1",
+                    "metadata": {"user_id": "user_route_1"},
+                }
+            },
+        }
+
+        mock_client = _mock_supabase_client()
+
+        with (
+            patch(
+                "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+                return_value=mock_event,
+            ),
+            patch(
+                "backend.payments.stripe_webhooks._get_supabase",
+                return_value=mock_client,
+            ),
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+            # Verify upsert was called (checkout uses upsert, not update)
+            mock_client.upsert.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_subscription_updated_routes_correctly(self) -> None:
+        """customer.subscription.updated routes to _handle_subscription_updated."""
+        mock_event = {
+            "id": "evt_route_sub_upd",
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": "sub_route_upd",
+                    "status": "past_due",
+                    "customer": "cus_route_upd",
+                    "current_period_end": "2026-05-01T00:00:00Z",
+                    "cancel_at_period_end": True,
+                }
+            },
+        }
+
+        mock_client = _mock_supabase_client()
+
+        with (
+            patch(
+                "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+                return_value=mock_event,
+            ),
+            patch(
+                "backend.payments.stripe_webhooks._get_supabase",
+                return_value=mock_client,
+            ),
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+            update_args = mock_client.update.call_args[0][0]
+            assert update_args["status"] == "past_due"
+            assert update_args["cancel_at_period_end"] is True
+            assert update_args["current_period_end"] == "2026-05-01T00:00:00Z"
+
+    @pytest.mark.asyncio
+    async def test_subscription_deleted_routes_correctly(self) -> None:
+        """customer.subscription.deleted routes to _handle_subscription_deleted."""
+        mock_event = {
+            "id": "evt_route_sub_del",
+            "type": "customer.subscription.deleted",
+            "data": {
+                "object": {
+                    "id": "sub_route_del",
+                    "customer": "cus_route_del",
+                }
+            },
+        }
+
+        mock_client = _mock_supabase_client()
+
+        with (
+            patch(
+                "backend.payments.stripe_webhooks.stripe.Webhook.construct_event",
+                return_value=mock_event,
+            ),
+            patch(
+                "backend.payments.stripe_webhooks._get_supabase",
+                return_value=mock_client,
+            ),
+        ):
+            result = await handle_webhook(b"payload", "sig_header")
+            assert result == {"status": "ok"}
+            mock_client.update.assert_called_once_with({"status": "canceled"})

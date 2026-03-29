@@ -11,7 +11,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: Dependencies
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS deps
+FROM node:20.11-alpine AS deps
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN npm ci --ignore-scripts
 # ---------------------------------------------------------------------------
 # Stage 2: Builder — produce the Next.js production build
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS builder
+FROM node:20.11-alpine AS builder
 
 WORKDIR /app
 
@@ -38,7 +38,7 @@ RUN npm run build
 # ---------------------------------------------------------------------------
 # Stage 3: Runtime — minimal production image
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS runtime
+FROM node:20.11-alpine AS runtime
 
 WORKDIR /app
 

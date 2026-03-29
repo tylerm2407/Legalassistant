@@ -36,7 +36,7 @@ def parse_supabase_row[T: BaseModel](data: Any, model_class: type[T]) -> T:
     Raises:
         pydantic.ValidationError: If the row data doesn't match the model schema.
     """
-    row: dict[str, Any] = dict(data)  # type: ignore[arg-type]
+    row: dict[str, Any] = dict(data)
     return model_class(**row)
 
 

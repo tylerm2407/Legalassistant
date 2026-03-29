@@ -23,6 +23,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from backend.utils.logger import get_logger
+
+_logger = get_logger(__name__)
+
 # Weight multiplier for multi-word keyword phrases (2+ words).
 # Multi-word phrases are more specific signals of intent, so they
 # receive higher weight than single-word matches.
@@ -448,7 +452,10 @@ def classify_legal_area(question: str) -> str:
         >>> classify_legal_area("hello how are you")
         'general'
     """
-    return classify_with_confidence(question).domain
+    _logger.info("classifying_legal_area", question_length=len(question))
+    result = classify_with_confidence(question)
+    _logger.info("classification_result", legal_area=result.domain, confidence=result.confidence)
+    return result.domain
 
 
 async def classify_with_llm_fallback(
@@ -483,6 +490,7 @@ async def classify_with_llm_fallback(
         return keyword_result
 
     # LLM fallback for ambiguous queries
+    _logger.info("llm_fallback_triggered", keyword_confidence=keyword_result.confidence)
     try:
         import anthropic
         from anthropic.types import TextBlock

@@ -70,7 +70,7 @@ async def handle_webhook(payload: bytes, sig_header: str) -> dict[str, str]:
 
     event_type: str = event["type"]
     event_id: str = event["id"]
-    data_object: dict[str, str] = event["data"]["object"]
+    data_object: dict[str, object] = event["data"]["object"]
 
     _logger.info(
         "webhook_received",
@@ -98,7 +98,7 @@ async def handle_webhook(payload: bytes, sig_header: str) -> dict[str, str]:
     return {"status": "ok"}
 
 
-async def _handle_checkout_completed(session: dict[str, str]) -> None:
+async def _handle_checkout_completed(session: dict[str, object]) -> None:
     """Process a completed checkout session.
 
     Activates the user's subscription in Supabase after successful payment.
@@ -153,7 +153,7 @@ async def _handle_checkout_completed(session: dict[str, str]) -> None:
         )
 
 
-async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
+async def _handle_subscription_updated(subscription: dict[str, object]) -> None:
     """Process a subscription update event.
 
     Syncs the subscription status, current_period_end, and cancel_at_period_end
@@ -202,7 +202,7 @@ async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
         )
 
 
-async def _handle_subscription_deleted(subscription: dict[str, str]) -> None:
+async def _handle_subscription_deleted(subscription: dict[str, object]) -> None:
     """Process a subscription cancellation/deletion event.
 
     Marks the user's subscription as cancelled in Supabase when Stripe
@@ -323,9 +323,9 @@ async def _handle_invoice_payment_failed(invoice: dict[str, object]) -> None:
 
     try:
         client = _get_supabase()
-        client.table("subscriptions").update(
-            {"status": "past_due"}
-        ).eq("stripe_subscription_id", subscription_id).execute()
+        client.table("subscriptions").update({"status": "past_due"}).eq(
+            "stripe_subscription_id", subscription_id
+        ).execute()
 
         _logger.info(
             "invoice_payment_failed_marked_past_due",

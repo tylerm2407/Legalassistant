@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from typing import cast
+
+from postgrest.types import JSON
 
 from backend.memory.profile import _get_supabase
 from backend.models.conversation import Conversation, Message
@@ -41,7 +44,7 @@ async def create_conversation(
     )
     try:
         client = _get_supabase()
-        data: dict[str, object] = {
+        data: dict[str, str | list[object] | None] = {
             "id": conversation.id,
             "user_id": user_id,
             "messages": [],
@@ -49,7 +52,7 @@ async def create_conversation(
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
         }
-        result = client.table("conversations").insert(data).execute()
+        result = client.table("conversations").insert(cast(JSON, data)).execute()
         if not result.data:
             raise RuntimeError(f"Failed to create conversation for user_id={user_id}")
         _logger.info("conversation_created", user_id=user_id, conversation_id=conversation.id)

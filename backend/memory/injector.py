@@ -13,6 +13,9 @@ import json
 from backend.legal.classifier import classify_legal_area
 from backend.legal.state_laws import STATE_LAWS
 from backend.models.legal_profile import LegalProfile
+from backend.utils.logger import get_logger
+
+_logger = get_logger(__name__)
 
 CASEMATE_BASE_INSTRUCTIONS: str = """You are CaseMate, a personalized AI legal assistant.
 You help everyday people understand their legal rights, navigate disputes,
@@ -100,7 +103,9 @@ def build_system_prompt(profile: LegalProfile, user_message: str) -> str:
     Returns:
         A complete system prompt string ready for the Claude API system parameter.
     """
+    _logger.info("building_system_prompt", user_id=profile.user_id, state=profile.state)
     legal_area = classify_legal_area(user_message)
+    _logger.info("legal_area_classified", legal_area=legal_area, user_id=profile.user_id)
 
     # Start with base instructions
     prompt_parts: list[str] = [CASEMATE_BASE_INSTRUCTIONS]
@@ -142,7 +147,9 @@ def build_system_prompt(profile: LegalProfile, user_message: str) -> str:
 
     prompt_parts.append(f"\n--- DETECTED LEGAL AREA: {legal_area} ---")
 
-    return "\n".join(prompt_parts)
+    prompt = "\n".join(prompt_parts)
+    _logger.info("system_prompt_built", prompt_length=len(prompt), legal_area=legal_area)
+    return prompt
 
 
 def build_system_prompt_parts(profile: LegalProfile, user_message: str) -> tuple[str, str]:

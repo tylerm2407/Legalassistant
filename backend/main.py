@@ -170,9 +170,7 @@ async def security_headers_middleware(
     # Only add HSTS for non-localhost deployments
     host = request.headers.get("host", "")
     if "localhost" not in host and "127.0.0.1" not in host:
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
     return response
 

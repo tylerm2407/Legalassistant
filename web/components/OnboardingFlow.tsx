@@ -148,8 +148,8 @@ export default function OnboardingFlow() {
         member_since: new Date().toISOString(),
         conversation_count: 0,
       });
-    } catch (err) {
-      console.warn("Profile creation failed, continuing to subscription:", err);
+    } catch {
+      // Profile creation failed — continue to subscription regardless
     }
 
     setSubmitting(false);

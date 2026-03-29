@@ -8,12 +8,12 @@ The average US lawyer charges $349/hour. The average American earns $52,000/year
 CaseMate closes that gap with AI that remembers your situation, knows your state's laws, and gives specific, actionable legal guidance for $20/month.
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/tylerm2407/Legalassistant/ci.yml?branch=main&label=CI)](https://github.com/tylerm2407/Legalassistant/actions)
-[![Backend Tests](https://img.shields.io/badge/backend_tests-535-blue)](tests/)
+[![Backend Tests](https://img.shields.io/badge/backend_tests-528-blue)](tests/)
 [![Frontend Tests](https://img.shields.io/badge/frontend_tests-143-blue)](web/__tests__/)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-6B57FF?logo=claude)](https://claude.ai/code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
-[![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 
 [Architecture](ARCHITECTURE.md) · [API Docs](#api-reference) · [Contributing](CONTRIBUTING.md)
 
@@ -86,7 +86,7 @@ flowchart TD
 ```mermaid
 graph TB
     subgraph "Frontend"
-        WEB["Next.js 14\nApp Router + TypeScript + Tailwind"]
+        WEB["Next.js 16\nApp Router + TypeScript + Tailwind"]
         MOBILE["Expo React Native\nExpo Router"]
     end
 
@@ -137,7 +137,7 @@ For the full technical deep dive -- data flow diagrams, database schema, memory 
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Frontend | Next.js 14, TypeScript, Tailwind CSS | SSR, App Router, type-safe UI |
+| Frontend | Next.js 16, TypeScript, Tailwind CSS | SSR, App Router, type-safe UI |
 | Mobile | Expo, React Native, Expo Router | Cross-platform iOS/Android from shared TypeScript |
 | Backend | FastAPI, Python 3.12 | Async API, background tasks, SSE streaming |
 | AI | Anthropic Claude (claude-sonnet-4-20250514) | Chat, legal reasoning, domain classification, fact extraction |
@@ -249,12 +249,12 @@ casemate/
 │   ├── export/                    # PDF generation + email delivery
 │   ├── models/                    # Pydantic models (LegalProfile, Conversation, etc.)
 │   └── utils/                     # Auth, Anthropic client, logger, rate limiter, retry
-├── web/                           # Next.js 14 frontend (App Router)
+├── web/                           # Next.js 16 frontend (App Router)
 │   ├── app/                       # Pages: landing, onboarding, chat, profile, deadlines, etc.
 │   └── components/                # ChatInterface, ProfileSidebar, ActionGenerator, etc.
 ├── mobile/                        # Expo React Native app (Expo Router)
 ├── shared/                        # Shared TypeScript types
-├── tests/                         # Backend test suite (535 tests across 38 files)
+├── tests/                         # Backend test suite (528 tests across 37 files)
 ├── web/__tests__/                 # Frontend test suite (143 tests across 21 files)
 ├── supabase/                      # Database schema + RLS policies
 ├── docs/decisions/                # 25 Architecture Decision Records
@@ -314,7 +314,7 @@ pytest tests/ -v --cov=backend --cov-report=term-missing  # Verbose with line-by
 pytest tests/test_memory_injector.py -v           # Run a specific file
 ```
 
-**535 tests** across 38 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery, 13 end-to-end integration tests covering full API pipelines, and a live deployment smoke test suite.
+**528 tests** across 37 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery, 13 end-to-end integration tests covering full API pipelines, and a live deployment smoke test suite.
 
 ### Frontend (Jest)
 
@@ -367,7 +367,7 @@ Verify key README claims directly from the codebase:
 | Claim | Verification Command |
 |-------|---------------------|
 | 50-state coverage | `python -c "from backend.legal.state_laws import STATE_LAWS; print(len(STATE_LAWS))"` → 51 (50 states + federal) |
-| Backend test count | `pytest tests/ --co -q \| tail -1` → 535 tests collected |
+| Backend test count | `pytest tests/ --co -q \| tail -1` → 528 tests collected |
 | Zero lint errors | `make lint` → All checks passed |
 | Zero type errors | `mypy backend/` → Success: no issues found |
 | Memory injection | Run demo, ask landlord question as MA renter → response cites M.G.L. |
@@ -382,7 +382,7 @@ Features marked "Complete" above are implemented, tested, and deployable. Featur
 
 | Dimension | Evidence | Verification |
 |-----------|----------|-------------|
-| **Backend Tests** | 535 pytest tests | `make test` |
+| **Backend Tests** | 528 pytest tests | `make test` |
 | **Frontend Tests** | 143 Jest tests across 21 files | `cd web && npm test` |
 | **Integration Tests** | 13 end-to-end pipeline tests | `pytest tests/test_integration.py -v` |
 | **Smoke Tests** | 7 live deployment checks | `python scripts/smoke_test.py <url>` |
@@ -508,7 +508,7 @@ Comprehensive documentation for every CaseMate subsystem lives in `docs/`:
 | [MEMORY_SYSTEM.md](docs/MEMORY_SYSTEM.md) | Core memory injection pattern — prompt assembly, fact extraction, conversation persistence |
 | [LEGAL_KNOWLEDGE_BASE.md](docs/LEGAL_KNOWLEDGE_BASE.md) | 50-state statute database, classifier algorithm, state law organization |
 | [LEGAL_DOMAINS.md](docs/LEGAL_DOMAINS.md) | 10 legal domains — keywords, statutes, response patterns, coverage matrix |
-| [FRONTEND.md](docs/FRONTEND.md) | Next.js 14 web app — pages, components, state management, API client |
+| [FRONTEND.md](docs/FRONTEND.md) | Next.js 16 web app — pages, components, state management, API client |
 | [MOBILE.md](docs/MOBILE.md) | Expo React Native — screens, navigation, shared types, EAS builds |
 | [DATABASE.md](docs/DATABASE.md) | Supabase schema, JSONB structures, RLS policies, indexes, migrations |
 
@@ -599,7 +599,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
 
 ## Acknowledgments
 
-- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (678 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
+- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (671 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
 - [Anthropic Claude](https://anthropic.com) -- AI reasoning engine powering all legal analysis
 - [Supabase](https://supabase.com) -- Database, auth, and storage infrastructure
 - [Next.js](https://nextjs.org) -- Frontend framework

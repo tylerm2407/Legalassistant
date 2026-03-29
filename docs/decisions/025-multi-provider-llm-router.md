@@ -1,24 +1,22 @@
-# ADR 025: Multi-Provider LLM Router with Automatic Failover
+# ADR 025: Anthropic-Only LLM Router with Circuit Breaker
 
 ## Status
 
-Accepted
+Accepted (supersedes original dual-provider design)
 
 ## Context
 
-CaseMate's chat endpoint is the core user-facing feature. A single-provider architecture (only Anthropic or only OpenAI) creates a single point of failure — if the provider has an outage, degradation, or rate limit event, all users lose access to the product simultaneously.
-
-During the hackathon, we switched from Anthropic Claude to OpenAI GPT-4o for the chat endpoint to leverage a different model's strengths. This created an opportunity to implement a more resilient architecture rather than a simple provider swap.
+CaseMate's chat endpoint is the core user-facing feature. Initially, a dual-provider architecture (OpenAI GPT-4o primary, Anthropic Claude fallback) was implemented for resilience. However, this introduced unnecessary complexity — two API keys, response style variance during failover, and coupling to a provider we don't need. The master plan specifies Anthropic Claude (claude-sonnet-4-20250514) as the sole LLM, and Claude's instruction-following quality is superior for CaseMate's structured legal context injection.
 
 ## Decision
 
-Implement a dual-model LLM router (`backend/utils/llm_router.py`) with:
+Simplify to a single-provider LLM router (`backend/utils/llm_router.py`) with:
 
-1. **Priority chain**: OpenAI GPT-4o as primary, Anthropic Claude as fallback
-2. **Independent circuit breakers**: Each provider has its own circuit breaker (3 failures to open, 30s recovery)
-3. **Transparent failover**: If the primary fails or its circuit opens, requests automatically route to the fallback with no caller-side changes
-4. **Per-provider metrics**: Track call counts, failure counts, latency, and circuit state for observability
-5. **Observability endpoint**: `GET /api/llm/status` exposes router health for monitoring
+1. **Single provider**: Anthropic Claude (claude-sonnet-4-20250514) for all chat completions
+2. **Circuit breaker**: 3-failure threshold, 30s recovery timeout — prevents hammering a degraded API
+3. **Per-provider metrics**: Track call counts, failure counts, latency, and circuit state for observability
+4. **Observability endpoint**: `GET /api/llm/status` exposes router health for monitoring
+5. **Streaming support**: SSE streaming via the Anthropic streaming API
 
 ## Architecture
 
@@ -26,36 +24,35 @@ Implement a dual-model LLM router (`backend/utils/llm_router.py`) with:
 chat request
     │
     ▼
-┌─────────────────┐    circuit open?    ┌──────────────────┐
-│  OpenAI GPT-4o  │ ──────────────────► │ Anthropic Claude │
-│  (primary)      │     or API error    │ (fallback)       │
-└────────┬────────┘                     └────────┬─────────┘
-         │                                       │
-         ▼                                       ▼
-     response                               response
+┌──────────────────────────┐
+│  Anthropic Claude        │
+│  claude-sonnet-4-20250514│
+│  (circuit-breaker guard) │
+└────────────┬─────────────┘
+             │
+             ▼
+         response
 ```
 
 ## Consequences
 
 ### Positive
 
-- **Zero-downtime AI**: Provider outages don't take down the product
-- **Cost optimization**: Can route to cheaper models for specific query types in the future
-- **Observability**: Per-provider metrics enable data-driven provider selection
-- **Streaming support**: Both providers support SSE streaming through the router
+- **Simpler architecture**: One provider, one API key, one response style
+- **Better quality**: Claude's instruction-following is superior for structured legal context injection
+- **Reduced cost**: No unused OpenAI API key or dependency
+- **Resilience**: Circuit breaker still prevents cascading failures during API outages
 
 ### Negative
 
-- **Two API keys required**: Both OPENAI_API_KEY and ANTHROPIC_API_KEY must be configured
-- **Response style variance**: Users may notice subtle differences in response style during failover
-- **Added complexity**: The router adds ~300 lines of code and 13 tests
+- **Single point of failure**: If Anthropic is down, chat is unavailable (mitigated by circuit breaker which fails fast rather than timing out)
 
 ### Trade-offs
 
-We chose independent circuit breakers over a shared circuit because provider outages are independent events — OpenAI being down doesn't imply Anthropic is down. The 3-failure threshold is aggressive (vs the 5-failure threshold on the standalone Anthropic breaker) because we have a fallback and want to fail over quickly.
+We chose simplicity over redundancy. A dual-provider architecture adds complexity that isn't justified when the primary provider (Anthropic) has consistently high uptime and the response quality difference makes failover problematic anyway. If Anthropic reliability becomes an issue, a fallback provider can be re-added to the router with minimal changes.
 
 ## Alternatives Considered
 
-1. **Simple try/except fallback**: No circuit breaker, just catch errors and retry with the other provider. Rejected because it doesn't prevent hammering a degraded provider.
-2. **Load balancer pattern**: Round-robin between providers. Rejected because response quality differs between models — we want a primary preference.
-3. **Single provider with retry**: Just retry the same provider with exponential backoff. Rejected because it doesn't help during extended outages.
+1. **Dual-provider with failover**: OpenAI primary, Anthropic fallback. Rejected — unnecessary complexity, two API keys, response style variance.
+2. **Load balancer pattern**: Round-robin between providers. Rejected — response quality differs between models.
+3. **No circuit breaker**: Direct API calls with retry only. Rejected — doesn't prevent hammering a degraded service.

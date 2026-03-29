@@ -16,7 +16,7 @@ interface AudioRecorderProps {
 
 /**
  * Browser-based audio recorder that captures microphone input and sends it
- * to the CaseMate Whisper transcription endpoint.
+ * to the CaseMate transcription endpoint.
  *
  * Uses the MediaRecorder API to capture audio from the user's microphone.
  * Displays a pulsing red dot while recording. On stop, sends the audio

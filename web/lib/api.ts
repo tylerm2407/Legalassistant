@@ -336,7 +336,7 @@ export const api = {
   },
 
   /**
-   * Transcribes an audio file using the OpenAI Whisper API via the backend.
+   * Transcribes an audio file via the backend speech-to-text endpoint.
    *
    * Sends the audio blob to POST /api/audio/transcribe and returns the
    * transcript text.

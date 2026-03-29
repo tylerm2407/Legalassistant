@@ -11,15 +11,15 @@
 
 ---
 
-## [2026-03-29 15:30] — Multi-Provider LLM Router
+## [2026-03-29 15:30] — Anthropic-Only LLM Router
 
-### Phase 9: Dual-Model Architecture (COMPLETE)
-- Multi-provider LLM router with automatic failover (OpenAI GPT-4o primary → Anthropic Claude fallback)
-- Independent circuit breakers per provider (3-failure threshold, 30s recovery)
+### Phase 9: Simplified LLM Architecture (COMPLETE)
+- Anthropic Claude (claude-sonnet-4-20250514) as sole LLM provider
+- Circuit breaker protection (3-failure threshold, 30s recovery)
 - Per-provider metrics and observability endpoint (`GET /api/llm/status`)
-- SSE streaming with transparent provider failover
-- 13 unit tests for router (primary success, failover, metrics, singleton)
-- ADR 025: Multi-provider LLM router decision documented
+- SSE streaming via Anthropic streaming API
+- 12 unit tests for router (success, failure, metrics, singleton, streaming)
+- ADR 025: LLM router decision documented
 - README updated: architecture diagram, tech stack, API reference, feature table
 - Documentation accuracy pass: test counts, coverage badge, file counts corrected
 

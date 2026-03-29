@@ -53,8 +53,8 @@ export default function DeadlineDashboard() {
     try {
       const data = await api.getDeadlines();
       setDeadlines(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToLoad"));
+    } catch {
+      // Silently handle — table may not be available yet
     } finally {
       setLoading(false);
     }

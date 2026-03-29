@@ -153,7 +153,7 @@ _OPENAPI_TAGS: list[dict[str, str]] = [
     },
     {
         "name": "Audio",
-        "description": "Audio recording transcription via the OpenAI Whisper API.",
+        "description": "Audio recording transcription via speech-to-text API.",
     },
     {
         "name": "Conversations",
@@ -783,8 +783,7 @@ async def chat_stream(
     async def _generate_sse() -> AsyncGenerator[str, None]:
         """Generate SSE from the LLM router with automatic failover.
 
-        Uses the LLM router to stream from the primary provider (OpenAI).
-        If the primary fails, falls back to Anthropic streaming transparently.
+        Uses the LLM router to stream from Anthropic Claude.
 
         Yields SSE-formatted strings with token chunks and metadata.
         """
@@ -1324,10 +1323,10 @@ async def transcribe_audio_endpoint(
     file: UploadFile,
     user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, str]:
-    """Transcribe an audio file using the OpenAI Whisper API.
+    """Transcribe an audio file using speech-to-text.
 
     Accepts an uploaded audio file (mp3, mp4, mpeg, mpga, m4a, wav, webm),
-    sends it to the Whisper API for speech-to-text transcription, and returns
+    sends it to the transcription API for speech-to-text, and returns
     the transcript text.
 
     Args:

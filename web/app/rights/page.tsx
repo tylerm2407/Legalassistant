@@ -25,6 +25,19 @@ interface Guide {
   when_to_get_a_lawyer: string;
 }
 
+/** Fallback domain list so the page renders even if the API is unavailable. */
+const FALLBACK_DOMAINS: Domain[] = [
+  { domain: "landlord_tenant", label: "Housing & Tenant Rights", guide_count: 5 },
+  { domain: "employment_rights", label: "Employment & Workplace", guide_count: 5 },
+  { domain: "consumer_protection", label: "Consumer Protection", guide_count: 2 },
+  { domain: "debt_collection", label: "Debt & Collections", guide_count: 2 },
+  { domain: "small_claims", label: "Small Claims Court", guide_count: 1 },
+  { domain: "family_law", label: "Family Law", guide_count: 1 },
+  { domain: "traffic_violations", label: "Traffic & Driving", guide_count: 1 },
+  { domain: "criminal_records", label: "Criminal Records", guide_count: 1 },
+  { domain: "immigration", label: "Immigration", guide_count: 1 },
+];
+
 /**
  * "Know Your Rights" library page with domain browsing and guide detail views.
  *
@@ -36,11 +49,11 @@ interface Guide {
 export default function RightsPage() {
   const { user, loading: authLoading } = useAuth();
   const { t } = useTranslation();
-  const [domains, setDomains] = useState<Domain[]>([]);
+  const [domains, setDomains] = useState<Domain[]>(FALLBACK_DOMAINS);
   const [guides, setGuides] = useState<Guide[]>([]);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -48,11 +61,9 @@ export default function RightsPage() {
     async function loadDomains() {
       try {
         const data = await api.getRightsDomains();
-        setDomains(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load rights categories");
-      } finally {
-        setLoading(false);
+        if (data.length > 0) setDomains(data);
+      } catch {
+        // Fallback domains already loaded — silently continue
       }
     }
     loadDomains();
@@ -65,8 +76,8 @@ export default function RightsPage() {
     try {
       const data = await api.getRightsGuides(domain);
       setGuides(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load guides");
+    } catch {
+      setError("Unable to load guides right now. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -10,6 +10,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **SSE streaming chat** with two-phase send strategy (immediate acknowledgment + streamed response via GET `/api/chat/{id}/stream`)
+- **Hybrid legal classifier** with keyword-first classification and LLM fallback for ambiguous queries
+- **Anthropic prompt caching** with static/dynamic content split using `cache_control` blocks for reduced latency and cost
+- **Complete Stripe subscription lifecycle** — checkout session creation, invoice webhooks (`invoice.paid`, `invoice.payment_failed`), subscription updates/cancellations, subscription gate middleware, and free tier fallback
+- **Real OCR pipeline** via pytesseract + Pillow replacing placeholder document extraction for image-based legal documents
+- **Security headers middleware** — Content-Security-Policy, Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy on all responses
+- **Supabase realtime sidebar** — live profile updates via Supabase realtime subscriptions in `LegalProfileSidebar`
+- **Property-based testing** with Hypothesis for edge case discovery across profile models and classifiers
+- **Accessibility testing** with jest-axe for WCAG compliance on all frontend components
+- **Playwright E2E tests** covering critical user journeys (onboarding, chat, profile updates) with screenshot/trace artifacts
+- **Jest coverage thresholds** enforced in Jest config for frontend test quality gates
 - **Full CI/CD deployment pipeline** with staging and production environments
   - Backend deploys to Railway via `railway up` CLI (not placeholder echo)
   - Frontend deploys to Vercel via `vercel deploy --prod` CLI
@@ -57,7 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CI/CD now validates Docker image builds before deployment
 - Deployment docs rewritten with full multi-platform guide (Railway, Vercel, EAS, Docker)
 - Makefile expanded from 8 to 15 targets (added Docker, deploy, and test-web commands)
-- README badges updated to match actual test counts (246 backend, 139 frontend)
+- README badges updated to match actual test counts (303 backend, 143 frontend)
 - Model version references corrected to `claude-sonnet-4-20250514` throughout
 - Backend version bumped from 0.1.0 to 0.3.0 to match CHANGELOG
 - Market validation section now includes methodology disclaimer
@@ -75,11 +86,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.3.0] - 2026-03-29
 
 ### Added
-- Backend test coverage increased from 40% to 89% (246 tests)
+- Backend test coverage increased from 40% to 87% (303 tests)
   - Legal area module tests (40 parametrized tests for all 10 domains)
   - Profile CRUD tests (8 tests for get/update operations)
   - Document extractor tests (9 tests for PDF/text/HTML)
-- Frontend test suite with Jest + React Testing Library (139 tests across 19 suites)
+- Frontend test suite with Jest + React Testing Library (143 tests across 21 suites)
   - Component tests for all 12 feature components
   - UI component tests (Button, Badge, Card, Input)
   - Library tests (API client, auth context, Supabase client)

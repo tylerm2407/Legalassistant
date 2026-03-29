@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from backend.memory.profile import _get_supabase
 from backend.utils.logger import get_logger
+from backend.utils.type_helpers import supabase_json_list, supabase_row_to_dict
 
 _logger = get_logger(__name__)
 
@@ -218,9 +219,9 @@ async def list_workflows(user_id: str) -> list[dict[str, object]]:
         )
         summaries: list[dict[str, object]] = []
         for raw_row in result.data or []:
-            row: dict[str, object] = dict(raw_row)  # type: ignore[arg-type]
+            row = supabase_row_to_dict(raw_row)
             raw_steps = row.get("steps") or []
-            steps: list[dict[str, object]] = list(raw_steps)  # type: ignore[call-overload]
+            steps = supabase_json_list(raw_steps)
             completed = sum(
                 1 for s in steps if isinstance(s, dict) and s.get("status") == "completed"
             )

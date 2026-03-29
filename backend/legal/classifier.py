@@ -513,7 +513,7 @@ async def classify_with_llm_fallback(
                 scores=keyword_result.scores,
             )
 
-    except Exception:
+    except (anthropic.APIError, anthropic.AuthenticationError, ValueError):
         pass  # LLM fallback failed — use keyword result
 
     return keyword_result

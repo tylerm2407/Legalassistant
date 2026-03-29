@@ -120,7 +120,8 @@ CaseMate is developed with [Claude Code](https://claude.ai/code), Anthropic's AI
 
 1. Architecture decisions documented in ADRs (`docs/decisions/`)
 2. Implementation with Claude Code (memory injection, legal modules, tests)
-3. `make verify` before every commit (lint + 290+ tests)
+3. `make verify` before every commit (lint + 446 tests: 303 backend + 143 frontend)
+4. `cd web && npx playwright test` for E2E tests
 4. CI/CD validates on push, deploys on merge to main
 
 ## Architecture

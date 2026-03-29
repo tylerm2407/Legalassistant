@@ -43,7 +43,7 @@ python -m pytest tests/test_memory_injector.py --cov=backend.memory.injector --c
 
 ## Test Files
 
-There are 18 test files in `tests/`:
+There are 24 test files in `tests/`:
 
 | File | What it tests |
 |------|--------------|
@@ -65,6 +65,13 @@ There are 18 test files in `tests/`:
 | `test_rights_library.py` | Rights guide lookups in `backend/knowledge/rights_library.py`. |
 | `test_workflow_engine.py` | Workflow instance management in `backend/workflows/engine.py`. |
 | `test_workflow_templates.py` | Workflow template definitions in `backend/workflows/templates/`. |
+| `test_models.py` | Pydantic model validation and serialization. |
+| `test_retry.py` | Exponential backoff retry logic in `backend/utils/retry.py`. |
+| `test_concurrency.py` | Concurrency utilities and thread safety. |
+| `test_idempotency.py` | Idempotency key handling for API operations. |
+| `test_lifecycle.py` | Application lifecycle (startup/shutdown) hooks. |
+| `test_content_store.py` | Content storage and retrieval. |
+| `test_audit_log.py` | Audit logging for sensitive operations. |
 
 ## Shared Fixtures
 
@@ -248,6 +255,54 @@ jest.mock('@/lib/api', () => ({
 }));
 ```
 
+## Property-Based Testing (Hypothesis)
+
+CaseMate uses [Hypothesis](https://hypothesis.readthedocs.io/) for property-based testing, which generates randomized inputs to discover edge cases that manual test cases miss.
+
+```python
+from hypothesis import given, strategies as st
+
+@given(state=st.sampled_from(["MA", "CA", "NY", "TX", "FL"]),
+       question=st.text(min_size=1, max_size=500))
+def test_classifier_always_returns_valid_area(state, question):
+    area = classify_legal_area(question)
+    assert area in VALID_LEGAL_AREAS
+```
+
+Property-based tests are in `tests/test_models.py` and integrated into the standard `make test` run. Hypothesis settings are configured in `.hypothesis/` (gitignored).
+
+## Accessibility Testing (jest-axe)
+
+Frontend components are tested for WCAG accessibility compliance using [jest-axe](https://github.com/nickcolley/jest-axe):
+
+```typescript
+import { axe, toHaveNoViolations } from 'jest-axe';
+expect.extend(toHaveNoViolations);
+
+it('has no accessibility violations', async () => {
+  const { container } = render(<ChatInterface />);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+## End-to-End Testing (Playwright)
+
+Critical user journeys are covered by Playwright E2E tests:
+
+```bash
+cd web && npx playwright test              # Run all E2E tests
+cd web && npx playwright test --ui         # Interactive UI mode
+cd web && npx playwright show-report       # View HTML report
+```
+
+E2E tests cover:
+- Onboarding flow (5-question intake wizard)
+- Chat interface (send message, receive response, memory indicator)
+- Profile updates (sidebar reflects conversation-extracted facts)
+
+Test artifacts (screenshots, traces) are captured on failure and uploaded as CI artifacts.
+
 ## Coverage
 
 Coverage is reported for the `backend/` package via `--cov=backend --cov-report=term-missing`. The `term-missing` report shows which lines are not covered.
@@ -256,7 +311,7 @@ Coverage is reported for the `backend/` package via `--cov=backend --cov-report=
 
 | Module | Target | Notes |
 |--------|--------|-------|
-| Overall backend | 89% | Current threshold |
+| Overall backend | 87% | Current threshold |
 | `backend/memory/injector.py` | 100% | Core differentiator — no untested paths |
 | `backend/memory/updater.py` | 90%+ | Background task with error handling branches |
 | `backend/legal/classifier.py` | 90%+ | All 10 domains + edge cases |

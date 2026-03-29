@@ -68,13 +68,25 @@ The CI pipeline mirrors commands available locally via `make`. See `CLAUDE.md` f
 
 **Rule:** Run `make verify` before every commit. CI will catch the same issues but the feedback loop is slower.
 
+### 3. E2E: `e2e-tests`
+
+**Runner:** `ubuntu-latest` with Node 20.
+
+Runs after the frontend build job succeeds, against the staging environment.
+
+| Step | Command | What It Checks |
+|------|---------|----------------|
+| Install deps | `cd web && npm ci` | All frontend packages |
+| Install Playwright | `npx playwright install --with-deps` | Browser binaries (Chromium, Firefox, WebKit) |
+| Run E2E tests | `npx playwright test` | Critical user journeys (onboarding, chat, profile) |
+| Upload artifacts | `actions/upload-artifact@v4` | Screenshots and traces on failure |
+
+Test artifacts (screenshots, traces) are uploaded as GitHub Actions artifacts when tests fail, making debugging straightforward from the CI logs.
+
 ## What Is Not in CI (Yet)
 
 - **Mobile build** -- The Expo React Native app (`mobile/`) has no CI job. Builds are done locally via `npx expo start`.
-- **E2E tests** -- No Playwright or Cypress pipeline. Only unit/integration tests via pytest.
-- **Deployment** -- No CD step. The pipeline is lint/test/build only.
 - **Caching** -- No pip or npm cache configured. Each run installs from scratch.
-- **Coverage threshold** -- Coverage is reported but not enforced with a minimum percentage.
 
 ## Adding New CI Steps
 

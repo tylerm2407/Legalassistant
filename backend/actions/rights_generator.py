@@ -78,18 +78,23 @@ async def generate_rights_summary(
 
     profile_context = profile.to_context_string()
 
+    dynamic_context = (
+        f"USER PROFILE:\n{profile_context}\n\n"
+        f"APPLICABLE LAWS:\n" + "\n".join(laws_context_parts) + "\n\n"
+        f"SITUATION:\n{context}"
+    )
+
     response = await client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=RIGHTS_PROMPT,
+        system=[
+            {"type": "text", "text": RIGHTS_PROMPT, "cache_control": {"type": "ephemeral"}},
+            {"type": "text", "text": dynamic_context},
+        ],
         messages=[
             {
                 "role": "user",
-                "content": (
-                    f"USER PROFILE:\n{profile_context}\n\n"
-                    f"APPLICABLE LAWS:\n" + "\n".join(laws_context_parts) + "\n\n"
-                    f"SITUATION:\n{context}"
-                ),
+                "content": "Generate the rights summary based on the above context.",
             }
         ],
     )

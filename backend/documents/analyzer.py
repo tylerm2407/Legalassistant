@@ -64,14 +64,19 @@ async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object
 
     profile_context = profile.to_context_string()
 
+    dynamic_context = f"USER PROFILE:\n{profile_context}\n\nDOCUMENT TEXT:\n{text}"
+
     response = await client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=ANALYSIS_PROMPT,
+        system=[
+            {"type": "text", "text": ANALYSIS_PROMPT, "cache_control": {"type": "ephemeral"}},
+            {"type": "text", "text": dynamic_context},
+        ],
         messages=[
             {
                 "role": "user",
-                "content": (f"USER PROFILE:\n{profile_context}\n\nDOCUMENT TEXT:\n{text}"),
+                "content": "Analyze the document based on the above context.",
             }
         ],
     )

@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from backend.memory.profile import _get_supabase
 from backend.utils.logger import get_logger
+from backend.utils.type_helpers import parse_supabase_rows
 
 _logger = get_logger(__name__)
 
@@ -80,7 +81,7 @@ async def find_attorneys(
         if legal_area:
             query = query.contains("specializations", [legal_area])
         result = query.order("rating", desc=True).limit(limit).execute()
-        return [Attorney(**dict(row)) for row in (result.data or [])]  # type: ignore[arg-type]
+        return parse_supabase_rows(result.data, Attorney)
     except Exception as exc:
         _logger.error(
             "attorney_search_error",

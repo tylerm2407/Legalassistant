@@ -7,19 +7,21 @@
 
 ## Current status
 
-**Phase:** Production Deployment Ready — 385 tests (246 backend + 139 frontend), full CI/CD pipeline, multi-platform deployment
+**Phase:** Production Deployment Ready — 446 tests (303 backend + 143 frontend), full CI/CD pipeline, multi-platform deployment
 
 ---
 
 ## [2026-03-29 — Current] MVP Finalization Sprint
 
 ### Phase 1: Backend Test Coverage (COMPLETE)
-- Coverage: 40% → 89% (246 tests, threshold: 80%)
+- Coverage: 40% → 87% (303 tests, threshold: 80%)
 - New test files: test_legal_areas.py, test_profile_crud.py, test_document_extractor.py
+- Property-based testing with Hypothesis for edge case discovery
 
 ### Phase 2: Frontend Test Suite (COMPLETE)
-- 139 tests across 19 suites with Jest + React Testing Library
+- 143 tests across 21 suites with Jest + React Testing Library
 - All 12 feature components tested + 4 UI components + 3 lib files
+- Accessibility tests with jest-axe for WCAG compliance
 
 ### Phase 3: Frontend Documentation (COMPLETE)
 - JSDoc added to all 34 frontend files (100+ documentation blocks)
@@ -45,7 +47,17 @@
 - Comprehensive deployment documentation (docs/DEPLOYMENT.md)
 - Backend resilience utilities (circuit breaker, telemetry, token budget)
 
-### Phase 7: Demo Readiness (COMPLETE)
+### Phase 7.5: Maximum Technical Sophistication (COMPLETE)
+- SSE streaming chat with two-phase send strategy
+- Hybrid classifier (keyword + LLM fallback)
+- Anthropic prompt caching with static/dynamic split
+- Complete Stripe subscription lifecycle (webhooks, gate, free tier)
+- Real OCR pipeline (pytesseract + Pillow)
+- Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- Supabase realtime sidebar subscriptions
+- Property-based tests (Hypothesis), accessibility tests (jest-axe), Playwright E2E
+
+### Phase 8: Demo Readiness (COMPLETE)
 - Sarah Chen profile seeding
 - End-to-end demo flow verification
 

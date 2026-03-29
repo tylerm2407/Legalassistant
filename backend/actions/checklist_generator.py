@@ -79,18 +79,23 @@ async def generate_checklist(
 
     profile_context = profile.to_context_string()
 
+    dynamic_context = (
+        f"USER PROFILE:\n{profile_context}\n\n"
+        f"APPLICABLE LAWS:\n" + "\n".join(laws_context_parts) + "\n\n"
+        f"SITUATION:\n{context}"
+    )
+
     response = await client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=CHECKLIST_PROMPT,
+        system=[
+            {"type": "text", "text": CHECKLIST_PROMPT, "cache_control": {"type": "ephemeral"}},
+            {"type": "text", "text": dynamic_context},
+        ],
         messages=[
             {
                 "role": "user",
-                "content": (
-                    f"USER PROFILE:\n{profile_context}\n\n"
-                    f"APPLICABLE LAWS:\n" + "\n".join(laws_context_parts) + "\n\n"
-                    f"SITUATION:\n{context}"
-                ),
+                "content": "Generate the checklist based on the above context.",
             }
         ],
     )

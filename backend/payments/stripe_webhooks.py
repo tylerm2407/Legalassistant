@@ -2,7 +2,8 @@
 
 Verifies webhook signatures using the Stripe library and dispatches
 events to the appropriate handler based on event type. Supported events
-include checkout completion, subscription updates, and cancellations.
+include checkout completion, subscription updates, cancellations,
+invoice payments, and payment failures.
 """
 
 from __future__ import annotations
@@ -83,6 +84,10 @@ async def handle_webhook(payload: bytes, sig_header: str) -> dict[str, str]:
         await _handle_subscription_updated(data_object)
     elif event_type == "customer.subscription.deleted":
         await _handle_subscription_deleted(data_object)
+    elif event_type == "invoice.paid":
+        await _handle_invoice_paid(data_object)
+    elif event_type == "invoice.payment_failed":
+        await _handle_invoice_payment_failed(data_object)
     else:
         _logger.info(
             "webhook_unhandled_event",
@@ -179,9 +184,9 @@ async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
         if current_period_end:
             update_data["current_period_end"] = current_period_end
 
-        client.table("subscriptions").update(update_data).eq(  # type: ignore[arg-type]
-            "stripe_subscription_id", subscription_id
-        ).execute()
+        client.table("subscriptions").update(
+            update_data  # type: ignore[arg-type]
+        ).eq("stripe_subscription_id", subscription_id).execute()
 
         _logger.info(
             "subscription_synced",
@@ -228,6 +233,108 @@ async def _handle_subscription_deleted(subscription: dict[str, str]) -> None:
     except Exception as exc:
         _logger.error(
             "subscription_cancel_error",
+            subscription_id=subscription_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
+
+
+async def _handle_invoice_paid(invoice: dict[str, object]) -> None:
+    """Process a successful invoice payment event.
+
+    Updates the subscription status to 'active' in Supabase and syncs
+    the current_period_end from the invoice line items when available.
+    This handles reactivation after failed payments and regular renewals.
+
+    Args:
+        invoice: The Stripe invoice object from the webhook payload.
+    """
+    subscription_id = str(invoice.get("subscription", ""))
+    customer_id = str(invoice.get("customer", ""))
+
+    _logger.info(
+        "invoice_paid",
+        subscription_id=subscription_id,
+        customer_id=customer_id,
+    )
+
+    if not subscription_id:
+        _logger.info("invoice_paid_no_subscription", customer_id=customer_id)
+        return
+
+    try:
+        client = _get_supabase()
+        update_data: dict[str, object] = {
+            "status": "active",
+        }
+
+        # Extract current_period_end from invoice line items if available
+        lines: object = invoice.get("lines", {})
+        if isinstance(lines, dict):
+            line_data: object = lines.get("data", [])
+            if isinstance(line_data, list) and len(line_data) > 0:
+                first_line: object = line_data[0]
+                if isinstance(first_line, dict):
+                    period: object = first_line.get("period", {})
+                    if isinstance(period, dict):
+                        period_end: object = period.get("end")
+                        if period_end:
+                            update_data["current_period_end"] = period_end
+
+        client.table("subscriptions").update(
+            update_data  # type: ignore[arg-type]
+        ).eq("stripe_subscription_id", subscription_id).execute()
+
+        _logger.info(
+            "invoice_paid_subscription_activated",
+            subscription_id=subscription_id,
+        )
+    except Exception as exc:
+        _logger.error(
+            "invoice_paid_update_error",
+            subscription_id=subscription_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
+
+
+async def _handle_invoice_payment_failed(invoice: dict[str, object]) -> None:
+    """Process a failed invoice payment event.
+
+    Marks the subscription as 'past_due' in Supabase when a payment
+    attempt fails. This triggers visual indicators in the UI prompting
+    the user to update their payment method.
+
+    Args:
+        invoice: The Stripe invoice object from the webhook payload.
+    """
+    subscription_id = str(invoice.get("subscription", ""))
+    customer_id = str(invoice.get("customer", ""))
+
+    _logger.info(
+        "invoice_payment_failed",
+        subscription_id=subscription_id,
+        customer_id=customer_id,
+    )
+
+    if not subscription_id:
+        _logger.info("invoice_payment_failed_no_subscription", customer_id=customer_id)
+        return
+
+    try:
+        client = _get_supabase()
+        client.table("subscriptions").update(
+            {"status": "past_due"}
+        ).eq("stripe_subscription_id", subscription_id).execute()
+
+        _logger.info(
+            "invoice_payment_failed_marked_past_due",
+            subscription_id=subscription_id,
+            customer_id=customer_id,
+        )
+    except Exception as exc:
+        _logger.error(
+            "invoice_payment_failed_update_error",
             subscription_id=subscription_id,
             error_type=type(exc).__name__,
             error_message=str(exc),

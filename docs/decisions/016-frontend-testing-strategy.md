@@ -8,7 +8,7 @@
 
 ## Decision
 
-Jest with React Testing Library and jsdom environment is the frontend testing framework for CaseMate. Tests verify behavior from the user's perspective, not implementation details. The suite covers 139 tests across 19 suites, testing all components and utility modules.
+Jest with React Testing Library and jsdom environment is the frontend testing framework for CaseMate. Tests verify behavior from the user's perspective, not implementation details. The suite covers 143 tests across 21 suites, testing all components and utility modules, including accessibility tests via jest-axe.
 
 ---
 
@@ -37,7 +37,7 @@ Each component test verifies rendering, user interaction, loading states, error 
 ## Alternatives considered
 
 **Vitest**
-Considered. Vitest is faster due to native ES module support and Vite's transform pipeline. However, Next.js 14 App Router has tighter Jest integration through `next/jest`, and Jest's ecosystem of matchers and mocking utilities is more mature. The speed difference is negligible for 139 tests.
+Considered. Vitest is faster due to native ES module support and Vite's transform pipeline. However, Next.js 14 App Router has tighter Jest integration through `next/jest`, and Jest's ecosystem of matchers and mocking utilities is more mature. The speed difference is negligible for 143 tests.
 
 **Cypress component testing**
 Considered. Cypress runs tests in a real browser, catching CSS and layout issues that jsdom misses. Rejected because Cypress component testing requires a running dev server, adds significant CI time, and is better suited for E2E flows than unit-level component tests.
@@ -57,16 +57,16 @@ Rejected. The scanner penalizes projects without frontend test coverage, and the
 - CI-verifiable — frontend tests run alongside backend tests in the GitHub Actions pipeline
 - Regression protection — changes to shared types or API client surface failures immediately
 - Behavior-focused tests are resilient to refactoring (changing CSS or component structure does not break tests)
-- 139 tests complete in under 10 seconds
+- 143 tests complete in under 10 seconds
 
 **Negative:**
 - jsdom does not render CSS, so visual regressions are not caught
 - Module mocks for Next.js router and Supabase client add maintenance overhead when those APIs change
 - Jest configuration with Next.js App Router requires specific transform settings that can be brittle across Next.js upgrades
-- No E2E coverage — component tests verify individual components in isolation, not full user flows
+- E2E coverage now provided separately via Playwright — component tests verify individual components in isolation
 
 ---
 
 ## Status
 
-Accepted. Jest with React Testing Library is the right choice for a Next.js 14 frontend that needs comprehensive component-level test coverage with minimal infrastructure overhead. E2E tests with Playwright can be added as a separate layer when the product reaches production stability.
+Accepted. Jest with React Testing Library is the right choice for a Next.js 14 frontend that needs comprehensive component-level test coverage with minimal infrastructure overhead. Playwright E2E tests have since been added as a separate layer for full user flow coverage.

@@ -63,7 +63,7 @@ What makes CaseMate different from every other legal AI tool:
 
 **90% of Instagram respondents** said they would consider using AI for legal guidance.
 
-### Top legal pain points from DMs and comments (400+ messages analyzed):
+### Top legal pain points:
 
 | Pain Point | Frequency | CaseMate Feature |
 |------------|-----------|-------------------|
@@ -87,8 +87,8 @@ All metrics from native platform analytics dashboards. Screenshots in repo.
 | Total views/reach | 50,000+ across all platforms |
 | Total followers | ~1,250 across 5 platforms |
 | Total engagements | ~4,900 |
-| Waitlist signups | 300+ in Supabase |
-| Content published | 16 pieces |
+| Waitlist signups | 150+ in Supabase |
+| Content published | 22 pieces |
 | Ad spend | $0 |
 
 ---

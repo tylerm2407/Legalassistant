@@ -58,7 +58,9 @@ async def _extract_facts(conversation: list[dict[str, str]]) -> list[str]:
     response = await client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
-        system=EXTRACTION_PROMPT,
+        system=[
+            {"type": "text", "text": EXTRACTION_PROMPT, "cache_control": {"type": "ephemeral"}},
+        ],
         messages=cast(list[MessageParam], conversation),
     )
 

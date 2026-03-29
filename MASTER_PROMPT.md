@@ -220,7 +220,7 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 Three force multipliers make this scope achievable for a 2-person team:
 
 1. **Clear dev/GTM split** — Owen compiles the 50-state legal knowledge base (Hours 1–8) while Tyler codes. Neither person blocks the other. The knowledge base is pure research, not code — it can be produced in parallel.
-2. **AI-assisted development** — Claude Code generates boilerplate, test scaffolding, and repetitive patterns (state law file structure, 10 area modules) at ~5x manual speed. The 246 tests are auto-generated alongside each module, not a separate QA phase.
+2. **AI-assisted development** — Claude Code generates boilerplate, test scaffolding, and repetitive patterns (state law file structure, 10 area modules) at ~5x manual speed. The 303 backend tests are auto-generated alongside each module, not a separate QA phase.
 3. **Shared codebase architecture** — The Expo mobile app uses shared TypeScript types and API client from the web app. It is a thin native shell over the same backend, not a separate codebase. Three platforms (web, iOS, Android) from one set of types and one API.
 
 ### Post-Hackathon Roadmap
@@ -702,7 +702,7 @@ casemate/
 ├── scripts/
 │   └── seed_demo.py                  ← Seed Sarah Chen demo profile
 │
-└── tests/                            ← 22 backend test files (246 tests)
+└── tests/                            ← 24 backend test files (303 tests)
     ├── conftest.py                   ← Shared fixtures (mock_profile, mock_anthropic, mock_supabase)
     ├── test_memory_injector.py       ← Core memory injection tests
     ├── test_profile_crud.py          ← Profile CRUD operations
@@ -1160,8 +1160,8 @@ Hidden screens (accessible via navigation, not tabs): `rights`, `rights-guide`, 
 
 - **Framework:** pytest with `pytest-asyncio` (auto mode)
 - **Coverage:** `pytest-cov` with term-missing report
-- **22 backend test files** + **19 frontend test files** covering all modules
-- **246 backend tests**, 100% pass rate
+- **24 backend test files** + **21 frontend test files** covering all modules
+- **303 backend tests**, 100% pass rate
 - All tests run without real API calls or database connections
 - **Coverage target:** 90%+ line coverage on core modules (memory/, legal/, actions/)
 - **CI integration:** `make verify` runs `ruff check` + `ruff format --check` + full test suite before every commit
@@ -1175,7 +1175,7 @@ Four shared fixtures: `mock_profile` (Sarah Chen power-user profile with 8 facts
 
 All tests run without real API calls or database connections. Anthropic is patched at the client level; Supabase is patched at the singleton getter. No external dependencies required to run the full test suite.
 
-### Backend Test Files (22 files, 246 tests)
+### Backend Test Files (24 files, 303 tests)
 
 | File | Tests |
 | ---- | ----- |

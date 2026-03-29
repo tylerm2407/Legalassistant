@@ -95,3 +95,143 @@ class TestDetectAndSaveDeadlines:
         conversation = [{"role": "user", "content": "Hello"}]
         await detect_and_save_deadlines(USER_ID, conversation)
         mock_create.assert_not_called()
+
+    async def test_malformed_json_response(self, mock_detector_deps: tuple) -> None:
+        """Malformed JSON from Claude should return empty list, not crash."""
+        mock_client, mock_create = mock_detector_deps
+
+        content_block = MagicMock()
+        content_block.text = "This is not JSON at all"
+        from anthropic.types import TextBlock
+
+        content_block.__class__ = TextBlock
+
+        mock_response = MagicMock()
+        mock_response.content = [content_block]
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        conversation = [{"role": "user", "content": "My lease ends soon"}]
+        await detect_and_save_deadlines(USER_ID, conversation)
+        mock_create.assert_not_called()
+
+    async def test_deadlines_not_a_list(self, mock_detector_deps: tuple) -> None:
+        """If Claude returns deadlines as a non-list, it should be handled gracefully."""
+        mock_client, mock_create = mock_detector_deps
+
+        response_data = {"deadlines": "not a list"}
+        content_block = MagicMock()
+        content_block.text = json.dumps(response_data)
+        from anthropic.types import TextBlock
+
+        content_block.__class__ = TextBlock
+
+        mock_response = MagicMock()
+        mock_response.content = [content_block]
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        conversation = [{"role": "user", "content": "What about my deadline?"}]
+        await detect_and_save_deadlines(USER_ID, conversation)
+        mock_create.assert_not_called()
+
+    async def test_multiple_deadlines_detected(self, mock_detector_deps: tuple) -> None:
+        """Multiple deadlines in one response should each be saved."""
+        mock_client, mock_create = mock_detector_deps
+
+        response_data = {
+            "deadlines": [
+                {
+                    "title": "File small claims",
+                    "date": "2026-04-15",
+                    "legal_area": "small_claims",
+                    "notes": "30-day filing window",
+                },
+                {
+                    "title": "Respond to landlord",
+                    "date": "2026-04-01",
+                    "legal_area": "landlord_tenant",
+                    "notes": "Must respond within 14 days",
+                },
+                {
+                    "title": "EEOC complaint deadline",
+                    "date": "2026-09-15",
+                    "legal_area": "employment",
+                    "notes": "180-day statute of limitations",
+                },
+            ]
+        }
+        content_block = MagicMock()
+        content_block.text = json.dumps(response_data)
+        from anthropic.types import TextBlock
+
+        content_block.__class__ = TextBlock
+
+        mock_response = MagicMock()
+        mock_response.content = [content_block]
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        conversation = [{"role": "user", "content": "I have multiple legal issues"}]
+        await detect_and_save_deadlines(USER_ID, conversation, conversation_id="conv_multi")
+
+        assert mock_create.call_count == 3
+
+    async def test_empty_conversation(self, mock_detector_deps: tuple) -> None:
+        """Empty conversation list should not crash."""
+        mock_client, mock_create = mock_detector_deps
+
+        response_data = {"deadlines": []}
+        content_block = MagicMock()
+        content_block.text = json.dumps(response_data)
+        from anthropic.types import TextBlock
+
+        content_block.__class__ = TextBlock
+
+        mock_response = MagicMock()
+        mock_response.content = [content_block]
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        await detect_and_save_deadlines(USER_ID, [], conversation_id=None)
+        mock_create.assert_not_called()
+
+    async def test_deadline_missing_title_skipped(self, mock_detector_deps: tuple) -> None:
+        """Deadlines without a title or date should be skipped."""
+        mock_client, mock_create = mock_detector_deps
+
+        response_data = {
+            "deadlines": [
+                {"title": "", "date": "2026-05-01", "legal_area": "contracts", "notes": ""},
+                {"title": "Valid deadline", "date": "", "legal_area": "traffic", "notes": ""},
+                {
+                    "title": "Good deadline",
+                    "date": "2026-06-01",
+                    "legal_area": "employment",
+                    "notes": "This one is valid",
+                },
+            ]
+        }
+        content_block = MagicMock()
+        content_block.text = json.dumps(response_data)
+        from anthropic.types import TextBlock
+
+        content_block.__class__ = TextBlock
+
+        mock_response = MagicMock()
+        mock_response.content = [content_block]
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        conversation = [{"role": "user", "content": "Check my deadlines"}]
+        await detect_and_save_deadlines(USER_ID, conversation)
+
+        # Only the third deadline with both title and date should be saved
+        mock_create.assert_called_once()
+
+    async def test_empty_content_blocks(self, mock_detector_deps: tuple) -> None:
+        """Response with empty content blocks should return empty list."""
+        mock_client, mock_create = mock_detector_deps
+
+        mock_response = MagicMock()
+        mock_response.content = []
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        conversation = [{"role": "user", "content": "Any deadlines?"}]
+        await detect_and_save_deadlines(USER_ID, conversation)
+        mock_create.assert_not_called()

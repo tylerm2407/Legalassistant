@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from backend.memory.profile import _get_supabase
 from backend.utils.logger import get_logger
+from backend.utils.type_helpers import parse_supabase_row, parse_supabase_rows
 
 _logger = get_logger(__name__)
 
@@ -151,7 +152,7 @@ async def list_deadlines(user_id: str, status: DeadlineStatus | None = None) -> 
         if status:
             query = query.eq("status", status.value)
         result = query.order("date", desc=False).execute()
-        return [Deadline(**dict(row)) for row in (result.data or [])]  # type: ignore[arg-type]
+        return parse_supabase_rows(result.data, Deadline)
     except Exception as exc:
         _logger.error(
             "deadline_list_error",
@@ -195,7 +196,7 @@ async def update_deadline(
         if not result.data:
             return None
         _logger.info("deadline_updated", deadline_id=deadline_id, user_id=user_id)
-        return Deadline(**dict(result.data[0]))  # type: ignore[arg-type]
+        return parse_supabase_row(result.data[0], Deadline)
     except Exception as exc:
         _logger.error(
             "deadline_update_error",

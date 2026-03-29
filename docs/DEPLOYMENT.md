@@ -50,8 +50,9 @@ Environment-specific configuration templates:
 ```
 Push to main
     │
-    ├── Backend: lint → typecheck → test (246 tests, 89% coverage)
-    ├── Frontend: lint → test (139 tests) → build
+    ├── Backend: lint → typecheck → test (303 tests, 87% coverage)
+    ├── Frontend: lint → test (143 tests) → build
+    ├── E2E: Playwright tests against staging
     └── Mobile: typecheck → EAS validate
            │
            ▼
@@ -335,7 +336,7 @@ Point-in-time recovery on Pro plan. Daily backups on Free plan.
 
 ## Pre-Deploy Checklist
 
-1. `make verify` — zero failures (lint + 246 backend tests + 139 frontend tests)
+1. `make verify` — zero failures (lint + 303 backend tests + 143 frontend tests)
 2. All required env vars set in deployment platform
 3. `CORS_ALLOWED_ORIGINS` includes only production domains
 4. `SUPABASE_SERVICE_ROLE_KEY` set only on backend

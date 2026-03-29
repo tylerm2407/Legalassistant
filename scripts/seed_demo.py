@@ -25,7 +25,9 @@ DEMO_PROFILE: dict[str, object] = {
     "active_issues": [
         {
             "issue_type": "landlord_tenant",
-            "summary": "Landlord claiming $800 for bathroom tile damage from pre-existing water damage",
+            "summary": (
+                "Landlord claiming $800 for bathroom tile damage from pre-existing water damage"
+            ),
             "status": "open",
             "started_at": (datetime.utcnow() - timedelta(days=18)).isoformat(),
             "updated_at": (datetime.utcnow() - timedelta(days=3)).isoformat(),
@@ -79,7 +81,10 @@ async def seed() -> None:
         )
         .execute()
     )
-    print(f"Seeded: {result.data}")
+    from backend.utils.logger import get_logger
+
+    _logger = get_logger(__name__)
+    _logger.info("demo_profile_seeded", user_id="demo-sarah-chen-uuid", rows=len(result.data or []))
 
 
 if __name__ == "__main__":

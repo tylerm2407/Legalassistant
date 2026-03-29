@@ -8,6 +8,8 @@ behavior.
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock
+
 from backend.legal.classifier import (
     CONFIDENCE_THRESHOLD,
     PHRASE_BOOST,
@@ -18,6 +20,7 @@ from backend.legal.classifier import (
     _longest_match_length,
     classify_legal_area,
     classify_with_confidence,
+    classify_with_llm_fallback,
 )
 
 
@@ -222,3 +225,75 @@ class TestConfidenceScoring:
         ]
         for q in questions:
             assert classify_with_confidence(q).domain == classify_legal_area(q)
+
+
+class TestClassifyWithLlmFallback:
+    """Test the hybrid keyword + LLM fallback classifier."""
+
+    async def test_high_confidence_returns_keyword_without_llm(self) -> None:
+        """High confidence keyword result returns without making an LLM call."""
+        # "landlord" + "security deposit" = high confidence
+        result = await classify_with_llm_fallback(
+            "my landlord kept my security deposit and won't return it"
+        )
+        assert result.domain == "landlord_tenant"
+        assert result.method == "keyword"
+
+    async def test_low_confidence_no_client_returns_keyword(self) -> None:
+        """Low confidence with no client returns keyword result."""
+        result = await classify_with_llm_fallback("hello", client=None)
+        assert result.domain == "general"
+        assert result.method == "keyword"
+
+    async def test_low_confidence_with_mock_client_returns_llm(self) -> None:
+        """Low confidence with a valid AsyncAnthropic client calls LLM."""
+        import anthropic
+        from anthropic.types import TextBlock
+
+        mock_text_block = TextBlock(type="text", text="employment_rights")
+        mock_response = MagicMock()
+        mock_response.content = [mock_text_block]
+
+        mock_client = AsyncMock(spec=anthropic.AsyncAnthropic)
+        mock_client.messages = MagicMock()
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        # Use an ambiguous query that has low keyword confidence
+        result = await classify_with_llm_fallback("what should I do about this", client=mock_client)
+        assert result.domain == "employment_rights"
+        assert result.method == "llm_fallback"
+        assert result.confidence == 0.85
+
+    async def test_llm_returns_invalid_domain_falls_back(self) -> None:
+        """LLM returning an invalid domain falls back to keyword result."""
+        import anthropic
+        from anthropic.types import TextBlock
+
+        mock_text_block = TextBlock(type="text", text="not_a_real_domain")
+        mock_response = MagicMock()
+        mock_response.content = [mock_text_block]
+
+        mock_client = AsyncMock(spec=anthropic.AsyncAnthropic)
+        mock_client.messages = MagicMock()
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+
+        result = await classify_with_llm_fallback("what should I do about this", client=mock_client)
+        # Falls back to keyword result since "not_a_real_domain" not in VALID_DOMAINS
+        assert result.method == "keyword"
+
+    async def test_llm_api_error_falls_back_to_keyword(self) -> None:
+        """LLM API error falls back to keyword result."""
+        import anthropic
+
+        mock_client = AsyncMock(spec=anthropic.AsyncAnthropic)
+        mock_client.messages = MagicMock()
+        mock_client.messages.create = AsyncMock(
+            side_effect=anthropic.APIError(
+                message="API error",
+                request=MagicMock(),
+                body=None,
+            )
+        )
+
+        result = await classify_with_llm_fallback("what should I do about this", client=mock_client)
+        assert result.method == "keyword"

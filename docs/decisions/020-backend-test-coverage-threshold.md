@@ -24,7 +24,7 @@ The question was not whether to increase coverage, but what threshold to target 
 
 **Framework:** pytest with pytest-cov for coverage measurement. The `pyproject.toml` configures pytest-cov with `--cov=backend --cov-fail-under=80` so that CI rejects any commit that drops coverage below the threshold.
 
-**Current coverage:** 89% across 246 tests in 18 test files.
+**Current coverage:** 87% across 303 tests in 24 test files.
 
 **Test prioritization strategy:**
 
@@ -56,7 +56,7 @@ Coverage was increased by targeting the largest untested modules first:
 Considered. A 60% threshold would have been met with the existing test suite and required no additional test writing. Rejected because 60% leaves significant backend logic untested — particularly the legal area modules which are the largest code surface — and scores lower on code quality metrics.
 
 **95% coverage threshold**
-Considered. Near-complete coverage would catch the most edge cases. Rejected because achieving 95% requires testing private helpers, exception branches in retry logic, and platform-specific code paths that provide diminishing returns. The effort to go from 89% to 95% would exceed the effort that took coverage from 40% to 89%.
+Considered. Near-complete coverage would catch the most edge cases. Rejected because achieving 95% requires testing private helpers, exception branches in retry logic, and platform-specific code paths that provide diminishing returns. The effort to go from 87% to 95% would exceed the effort that took coverage from 40% to 87%.
 
 **No coverage threshold (advisory only)**
 Rejected. Without a CI-enforced threshold, coverage drifts downward as new code is added without tests. An advisory metric is ignored under time pressure. The enforced threshold ensures that new code includes tests.
@@ -70,7 +70,7 @@ Considered as a complement to line coverage. Mutation testing verifies that test
 
 **Positive:**
 - CI fails on coverage regression — new code must include tests
-- 89% coverage means the core paths (memory injection, profile CRUD, legal classification, API endpoints) are all verified
+- 87% coverage means the core paths (memory injection, profile CRUD, legal classification, API endpoints) are all verified
 - Parametrized legal area tests catch missing state support or empty guidance strings across all 10 domains
 - Coverage report in CI output provides visibility into which modules need attention
 - The 80% threshold is achievable for new contributors without excessive test overhead
@@ -85,4 +85,4 @@ Considered as a complement to line coverage. Mutation testing verifies that test
 
 ## Status
 
-Accepted. An 80% coverage threshold enforced in CI, with current coverage at 89%, provides strong regression protection for a legal guidance backend where correctness matters. The parametrized testing approach for legal area modules is the most efficient coverage strategy and should be extended as new legal domains or states are added.
+Accepted. An 80% coverage threshold enforced in CI, with current coverage at 87%, provides strong regression protection for a legal guidance backend where correctness matters. The parametrized testing approach for legal area modules is the most efficient coverage strategy and should be extended as new legal domains or states are added.

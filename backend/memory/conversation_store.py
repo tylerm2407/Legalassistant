@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from backend.memory.profile import _get_supabase
 from backend.models.conversation import Conversation, Message
 from backend.utils.logger import get_logger
+from backend.utils.type_helpers import supabase_json_list, supabase_row_to_dict
 
 _logger = get_logger(__name__)
 
@@ -48,7 +49,7 @@ async def create_conversation(
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
         }
-        result = client.table("conversations").insert(data).execute()  # type: ignore[arg-type]
+        result = client.table("conversations").insert(data).execute()
         if not result.data:
             raise RuntimeError(f"Failed to create conversation for user_id={user_id}")
         _logger.info("conversation_created", user_id=user_id, conversation_id=conversation.id)
@@ -128,9 +129,9 @@ async def list_conversations(user_id: str, limit: int = 50) -> list[dict[str, ob
         )
         summaries: list[dict[str, object]] = []
         for raw_row in result.data or []:
-            row: dict[str, object] = dict(raw_row)  # type: ignore[arg-type]
+            row = supabase_row_to_dict(raw_row)
             raw_messages = row.get("messages") or []
-            messages: list[dict[str, object]] = list(raw_messages)  # type: ignore[call-overload]
+            messages = supabase_json_list(raw_messages)
             first_user_msg: str = next(
                 (
                     str(m["content"])

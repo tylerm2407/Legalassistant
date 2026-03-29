@@ -42,6 +42,11 @@ dev = [
     "mypy>=1.13.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/tylerm2407/Legalassistant"
+Documentation = "https://github.com/tylerm2407/Legalassistant/tree/main/docs"
+Repository = "https://github.com/tylerm2407/Legalassistant"
+
 [tool.setuptools.packages.find]
 include = ["backend*"]
 
@@ -71,4 +76,4 @@ disallow_any_generics = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "-v --tb=short --cov=backend --cov-fail-under=80"
+addopts = "-v --tb=short --cov=backend --cov-fail-under=90"

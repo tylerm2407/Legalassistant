@@ -209,7 +209,7 @@ class CircuitBreaker:
                 return result
             except CircuitBreakerOpenError:
                 raise
-            except Exception:
+            except Exception:  # noqa: BLE001 — intentionally broad; circuit breaker must track all failures
                 await self._record_failure()
                 raise
 

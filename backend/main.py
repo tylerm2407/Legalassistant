@@ -64,7 +64,6 @@ from backend.memory.profile import (
 )
 from backend.memory.updater import update_profile_from_conversation
 from backend.models.legal_profile import LegalProfile
-from backend.models.responses import HealthResponse
 from backend.payments.stripe_webhooks import handle_webhook
 from backend.payments.subscription import (
     CheckoutSessionResponse,
@@ -74,14 +73,17 @@ from backend.payments.subscription import (
     get_subscription_status,
 )
 from backend.referrals.matcher import find_attorneys, get_referral_suggestions
+from backend.utils.audit_log import AuditEventType, record_audit_event
 from backend.utils.auth import verify_supabase_jwt
 from backend.utils.circuit_breaker import CircuitBreakerOpenError, anthropic_breaker
 from backend.utils.client import get_anthropic_client
+from backend.utils.lifecycle import get_lifecycle_manager, lifecycle_middleware
 from backend.utils.logger import configure_logging, get_logger
 from backend.utils.rate_limiter import rate_limit
 from backend.utils.retry import retry_anthropic
 from backend.utils.telemetry import MetricsCollector, get_metrics_response, telemetry_middleware
 from backend.utils.token_budget import TokenBudgetManager, estimate_tokens
+from backend.utils.type_helpers import as_anthropic_messages
 from backend.workflows.engine import (
     WorkflowStepUpdateRequest,
     get_workflow,
@@ -119,9 +121,78 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+# ---------- Lifecycle middleware — graceful shutdown with request draining ----------
+
+app.middleware("http")(lifecycle_middleware)
+
 # ---------- Telemetry middleware — traces every request ----------
 
 app.middleware("http")(telemetry_middleware)
+
+
+# ---------- Security headers middleware ----------
+
+
+@app.middleware("http")
+async def security_headers_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    """Add security headers to every HTTP response.
+
+    Applies defense-in-depth headers that protect against common web
+    vulnerabilities (clickjacking, MIME sniffing, XSS, data leakage).
+    HSTS is only set for non-localhost origins to avoid breaking local
+    development.
+
+    Args:
+        request: The incoming FastAPI request.
+        call_next: The next middleware or route handler.
+
+    Returns:
+        The response with security headers attached.
+    """
+    response: Response = await call_next(request)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data:; "
+        "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com"
+    )
+
+    # Only add HSTS for non-localhost deployments
+    host = request.headers.get("host", "")
+    if "localhost" not in host and "127.0.0.1" not in host:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+
+    return response
+
+
+# ---------- Lifecycle events — startup and shutdown ----------
+
+
+@app.on_event("startup")
+async def _on_startup() -> None:
+    """Initialize lifecycle manager and register shutdown hooks."""
+    manager = get_lifecycle_manager(drain_timeout=30)
+    await manager.startup()
+
+
+@app.on_event("shutdown")
+async def _on_shutdown() -> None:
+    """Gracefully drain in-flight requests and run cleanup hooks."""
+    manager = get_lifecycle_manager()
+    await manager.shutdown()
+
 
 # ---------- Token budget manager for context window optimization ----------
 
@@ -284,13 +355,18 @@ MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
 
 
 @app.get("/health")
-async def health_check() -> HealthResponse:
-    """Health check endpoint for uptime monitoring.
+async def health_check() -> dict[str, object]:
+    """Health check endpoint with lifecycle state and uptime.
 
-    Returns:
-        HealthResponse with status 'ok' and the current service version.
+    Returns lifecycle state, active request count, and uptime alongside
+    the standard status/version fields for richer monitoring.
     """
-    return HealthResponse(status="ok", version="0.3.0")
+    lifecycle = get_lifecycle_manager().get_health()
+    return {
+        "status": "ok",
+        "version": "0.4.0",
+        "lifecycle": lifecycle,
+    }
 
 
 @app.get("/metrics")
@@ -301,6 +377,29 @@ async def metrics_endpoint() -> Response:
     and labeled counters (status code distribution, legal area classification).
     """
     return get_metrics_response()
+
+
+@app.get("/api/audit/verify")
+async def verify_audit_chain(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Verify the integrity of the user's audit event hash chain.
+
+    Reads the user's audit events from Supabase and checks that each
+    event's cryptographic hash correctly links to its predecessor,
+    detecting any tampering or deletion.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        VerificationResult with validity status and events checked.
+    """
+    from backend.utils.audit_log import AuditLog
+
+    audit_log = AuditLog.get_instance()
+    result = await audit_log.verify_chain(user_id)
+    return {"verification": result.model_dump(mode="json")}
 
 
 @app.post("/api/chat", response_model=ChatResponse)
@@ -388,7 +487,7 @@ async def chat(
                     {"type": "text", "text": static_prefix, "cache_control": {"type": "ephemeral"}},
                     {"type": "text", "text": dynamic_suffix},
                 ],
-                messages=api_messages,  # type: ignore[arg-type]
+                messages=as_anthropic_messages(api_messages),
             )
             first_block = response.content[0] if response.content else None
             return first_block.text if isinstance(first_block, TextBlock) else ""
@@ -445,6 +544,18 @@ async def chat(
         user_id,
         conversation_messages,
         conversation.id,
+    )
+
+    # Record audit event for the chat interaction
+    background_tasks.add_task(
+        record_audit_event,
+        AuditEventType.CONVERSATION_CREATED,
+        user_id,
+        {
+            "conversation_id": conversation.id,
+            "legal_area": legal_area,
+            "classifier_confidence": str(round(classification.confidence, 2)),
+        },
     )
 
     _logger.info(
@@ -537,7 +648,7 @@ async def chat_stream(
                     {"type": "text", "text": static_prefix, "cache_control": {"type": "ephemeral"}},
                     {"type": "text", "text": dynamic_suffix},
                 ],
-                messages=api_messages,  # type: ignore[arg-type]
+                messages=as_anthropic_messages(api_messages),
             ) as stream:
                 async for text in stream.text_stream:
                     full_response_parts.append(text)
@@ -638,6 +749,11 @@ async def upsert_profile(
 
     try:
         updated = await update_profile(profile)
+        await record_audit_event(
+            AuditEventType.PROFILE_UPDATED,
+            user_id,
+            {"state": request.state, "action": "upsert"},
+        )
         return {"profile": updated.model_dump(mode="json")}
     except (ValueError, RuntimeError) as exc:
         _logger.error(
@@ -742,7 +858,7 @@ async def delete_user_conversation(
 @app.post("/api/actions/letter")
 async def create_demand_letter(
     request: ActionRequest,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
     _rate: None = Depends(_actions_rate_limit),
 ) -> dict[str, object]:
     """Generate a demand letter for the user.
@@ -778,7 +894,7 @@ async def create_demand_letter(
 @app.post("/api/actions/rights")
 async def create_rights_summary(
     request: ActionRequest,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
     _rate: None = Depends(_actions_rate_limit),
 ) -> dict[str, object]:
     """Generate a rights summary for the user.
@@ -814,7 +930,7 @@ async def create_rights_summary(
 @app.post("/api/actions/checklist")
 async def create_checklist(
     request: ActionRequest,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
     _rate: None = Depends(_actions_rate_limit),
 ) -> dict[str, object]:
     """Generate a next-steps checklist for the user.
@@ -851,7 +967,7 @@ async def create_checklist(
 async def upload_document(
     file: UploadFile,
     background_tasks: BackgroundTasks,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
     _rate: None = Depends(_documents_rate_limit),
 ) -> dict[str, object]:
     """Upload and analyze a legal document.
@@ -901,6 +1017,11 @@ async def upload_document(
 
     try:
         analysis = await analyze_document(text, profile)
+        await record_audit_event(
+            AuditEventType.DOCUMENT_ANALYZED,
+            user_id,
+            {"filename": file.filename or "unknown", "size_bytes": len(contents)},
+        )
         return analysis
     except (anthropic.APIError, RuntimeError) as exc:
         _logger.error(
@@ -1259,7 +1380,7 @@ class ExportEmailRequest(BaseModel):
 @app.post("/api/export/document")
 async def export_document(
     request: ExportDocumentRequest,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
 ) -> Response:
     """Generate and download a document.
 
@@ -1319,7 +1440,7 @@ async def export_document(
 @app.post("/api/export/email")
 async def export_email(
     request: ExportEmailRequest,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
 ) -> dict[str, object]:
     """Generate a document and send it via email.
 

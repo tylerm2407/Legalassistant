@@ -664,6 +664,58 @@ The `telemetry_middleware` (`backend/utils/telemetry.py`) and `MetricsCollector`
 - **Business metrics:** Chat latency, classifier domain distribution, confidence bucket distribution, stream vs. sync usage.
 - **Status code distribution:** Labeled counters for HTTP response codes.
 
+### Event-Sourced Audit Log — Cryptographic Hash Chain
+
+The `AuditLog` (`backend/utils/audit_log.py`) provides tamper-evident logging for all sensitive operations. Every profile mutation, document upload, conversation creation, and subscription change is recorded as an immutable event in a cryptographic hash chain:
+
+- **Hash chaining:** Each event's SHA-256 hash incorporates the previous event's hash, creating an append-only chain. Any modification to a past event breaks the chain and is detectable via `verify_chain()`.
+- **Genesis block:** The chain is anchored to a deterministic genesis hash (`SHA-256("CASEMATE_GENESIS_BLOCK")`), providing a known starting point for verification.
+- **Canonical serialization:** Event hashes use sorted-key JSON with no whitespace, ensuring deterministic hashing regardless of dict insertion order.
+- **Fail-safe writes:** Audit logging never blocks or crashes the main request flow. All Supabase write failures are caught and logged.
+- **Chain verification endpoint:** `GET /api/audit/verify` reads back events and validates the chain integrity, returning the break index if tampering is detected.
+- **11 event types:** PROFILE_CREATED, PROFILE_UPDATED, FACT_EXTRACTED, DOCUMENT_UPLOADED, DOCUMENT_ANALYZED, CONVERSATION_CREATED, SUBSCRIPTION_CHANGED, DEADLINE_DETECTED, ACTION_GENERATED, LOGIN, EXPORT_GENERATED.
+
+### Idempotency Layer — Redis-Backed Request Deduplication
+
+The `IdempotencyStore` (`backend/utils/idempotency.py`) prevents duplicate operations from network retries, double-submits, and webhook replays:
+
+- **Request fingerprinting:** SHA-256 of (user_id + endpoint path + request body hash) produces a deterministic idempotency key.
+- **Redis-backed cache:** Responses are stored in Redis with configurable TTL (default 300 seconds). Duplicate requests return the cached response immediately.
+- **Client key override:** Supports explicit `Idempotency-Key` header for client-controlled deduplication.
+- **Fail-open semantics:** If Redis is unavailable, every request is treated as unique — the idempotency layer never blocks legitimate traffic.
+- **FastAPI dependency:** `idempotency_guard(ttl=300)` is a dependency factory that integrates into any endpoint with a single `Depends()` call.
+
+### Graceful Shutdown Manager — Request Draining
+
+The `LifecycleManager` (`backend/utils/lifecycle.py`) manages the application lifecycle with four states:
+
+- **STARTING → READY:** Application initializes, registers SIGTERM/SIGINT handlers.
+- **READY → DRAINING:** Shutdown signal received. New requests are rejected with 503 + `Retry-After` header. In-flight requests are allowed to complete.
+- **DRAINING → STOPPED:** Active requests drained (or timeout exceeded), registered cleanup hooks executed in order.
+- **Request counting:** Lifecycle middleware tracks in-flight requests with atomic increment/decrement.
+- **Configurable drain timeout:** Default 30 seconds; polls every 0.5s for active request count to reach zero.
+- **Cleanup hooks:** Modules register shutdown callbacks (e.g., close Redis connections, flush metrics) via `register_shutdown_hook()`.
+- **Enhanced health endpoint:** `GET /health` now returns lifecycle state, active request count, and uptime.
+
+### Optimistic Concurrency Control — Version-Based Conflict Detection
+
+The `OptimisticLock` (`backend/utils/concurrency.py`) prevents lost updates when background tasks and user edits race on the same row:
+
+- **Version column:** Each mutable row carries an integer `version` column that is checked-and-incremented atomically on write.
+- **Conflict detection:** `write_with_version()` succeeds only if the current version matches the expected version from the prior read. Mismatches raise `ConflictError`.
+- **Read-modify-write loop:** `retry_with_merge()` automates the pattern with configurable retry count and backoff, making it safe for background tasks.
+- **No database locks:** Uses application-level optimistic locking rather than `SELECT ... FOR UPDATE`, avoiding lock contention under concurrent write loads.
+
+### Content-Addressable Document Storage — SHA-256 Deduplication
+
+The `ContentAddressableStore` (`backend/utils/content_store.py`) implements zero-duplicate storage for uploaded legal documents:
+
+- **Content addressing:** Each document is identified by its SHA-256 hash, not a UUID. Identical uploads resolve to the same storage object.
+- **Sharded directory structure:** Storage paths use `{hash[:2]}/{hash[2:4]}/{hash}` to distribute files across subdirectories, avoiding flat directory performance issues.
+- **Reference counting:** Multiple users uploading the same document increment a reference count. The blob is only deleted from Supabase Storage when all references are removed.
+- **Streaming hash computation:** `_compute_content_hash_streaming()` processes files in 8KB chunks, avoiding full-file memory loads for large documents.
+- **Deduplication metrics:** `get_storage_stats()` returns total/unique document counts and bytes saved by deduplication.
+
 ---
 
 ## 11. Deployment Architecture
@@ -723,8 +775,9 @@ graph LR
 
 ```mermaid
 flowchart TD
-    PUSH["Push to main"] --> LINT["Backend: lint + typecheck + test<br/>(246 tests, 89% coverage)"]
-    PUSH --> WEB["Frontend: lint + test + build<br/>(139 tests)"]
+    PUSH["Push to main"] --> LINT["Backend: lint + typecheck + test<br/>(462 tests, 91% coverage)"]
+    PUSH --> WEB["Frontend: lint + test + build<br/>(143 tests)"]
+    PUSH --> E2E["E2E: Playwright against staging"]
     PUSH --> MOBILE["Mobile: typecheck + EAS validate"]
     LINT --> DOCKER["Docker: build backend + frontend images"]
     WEB --> DOCKER
@@ -801,8 +854,8 @@ This endpoint is unauthenticated and used for uptime monitoring and deployment r
 ### Backend Testing
 
 - **Framework:** pytest with pytest-cov for coverage reporting
-- **Test count:** 246 tests across 11 test modules
-- **Coverage target:** 89% line coverage
+- **Test count:** 462 tests across 29 test modules
+- **Coverage target:** 91% line coverage
 
 | Test Module | Focus | Priority |
 |-------------|-------|----------|
@@ -820,8 +873,8 @@ This endpoint is unauthenticated and used for uptime monitoring and deployment r
 ### Frontend Testing
 
 - **Framework:** Jest with React Testing Library
-- **Test count:** 139 tests
-- **Focus:** Component rendering, form validation, API integration
+- **Test count:** 143 tests across 21 suites
+- **Focus:** Component rendering, form validation, API integration, accessibility (jest-axe)
 
 ### Verification
 

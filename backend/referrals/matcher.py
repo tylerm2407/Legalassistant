@@ -138,11 +138,13 @@ async def get_referral_suggestions(
         if attorney.accepts_free_consultations:
             match_reason_parts.append("Offers free consultations")
 
-        suggestions.append(ReferralSuggestion(
-            attorney=attorney,
-            match_reason=". ".join(match_reason_parts),
-            relevance_score=min(score, 100),
-        ))
+        suggestions.append(
+            ReferralSuggestion(
+                attorney=attorney,
+                match_reason=". ".join(match_reason_parts),
+                relevance_score=min(score, 100),
+            )
+        )
 
     # Sort by relevance score descending
     suggestions.sort(key=lambda s: s.relevance_score, reverse=True)

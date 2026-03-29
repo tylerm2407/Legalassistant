@@ -29,8 +29,7 @@ def mock_profile() -> LegalProfile:
             LegalIssue(
                 issue_type="landlord_tenant",
                 summary=(
-                    "Landlord has not returned $2,400 security deposit"
-                    " after move-out 45 days ago"
+                    "Landlord has not returned $2,400 security deposit after move-out 45 days ago"
                 ),
                 status=IssueStatus.OPEN,
                 started_at=datetime(2026, 2, 1),
@@ -85,9 +84,7 @@ def mock_anthropic(mock_anthropic_response):
         mock_anthropic.messages.create.return_value = mock_anthropic_response("...")
     """
     mock_client = MagicMock()
-    mock_create = AsyncMock(
-        return_value=mock_anthropic_response(json.dumps({"new_facts": []}))
-    )
+    mock_create = AsyncMock(return_value=mock_anthropic_response(json.dumps({"new_facts": []})))
     mock_client.messages = MagicMock()
     mock_client.messages.create = mock_create
 
@@ -109,10 +106,7 @@ def mock_supabase():
     select_chain = MagicMock()
     select_chain.execute.return_value = MagicMock(data=None)
     (
-        mock_client.table.return_value
-        .select.return_value
-        .eq.return_value
-        .maybe_single.return_value
+        mock_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value
     ) = select_chain
 
     # Default: upsert returns empty list

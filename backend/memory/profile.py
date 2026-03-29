@@ -33,9 +33,7 @@ def _get_supabase() -> Client:
         url = os.environ.get("SUPABASE_URL")
         key = os.environ.get("SUPABASE_KEY")
         if not url or not key:
-            raise ValueError(
-                "SUPABASE_URL and SUPABASE_KEY environment variables must be set"
-            )
+            raise ValueError("SUPABASE_URL and SUPABASE_KEY environment variables must be set")
         _supabase_client = create_client(url, key)
     return _supabase_client
 
@@ -99,11 +97,7 @@ async def update_profile(profile: LegalProfile) -> LegalProfile:
     try:
         client = _get_supabase()
         data = profile.model_dump(mode="json")
-        result = (
-            client.table("user_profiles")
-            .upsert(data, on_conflict="user_id")
-            .execute()
-        )
+        result = client.table("user_profiles").upsert(data, on_conflict="user_id").execute()
 
         if not result.data:
             raise RuntimeError(f"Upsert returned no data for user_id={profile.user_id}")

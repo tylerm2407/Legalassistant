@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from backend.referrals.matcher import (
-    Attorney,
     find_attorneys,
     get_referral_suggestions,
 )
@@ -55,7 +54,9 @@ class TestFindAttorneys:
         assert attorneys[0].state == "MA"
 
     async def test_returns_empty_on_error(self, mock_supabase_referrals: MagicMock) -> None:
-        mock_supabase_referrals.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.side_effect = Exception("DB error")
+        mock_supabase_referrals.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.side_effect = Exception(
+            "DB error"
+        )
 
         attorneys = await find_attorneys("MA")
         assert attorneys == []

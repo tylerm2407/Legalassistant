@@ -18,7 +18,7 @@ from backend.memory.conversation_store import (
     list_conversations,
     save_conversation,
 )
-from backend.models.conversation import Conversation, Message
+from backend.models.conversation import Conversation
 
 USER_ID = "user_test_conversations"
 
@@ -72,12 +72,7 @@ class TestGetConversation:
             "updated_at": now,
         }
         (
-            mock_supabase_conversations.table.return_value
-            .select.return_value
-            .eq.return_value
-            .eq.return_value
-            .maybe_single.return_value
-            .execute.return_value
+            mock_supabase_conversations.table.return_value.select.return_value.eq.return_value.eq.return_value.maybe_single.return_value.execute.return_value
         ) = mock_result
 
         conv = await get_conversation("c1", USER_ID)
@@ -86,16 +81,13 @@ class TestGetConversation:
         assert len(conv.messages) == 2
         assert conv.messages[0].role == "user"
 
-    async def test_returns_none_when_not_found(self, mock_supabase_conversations: MagicMock) -> None:
+    async def test_returns_none_when_not_found(
+        self, mock_supabase_conversations: MagicMock
+    ) -> None:
         mock_result = MagicMock()
         mock_result.data = None
         (
-            mock_supabase_conversations.table.return_value
-            .select.return_value
-            .eq.return_value
-            .eq.return_value
-            .maybe_single.return_value
-            .execute.return_value
+            mock_supabase_conversations.table.return_value.select.return_value.eq.return_value.eq.return_value.maybe_single.return_value.execute.return_value
         ) = mock_result
 
         conv = await get_conversation("nonexistent", USER_ID)
@@ -113,7 +105,9 @@ class TestListConversations:
                     "id": "c1",
                     "legal_area": "landlord_tenant",
                     "updated_at": now,
-                    "messages": [{"role": "user", "content": "My landlord won't return my deposit"}],
+                    "messages": [
+                        {"role": "user", "content": "My landlord won't return my deposit"}
+                    ],
                 },
             ]
         )
@@ -132,7 +126,9 @@ class TestSaveConversation:
         conv = Conversation(id="c1", user_id=USER_ID, legal_area="landlord_tenant")
         conv.add_message("user", "My landlord is withholding my deposit")
 
-        mock_supabase_conversations.table.return_value.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{}])
+        mock_supabase_conversations.table.return_value.update.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{}]
+        )
 
         # Should not raise
         await save_conversation(conv)
@@ -140,7 +136,9 @@ class TestSaveConversation:
 
     async def test_raises_on_save_failure(self, mock_supabase_conversations: MagicMock) -> None:
         conv = Conversation(id="c1", user_id=USER_ID)
-        mock_supabase_conversations.table.return_value.update.return_value.eq.return_value.execute.side_effect = Exception("DB error")
+        mock_supabase_conversations.table.return_value.update.return_value.eq.return_value.execute.side_effect = Exception(
+            "DB error"
+        )
 
         with pytest.raises(RuntimeError, match="Failed to save conversation"):
             await save_conversation(conv)
@@ -157,7 +155,9 @@ class TestDeleteConversation:
         result = await delete_conversation("c1", USER_ID)
         assert result is True
 
-    async def test_returns_false_when_not_found(self, mock_supabase_conversations: MagicMock) -> None:
+    async def test_returns_false_when_not_found(
+        self, mock_supabase_conversations: MagicMock
+    ) -> None:
         mock_supabase_conversations.table.return_value.delete.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(
             data=[]
         )

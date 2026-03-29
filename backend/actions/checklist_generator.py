@@ -19,8 +19,8 @@ from backend.utils.retry import retry_anthropic
 
 _logger = get_logger(__name__)
 
-CHECKLIST_PROMPT: str = (
-    """You are CaseMate, an AI legal assistant generating a next-steps checklist.
+CHECKLIST_PROMPT: str = """You are CaseMate, an AI legal assistant generating a next-steps \
+checklist.
 
 Generate a prioritized checklist of actions the user should take based on their legal situation.
 Return ONLY a JSON object with this exact structure:
@@ -40,7 +40,6 @@ Rules:
 - Note which items require a lawyer vs. which the user can do themselves.
 - Reference specific statutes where deadlines come from statutory requirements.
 """
-)
 
 
 @retry_anthropic
@@ -134,6 +133,4 @@ async def generate_checklist(
             user_id=profile.user_id,
             raw_response=response_text[:500],
         )
-        raise RuntimeError(
-            f"Failed to parse checklist response as JSON: {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to parse checklist response as JSON: {exc}") from exc

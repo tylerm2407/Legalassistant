@@ -219,9 +219,7 @@ class TestUpdateProfileHandlesEmptyResponse:
             mock_update.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_malformed_json_response(
-        self, sample_conversation: list[dict[str, str]]
-    ) -> None:
+    async def test_malformed_json_response(self, sample_conversation: list[dict[str, str]]) -> None:
         content_block = MagicMock(spec=TextBlock)
         content_block.text = "This is not JSON at all"
         mock_response = MagicMock()
@@ -251,9 +249,7 @@ class TestUpdateProfileHandlesEmptyResponse:
             mock_update.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_empty_content_response(
-        self, sample_conversation: list[dict[str, str]]
-    ) -> None:
+    async def test_empty_content_response(self, sample_conversation: list[dict[str, str]]) -> None:
         mock_response = MagicMock()
         mock_response.content = []  # No content blocks at all
 

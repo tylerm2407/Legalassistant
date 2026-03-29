@@ -23,7 +23,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.2.0] — 2026-03-28
 
 ### Added
-- Comprehensive test suite: 110+ tests across 10 test files
+- Comprehensive test suite: 168 tests across 18 test files
 - API endpoint tests for all 25 routes
 - JWT authentication tests (valid, expired, missing, malformed tokens)
 - Rate limiter tests (fail-open, under/over limit, Retry-After header)
@@ -32,7 +32,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Rights library tests (domains, guides, structure validation)
 - CI pipeline with pytest-cov coverage reporting
 - Web build step in CI pipeline
-- Know Your Rights library (18 guides across 10 legal domains)
+- Know Your Rights library (19 guides across 10 legal domains)
 - Guided workflow system with templates and step tracking
 - Attorney referral matching by state and legal area
 - Deadline detection and tracking (auto-detected + manual)

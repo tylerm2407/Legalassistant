@@ -50,6 +50,7 @@ def client():
     app.dependency_overrides[verify_supabase_jwt] = _mock_auth
     # Override rate limit dependencies
     from backend.main import _actions_rate_limit, _chat_rate_limit, _documents_rate_limit
+
     app.dependency_overrides[_chat_rate_limit] = _mock_rate_limit
     app.dependency_overrides[_actions_rate_limit] = _mock_rate_limit
     app.dependency_overrides[_documents_rate_limit] = _mock_rate_limit
@@ -156,9 +157,7 @@ def test_chat_success(client, sample_profile):
     mock_conversation = MagicMock()
     mock_conversation.id = "conv_001"
     mock_conversation.legal_area = "landlord_tenant"
-    mock_conversation.to_anthropic_messages.return_value = [
-        {"role": "user", "content": "test"}
-    ]
+    mock_conversation.to_anthropic_messages.return_value = [{"role": "user", "content": "test"}]
 
     mock_client = MagicMock()
     mock_content_block = MagicMock()
@@ -167,12 +166,18 @@ def test_chat_success(client, sample_profile):
     mock_response.content = [mock_content_block]
     mock_client.messages.create = AsyncMock(return_value=mock_response)
 
-    with patch("backend.main.get_profile", new_callable=AsyncMock, return_value=sample_profile), \
-         patch("backend.main.create_conversation", new_callable=AsyncMock, return_value=mock_conversation), \
-         patch("backend.main.get_anthropic_client", return_value=mock_client), \
-         patch("backend.main.save_conversation", new_callable=AsyncMock), \
-         patch("backend.main.update_profile_from_conversation", new_callable=AsyncMock), \
-         patch("backend.main.detect_and_save_deadlines", new_callable=AsyncMock):
+    with (
+        patch("backend.main.get_profile", new_callable=AsyncMock, return_value=sample_profile),
+        patch(
+            "backend.main.create_conversation",
+            new_callable=AsyncMock,
+            return_value=mock_conversation,
+        ),
+        patch("backend.main.get_anthropic_client", return_value=mock_client),
+        patch("backend.main.save_conversation", new_callable=AsyncMock),
+        patch("backend.main.update_profile_from_conversation", new_callable=AsyncMock),
+        patch("backend.main.detect_and_save_deadlines", new_callable=AsyncMock),
+    ):
         response = client.post(
             "/api/chat",
             json={"message": "What are my tenant rights?"},
@@ -268,8 +273,12 @@ def test_action_letter_success(client, sample_profile):
     mock_letter = MagicMock()
     mock_letter.model_dump.return_value = {"letter_text": "Dear Sir..."}
 
-    with patch("backend.main.get_profile", new_callable=AsyncMock, return_value=sample_profile), \
-         patch("backend.main.generate_demand_letter", new_callable=AsyncMock, return_value=mock_letter):
+    with (
+        patch("backend.main.get_profile", new_callable=AsyncMock, return_value=sample_profile),
+        patch(
+            "backend.main.generate_demand_letter", new_callable=AsyncMock, return_value=mock_letter
+        ),
+    ):
         response = client.post(
             "/api/actions/letter",
             json={"context": "My landlord won't return my deposit."},
@@ -283,8 +292,10 @@ def test_action_letter_success(client, sample_profile):
 
 def test_document_upload_no_profile(client):
     """POST /api/documents returns 404 without profile."""
-    with patch("backend.main.get_profile", new_callable=AsyncMock, return_value=None), \
-         patch("backend.main.extract_text", return_value="Some text"):
+    with (
+        patch("backend.main.get_profile", new_callable=AsyncMock, return_value=None),
+        patch("backend.main.extract_text", return_value="Some text"),
+    ):
         file_content = b"fake pdf content"
         response = client.post(
             "/api/documents",

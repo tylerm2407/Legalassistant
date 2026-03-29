@@ -292,7 +292,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8081
 ├── web/                         # Next.js 14 frontend
 ├── mobile/                      # Expo React Native app
 ├── shared/                      # Shared TypeScript types
-├── tests/                       # Pytest test suite (110+ tests)
+├── tests/                       # Pytest test suite (168 tests)
 ├── supabase/                    # Database schema + RLS policies
 ├── docs/                        # Architecture decisions
 └── scripts/                     # Demo seed scripts
@@ -336,6 +336,13 @@ ruff check backend/ tests/
 | Family | $35/month | Up to 5 profiles, shared document vault |
 
 At 1% penetration of Americans who cannot afford a lawyer: **$360M ARR**.
+
+## Early traction
+
+- **15,000+ TikTok views** in the first week of content (@casematelaw)
+- **1,000+ engagements** across platforms pre-launch
+- Active Instagram with content live and posting 4x/week
+- 25 ready-to-post pieces across Instagram, X, LinkedIn, and TikTok
 
 ---
 

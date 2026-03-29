@@ -71,10 +71,7 @@ async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object
         messages=[
             {
                 "role": "user",
-                "content": (
-                    f"USER PROFILE:\n{profile_context}\n\n"
-                    f"DOCUMENT TEXT:\n{text}"
-                ),
+                "content": (f"USER PROFILE:\n{profile_context}\n\nDOCUMENT TEXT:\n{text}"),
             }
         ],
     )
@@ -114,6 +111,4 @@ async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object
             user_id=profile.user_id,
             raw_response=response_text[:500],
         )
-        raise RuntimeError(
-            f"Failed to parse document analysis response as JSON: {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to parse document analysis response as JSON: {exc}") from exc

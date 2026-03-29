@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "casemate"
 version = "0.1.0"
 description = "CaseMate — Personalized AI Legal Assistant"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.109.0",
     "uvicorn[standard]>=0.27.0",
@@ -44,23 +44,23 @@ dev = [
 include = ["backend*"]
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ANN"]
-ignore = ["ANN101", "ANN102", "S101", "ANN401"]
+ignore = ["S101", "ANN401"]
 
 [tool.ruff.lint.per-file-ignores]
 "backend/knowledge/rights_library.py" = ["E501"]
 "backend/workflows/templates/definitions.py" = ["E501"]
 "backend/legal/state_laws.py" = ["E501"]
 "backend/legal/states/*.py" = ["E501"]
-"tests/*.py" = ["E501", "SIM117", "SIM101", "B008"]
+"tests/*.py" = ["E501", "SIM117", "SIM101", "B008", "ANN001", "ANN002", "ANN003", "ANN201", "ANN202", "ANN204", "ANN205", "ANN206"]
 "backend/utils/auth.py" = ["B008"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 warn_unused_configs = true
 warn_return_any = true

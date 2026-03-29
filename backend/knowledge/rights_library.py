@@ -176,7 +176,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "uninhabitable conditions."
         ),
     ),
-
     # --- EMPLOYMENT ---
     RightsGuide(
         id="employment_wage_theft",
@@ -313,7 +312,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "Many offer free consultations and work on contingency."
         ),
     ),
-
     # --- CONSUMER PROTECTION ---
     RightsGuide(
         id="consumer_refund_rights",
@@ -448,7 +446,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "if you want to countersue for FDCPA violations. Many consumer attorneys work on contingency."
         ),
     ),
-
     # --- TRAFFIC ---
     RightsGuide(
         id="traffic_ticket_fight",
@@ -541,7 +538,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "insurance increases, and a criminal record. This is not a do-it-yourself legal matter."
         ),
     ),
-
     # --- FAMILY LAW ---
     RightsGuide(
         id="family_divorce_basics",
@@ -636,7 +632,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "Legal aid may help if you can't afford an attorney."
         ),
     ),
-
     # --- CRIMINAL RECORDS ---
     RightsGuide(
         id="criminal_expungement",
@@ -682,7 +677,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "Many legal aid organizations help with expungement for free."
         ),
     ),
-
     # --- SMALL CLAIMS ---
     RightsGuide(
         id="small_claims_filing",
@@ -727,7 +721,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "case involves complex legal issues or if you're the defendant in a large claim."
         ),
     ),
-
     # --- CONTRACTS ---
     RightsGuide(
         id="contract_breach",
@@ -772,7 +765,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "Small straightforward breaches can often be handled in small claims court."
         ),
     ),
-
     # --- IMMIGRATION ---
     RightsGuide(
         id="immigration_rights_overview",
@@ -820,7 +812,6 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "Many organizations provide free or low-cost immigration legal services."
         ),
     ),
-
     # --- DEBT ---
     RightsGuide(
         id="debt_bankruptcy_basics",

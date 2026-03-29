@@ -36,9 +36,7 @@ def _log_retry(retry_state: tenacity.RetryCallState) -> None:
 
 
 retry_anthropic = tenacity.retry(
-    retry=tenacity.retry_if_exception_type(
-        (anthropic.APIError, anthropic.RateLimitError)
-    ),
+    retry=tenacity.retry_if_exception_type((anthropic.APIError, anthropic.RateLimitError)),
     wait=tenacity.wait_exponential(multiplier=1, min=1, max=16),
     stop=tenacity.stop_after_attempt(3),
     before_sleep=_log_retry,

@@ -5,8 +5,15 @@
 | Platform | Handle | Status |
 |----------|--------|--------|
 | Instagram | @casematelaw | Active — [first post](https://www.instagram.com/p/DWcK7XfCavA/) |
+| TikTok | @casematelaw | Active — 15,000+ views |
 | X (Twitter) | @casematelaw | Set up needed |
 | LinkedIn | CaseMate | Set up needed |
+
+## Early Traction
+
+- **15,000+ TikTok views** in the first week of content
+- **1,000+ engagements** across platforms (likes, comments, shares, saves)
+- **25 content pieces** ready to post across 4 platforms
 
 ## Cadence
 

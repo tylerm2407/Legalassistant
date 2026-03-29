@@ -31,16 +31,13 @@ KEY_STATUTES: dict[str, str] = {
         "corporations. No attorneys allowed."
     ),
     "N.Y. Uniform City Court Act § 1801": (
-        "New York small claims jurisdiction up to $10,000 in NYC, $5,000 in other "
-        "city courts."
+        "New York small claims jurisdiction up to $10,000 in NYC, $5,000 in other city courts."
     ),
     "Tex. Gov. Code § 27.031": (
-        "Texas justice court jurisdiction up to $20,000. Both parties may have "
-        "attorneys."
+        "Texas justice court jurisdiction up to $20,000. Both parties may have attorneys."
     ),
     "Fla. Stat. § 34.01": (
-        "Florida small claims jurisdiction up to $8,000 with mandatory pre-trial "
-        "mediation."
+        "Florida small claims jurisdiction up to $8,000 with mandatory pre-trial mediation."
     ),
     "28 U.S.C. § 1332": (
         "Federal diversity jurisdiction requiring amount in controversy over $75,000, "
@@ -51,8 +48,7 @@ KEY_STATUTES: dict[str, str] = {
         "personal service and certified mail options."
     ),
     "Fla. Small Claims Rule 7.090": (
-        "Florida pre-trial conference and mediation requirements in small claims "
-        "actions."
+        "Florida pre-trial conference and mediation requirements in small claims actions."
     ),
 }
 

@@ -49,6 +49,7 @@ class TestDetectAndSaveDeadlines:
         content_block.text = json.dumps(response_data)
         # Make isinstance check work for TextBlock
         from anthropic.types import TextBlock
+
         content_block.__class__ = TextBlock
 
         mock_response = MagicMock()
@@ -84,6 +85,7 @@ class TestDetectAndSaveDeadlines:
         content_block = MagicMock()
         content_block.text = json.dumps(response_data)
         from anthropic.types import TextBlock
+
         content_block.__class__ = TextBlock
 
         mock_response = MagicMock()

@@ -68,8 +68,20 @@ class TestListDeadlines:
     async def test_returns_deadlines(self, mock_supabase_deadlines: MagicMock) -> None:
         mock_supabase_deadlines.table.return_value.select.return_value.eq.return_value.order.return_value.execute.return_value = MagicMock(
             data=[
-                {"id": "d1", "user_id": USER_ID, "title": "Court date", "date": "2026-04-10", "status": "active"},
-                {"id": "d2", "user_id": USER_ID, "title": "Filing deadline", "date": "2026-04-20", "status": "active"},
+                {
+                    "id": "d1",
+                    "user_id": USER_ID,
+                    "title": "Court date",
+                    "date": "2026-04-10",
+                    "status": "active",
+                },
+                {
+                    "id": "d2",
+                    "user_id": USER_ID,
+                    "title": "Filing deadline",
+                    "date": "2026-04-20",
+                    "status": "active",
+                },
             ]
         )
 
@@ -78,7 +90,9 @@ class TestListDeadlines:
         assert deadlines[0].title == "Court date"
 
     async def test_returns_empty_on_error(self, mock_supabase_deadlines: MagicMock) -> None:
-        mock_supabase_deadlines.table.return_value.select.return_value.eq.return_value.order.return_value.execute.side_effect = Exception("DB down")
+        mock_supabase_deadlines.table.return_value.select.return_value.eq.return_value.order.return_value.execute.side_effect = Exception(
+            "DB down"
+        )
 
         deadlines = await list_deadlines(USER_ID)
         assert deadlines == []
@@ -86,7 +100,15 @@ class TestListDeadlines:
     async def test_filters_by_status(self, mock_supabase_deadlines: MagicMock) -> None:
         eq_mock = MagicMock()
         eq_mock.eq.return_value.order.return_value.execute.return_value = MagicMock(
-            data=[{"id": "d1", "user_id": USER_ID, "title": "Done", "date": "2026-04-01", "status": "completed"}]
+            data=[
+                {
+                    "id": "d1",
+                    "user_id": USER_ID,
+                    "title": "Done",
+                    "date": "2026-04-01",
+                    "status": "completed",
+                }
+            ]
         )
         mock_supabase_deadlines.table.return_value.select.return_value.eq.return_value = eq_mock
 
@@ -100,12 +122,18 @@ class TestUpdateDeadline:
 
     async def test_updates_deadline(self, mock_supabase_deadlines: MagicMock) -> None:
         mock_supabase_deadlines.table.return_value.update.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(
-            data=[{"id": "d1", "user_id": USER_ID, "title": "Updated title", "date": "2026-05-01", "status": "active"}]
+            data=[
+                {
+                    "id": "d1",
+                    "user_id": USER_ID,
+                    "title": "Updated title",
+                    "date": "2026-05-01",
+                    "status": "active",
+                }
+            ]
         )
 
-        result = await update_deadline(
-            "d1", USER_ID, DeadlineUpdateRequest(title="Updated title")
-        )
+        result = await update_deadline("d1", USER_ID, DeadlineUpdateRequest(title="Updated title"))
         assert result is not None
         assert result.title == "Updated title"
 

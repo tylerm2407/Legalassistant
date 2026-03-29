@@ -49,8 +49,15 @@ def test_invalid_domain_returns_empty():
 def test_guide_structure_has_required_fields():
     """Every guide has all required fields populated."""
     required_attrs = [
-        "id", "domain", "title", "description", "explanation",
-        "your_rights", "action_steps", "deadlines", "common_mistakes",
+        "id",
+        "domain",
+        "title",
+        "description",
+        "explanation",
+        "your_rights",
+        "action_steps",
+        "deadlines",
+        "common_mistakes",
         "when_to_get_a_lawyer",
     ]
     guides = get_all_guides()

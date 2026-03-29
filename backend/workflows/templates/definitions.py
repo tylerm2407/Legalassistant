@@ -91,7 +91,9 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "If you can't afford the filing fee, ask for a fee waiver",
                     "Keep a copy of your filed answer with the court stamp",
                 ],
-                deadlines=["File before the deadline on your summons — missing this usually means losing"],
+                deadlines=[
+                    "File before the deadline on your summons — missing this usually means losing"
+                ],
             ),
             WorkflowStep(
                 id="request_hearing",
@@ -146,11 +148,12 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "Stand when speaking to the judge",
                     "If you lose, ask about the appeal process and timeline immediately",
                 ],
-                deadlines=["Attend on the scheduled date — missing means default judgment against you"],
+                deadlines=[
+                    "Attend on the scheduled date — missing means default judgment against you"
+                ],
             ),
         ],
     ),
-
     # --- File Small Claims ---
     WorkflowTemplate(
         id="file_small_claims",
@@ -223,7 +226,9 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "You cannot serve the papers yourself in most states",
                     "Keep the proof of service — you'll need it at the hearing",
                 ],
-                deadlines=["Service must be completed before the hearing date (usually 10-20 days before)"],
+                deadlines=[
+                    "Service must be completed before the hearing date (usually 10-20 days before)"
+                ],
             ),
             WorkflowStep(
                 id="present_case",
@@ -249,7 +254,6 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
             ),
         ],
     ),
-
     # --- Get Record Expunged ---
     WorkflowTemplate(
         id="expunge_record",
@@ -284,7 +288,11 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "court records, or your state's criminal records bureau. You need the "
                     "exact case numbers, charges, and dispositions for your petition."
                 ),
-                required_documents=["Government ID", "Fingerprints (if required)", "Records request fee"],
+                required_documents=[
+                    "Government ID",
+                    "Fingerprints (if required)",
+                    "Records request fee",
+                ],
                 tips=[
                     "Request records from BOTH state and court systems",
                     "Verify all information is accurate — errors should be corrected first",
@@ -322,7 +330,11 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "case. Pay the filing fee (or request a fee waiver if you qualify). "
                     "Some states require you to serve the District Attorney."
                 ),
-                required_documents=["Completed petition", "Filing fee or fee waiver", "Copies for service"],
+                required_documents=[
+                    "Completed petition",
+                    "Filing fee or fee waiver",
+                    "Copies for service",
+                ],
                 tips=[
                     "Filing fees range from $50-$450 depending on state",
                     "Ask about fee waivers — many courts offer them based on income",
@@ -368,7 +380,6 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
             ),
         ],
     ),
-
     # --- File Wage Complaint ---
     WorkflowTemplate(
         id="file_wage_complaint",
@@ -406,7 +417,11 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "You can also file with the federal DOL Wage and Hour Division. Include all "
                     "documentation and a clear calculation of what you're owed."
                 ),
-                required_documents=["Completed wage complaint form", "Supporting documentation", "Calculation of wages owed"],
+                required_documents=[
+                    "Completed wage complaint form",
+                    "Supporting documentation",
+                    "Calculation of wages owed",
+                ],
                 tips=[
                     "You can file both state and federal complaints",
                     "Filing is usually free",
@@ -446,11 +461,12 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "Class actions are possible if other employees are affected",
                     "Small claims court is an option for smaller amounts",
                 ],
-                deadlines=["Don't let the statute of limitations expire while waiting for the labor board"],
+                deadlines=[
+                    "Don't let the statute of limitations expire while waiting for the labor board"
+                ],
             ),
         ],
     ),
-
     # --- Fight a Traffic Ticket ---
     WorkflowTemplate(
         id="fight_traffic_ticket",
@@ -483,7 +499,11 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "calibration records, and any dashcam footage through discovery. Visit the "
                     "location and take photos showing speed limit signs, visibility, road conditions."
                 ),
-                required_documents=["Discovery request form", "Photos of the location", "Witness information"],
+                required_documents=[
+                    "Discovery request form",
+                    "Photos of the location",
+                    "Witness information",
+                ],
                 tips=[
                     "Request radar/lidar calibration and maintenance records",
                     "Take photos at the same time of day as the alleged violation",
@@ -526,7 +546,6 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
             ),
         ],
     ),
-
     # --- Create a Basic Will ---
     WorkflowTemplate(
         id="create_basic_will",
@@ -544,7 +563,11 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "digital assets, and life insurance policies. Note current values and any "
                     "debts secured by these assets."
                 ),
-                required_documents=["Asset list with approximate values", "Debt list", "Account information"],
+                required_documents=[
+                    "Asset list with approximate values",
+                    "Debt list",
+                    "Account information",
+                ],
                 tips=[
                     "Don't forget digital assets: crypto, online accounts, domain names",
                     "Note which assets have designated beneficiaries already (retirement, life insurance)",
@@ -622,7 +645,9 @@ WORKFLOW_TEMPLATES: list[WorkflowTemplate] = [
                     "Tell your executor where the will is stored",
                     "Review and update your will every 3-5 years or after major life events",
                 ],
-                deadlines=["Review and update after major life events: marriage, divorce, birth, death, major asset changes"],
+                deadlines=[
+                    "Review and update after major life events: marriage, divorce, birth, death, major asset changes"
+                ],
             ),
         ],
     ),

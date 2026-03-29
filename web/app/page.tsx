@@ -1,160 +1,120 @@
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import WaitlistForm from "@/components/WaitlistForm";
 
-function FeatureCard({
-  icon,
-  iconColor,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  iconColor: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-6 hover:border-white/20 hover:shadow-glow-sm transition-all duration-300">
-      <div className={`text-3xl mb-4 ${iconColor}`}>{icon}</div>
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
-    </div>
-  );
-}
+const LiquidEther = dynamic(() => import("@/components/LiquidEther"), { ssr: false });
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#050505] bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.15)_0%,rgba(139,92,246,0.05)_45%,transparent_70%)]">
-      {/* Nav */}
-      <nav className="container-wide py-6 flex items-center justify-between">
-        <div className="text-xl font-bold text-blue-400">CaseMate</div>
-        <div className="flex items-center gap-4">
+    <div className="relative min-h-screen bg-[#030305] overflow-hidden">
+      {/* Liquid Ether Background — z-0 */}
+      <div className="absolute inset-0 z-0">
+        <LiquidEther
+          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          mouseForce={20}
+          cursorSize={100}
+          isViscous
+          viscous={30}
+          iterationsViscous={32}
+          iterationsPoisson={32}
+          resolution={0.5}
+          isBounce={false}
+          autoDemo
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
+        />
+      </div>
+
+      {/* Gradient overlay — z-1 */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-[#030305]/40 via-[#030305]/60 to-[#030305]/90 pointer-events-none" />
+
+      {/* Content — z-10 */}
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Nav */}
+        <nav className="container-wide py-6 flex items-center justify-between animate-fade-up">
+          <div className="text-xl font-bold text-blue-400">CaseMate</div>
           <Link
             href="/chat?demo=true"
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
             Try Demo
           </Link>
-          <Link
-            href="/onboarding"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 shadow-glow-md hover:shadow-glow-lg transition-all duration-200"
-          >
-            Get Started
-          </Link>
-        </div>
-      </nav>
+        </nav>
 
-      {/* Hero */}
-      <section className="container-narrow pt-16 pb-20 text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6 leading-tight">
-          Your Personal AI
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">Legal Assistant</span>
-        </h1>
-        <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          CaseMate remembers your situation, cites your state&apos;s actual statutes,
-          and generates demand letters, rights summaries, and checklists
-          tailored to you.
-        </p>
-        <div className="flex items-center justify-center gap-4">
-          <Link
-            href="/onboarding"
-            className="inline-flex items-center px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-400 shadow-glow-lg hover:shadow-[0_0_60px_rgba(59,130,246,0.3)] transition-all duration-200 text-base"
-          >
-            Get Started
-          </Link>
-          <Link
-            href="/chat?demo=true"
-            className="inline-flex items-center px-6 py-3 border border-white/15 text-gray-300 font-medium rounded-lg hover:bg-white/5 hover:border-white/25 transition-all text-base"
-          >
-            Try Demo
-          </Link>
-        </div>
-      </section>
+        {/* Hero — centered vertically */}
+        <main className="flex-1 flex items-center justify-center px-4">
+          <div className="text-center max-w-2xl mx-auto">
+            {/* Badge */}
+            <div className="animate-fade-up delay-100">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-xs font-medium text-blue-400 mb-8">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                AI-Powered Legal Help
+              </span>
+            </div>
 
-      {/* Trust bar */}
-      <section className="container-narrow pb-16">
-        <div className="flex items-center justify-center gap-8 text-gray-500 text-sm">
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-            <span>Private & Encrypted</span>
+            {/* Headline */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6 animate-fade-up delay-200">
+              <span className="text-white">Legal Help That</span>
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-blue-400">
+                Remembers You
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg sm:text-xl text-gray-400 max-w-lg mx-auto mb-10 leading-relaxed animate-fade-up delay-300">
+              Your state. Your situation. Your rights.
+              <br />
+              <span className="text-gray-500">$20/month instead of $349/hour.</span>
+            </p>
+
+            {/* Email form — glassmorphic card */}
+            <div className="animate-fade-up delay-400">
+              <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 max-w-md mx-auto shadow-[0_0_80px_rgba(59,130,246,0.08)]">
+                <WaitlistForm />
+                <p className="text-gray-600 text-xs mt-4">
+                  Join 100+ people on the waitlist
+                </p>
+              </div>
+            </div>
+
+            {/* Trust bar */}
+            <div className="flex items-center justify-center gap-6 sm:gap-8 mt-10 text-gray-500 text-sm animate-fade-up delay-500">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span>Private</span>
+              </div>
+              <div className="border-r border-white/10 h-4" />
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+                <span>Real Citations</span>
+              </div>
+              <div className="border-r border-white/10 h-4" />
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.893 13.393l-1.135-1.135a2.252 2.252 0 01-.421-.585l-1.08-2.16a.414.414 0 00-.663-.107.827.827 0 01-.812.21l-1.273-.363a.89.89 0 00-.738 1.595l.587.39c.59.395.674 1.23.172 1.732l-.2.2c-.212.212-.33.498-.33.796v.41c0 .409-.11.809-.32 1.158l-1.315 2.191a2.11 2.11 0 01-1.81 1.025 1.055 1.055 0 01-1.055-1.055v-1.172c0-.92-.56-1.747-1.414-2.089l-.655-.261a2.25 2.25 0 01-1.383-2.46l.007-.042a2.25 2.25 0 01.29-.787l.09-.15a2.25 2.25 0 012.37-1.048l1.178.236a1.125 1.125 0 001.302-.795l.208-.73a1.125 1.125 0 00-.578-1.315l-.665-.332-.091.091a2.25 2.25 0 01-1.591.659h-.18a.94.94 0 00-.662.274.931.931 0 01-1.458-1.137l1.411-2.353a2.25 2.25 0 00.286-.76M11.25 2.25L12 2c3.209 0 6.168 1.06 8.55 2.85" />
+                </svg>
+                <span>50 States</span>
+              </div>
+            </div>
           </div>
-          <div className="border-r border-white/10 h-4" />
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-            </svg>
-            <span>Data Never Shared</span>
-          </div>
-          <div className="border-r border-white/10 h-4" />
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-            <span>Real Statute Citations</span>
-          </div>
-        </div>
-      </section>
+        </main>
 
-      {/* Features */}
-      <section className="container-wide pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <FeatureCard
-            icon={
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-              </svg>
-            }
-            iconColor="text-blue-400"
-            title="Memory"
-            description="CaseMate builds a profile of your legal situation over time. No need to repeat yourself — it remembers your housing, employment, family status, and active issues."
-          />
-          <FeatureCard
-            icon={
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
-              </svg>
-            }
-            iconColor="text-violet-400"
-            title="State-Specific"
-            description="Get answers grounded in your state's actual statutes and regulations. Real legal citations, not generic advice."
-          />
-          <FeatureCard
-            icon={
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-              </svg>
-            }
-            iconColor="text-emerald-400"
-            title="Actions"
-            description="Generate demand letters, rights summaries, and step-by-step legal checklists with deadlines — all personalized to your situation."
-          />
-        </div>
-      </section>
-
-      {/* Waitlist */}
-      <section className="container-narrow pb-24 text-center">
-        <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10 p-10 max-w-xl mx-auto">
-          <h2 className="text-2xl font-bold text-white mb-3">Get Early Access</h2>
-          <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-            Be the first to try CaseMate. Lawyers charge $349/hour &mdash;
-            CaseMate costs $20/month. Join the waitlist and lock in early pricing.
+        {/* Footer */}
+        <footer className="py-6 text-center">
+          <p className="text-xs text-gray-600 max-w-md mx-auto px-4">
+            CaseMate is an AI assistant and does not provide legal advice.
+            Consult a licensed attorney for legal matters.
           </p>
-          <WaitlistForm />
-          <p className="text-gray-600 text-xs mt-4">
-            Join 100+ people on the waitlist
-          </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-8">
-        <div className="container-wide text-center text-sm text-gray-600">
-          CaseMate is an AI assistant and does not provide legal advice. Consult a
-          licensed attorney for legal matters.
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

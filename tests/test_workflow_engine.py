@@ -5,13 +5,12 @@ Verifies start, list, get, and step update operations with mocked Supabase.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from backend.workflows.engine import (
     StepStatus,
-    WorkflowInstance,
     WorkflowStep,
     WorkflowStepUpdateRequest,
     WorkflowTemplate,
@@ -112,7 +111,9 @@ class TestListWorkflows:
         assert summaries[0]["total_steps"] == 2
 
     async def test_returns_empty_on_error(self, mock_supabase_workflows: MagicMock) -> None:
-        mock_supabase_workflows.table.return_value.select.return_value.eq.return_value.order.return_value.execute.side_effect = Exception("DB down")
+        mock_supabase_workflows.table.return_value.select.return_value.eq.return_value.order.return_value.execute.side_effect = Exception(
+            "DB down"
+        )
 
         summaries = await list_workflows(USER_ID)
         assert summaries == []
@@ -138,12 +139,7 @@ class TestGetWorkflow:
             "updated_at": "2026-03-01T00:00:00",
         }
         (
-            mock_supabase_workflows.table.return_value
-            .select.return_value
-            .eq.return_value
-            .eq.return_value
-            .maybe_single.return_value
-            .execute.return_value
+            mock_supabase_workflows.table.return_value.select.return_value.eq.return_value.eq.return_value.maybe_single.return_value.execute.return_value
         ) = mock_result
 
         instance = await get_workflow("w1", USER_ID)
@@ -154,12 +150,7 @@ class TestGetWorkflow:
         mock_result = MagicMock()
         mock_result.data = None
         (
-            mock_supabase_workflows.table.return_value
-            .select.return_value
-            .eq.return_value
-            .eq.return_value
-            .maybe_single.return_value
-            .execute.return_value
+            mock_supabase_workflows.table.return_value.select.return_value.eq.return_value.eq.return_value.maybe_single.return_value.execute.return_value
         ) = mock_result
 
         instance = await get_workflow("nonexistent", USER_ID)
@@ -188,16 +179,13 @@ class TestUpdateWorkflowStep:
             "updated_at": "2026-03-01T00:00:00",
         }
         (
-            mock_supabase_workflows.table.return_value
-            .select.return_value
-            .eq.return_value
-            .eq.return_value
-            .maybe_single.return_value
-            .execute.return_value
+            mock_supabase_workflows.table.return_value.select.return_value.eq.return_value.eq.return_value.maybe_single.return_value.execute.return_value
         ) = mock_result
 
         # Mock the update call
-        mock_supabase_workflows.table.return_value.update.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[{}])
+        mock_supabase_workflows.table.return_value.update.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{}]
+        )
 
         update = WorkflowStepUpdateRequest(step_index=0, status=StepStatus.COMPLETED)
         result = await update_workflow_step("w1", USER_ID, update)

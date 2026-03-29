@@ -9,8 +9,6 @@ from __future__ import annotations
 import smtplib
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from backend.export.email_sender import send_document_email
 
 ATTACHMENT = b"%PDF-1.4 fake pdf content"

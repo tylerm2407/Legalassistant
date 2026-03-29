@@ -117,6 +117,4 @@ async def generate_demand_letter(
             user_id=profile.user_id,
             raw_response=response_text[:500],
         )
-        raise RuntimeError(
-            f"Failed to parse demand letter response as JSON: {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to parse demand letter response as JSON: {exc}") from exc

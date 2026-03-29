@@ -115,6 +115,4 @@ async def generate_rights_summary(
             user_id=profile.user_id,
             raw_response=response_text[:500],
         )
-        raise RuntimeError(
-            f"Failed to parse rights summary response as JSON: {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to parse rights summary response as JSON: {exc}") from exc

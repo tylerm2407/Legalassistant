@@ -220,18 +220,20 @@ async def list_workflows(user_id: str) -> list[dict[str, object]]:
         for row in result.data or []:
             steps = row.get("steps") or []
             completed = sum(1 for s in steps if s.get("status") == "completed")
-            summaries.append({
-                "id": row["id"],
-                "template_id": row.get("template_id"),
-                "title": row.get("title"),
-                "domain": row.get("domain"),
-                "current_step": row.get("current_step", 0),
-                "total_steps": len(steps),
-                "completed_steps": completed,
-                "status": row.get("status"),
-                "started_at": row.get("started_at"),
-                "updated_at": row.get("updated_at"),
-            })
+            summaries.append(
+                {
+                    "id": row["id"],
+                    "template_id": row.get("template_id"),
+                    "title": row.get("title"),
+                    "domain": row.get("domain"),
+                    "current_step": row.get("current_step", 0),
+                    "total_steps": len(steps),
+                    "completed_steps": completed,
+                    "status": row.get("status"),
+                    "started_at": row.get("started_at"),
+                    "updated_at": row.get("updated_at"),
+                }
+            )
         return summaries
     except Exception as exc:
         _logger.error(
@@ -283,12 +285,14 @@ async def update_workflow_step(
     try:
         client = _get_supabase()
         steps_data = [s.model_dump(mode="json") for s in instance.steps]
-        client.table("workflow_instances").update({
-            "steps": steps_data,
-            "current_step": instance.current_step,
-            "status": instance.status.value,
-            "updated_at": instance.updated_at.isoformat(),
-        }).eq("id", workflow_id).eq("user_id", user_id).execute()
+        client.table("workflow_instances").update(
+            {
+                "steps": steps_data,
+                "current_step": instance.current_step,
+                "status": instance.status.value,
+                "updated_at": instance.updated_at.isoformat(),
+            }
+        ).eq("id", workflow_id).eq("user_id", user_id).execute()
 
         _logger.info(
             "workflow_step_updated",

@@ -134,13 +134,15 @@ async def list_conversations(user_id: str, limit: int = 50) -> list[dict[str, ob
                 "New conversation",
             )
             preview = first_user_msg[:100] + ("..." if len(first_user_msg) > 100 else "")
-            summaries.append({
-                "id": row["id"],
-                "legal_area": row.get("legal_area"),
-                "updated_at": row.get("updated_at"),
-                "preview": preview,
-                "message_count": len(messages),
-            })
+            summaries.append(
+                {
+                    "id": row["id"],
+                    "legal_area": row.get("legal_area"),
+                    "updated_at": row.get("updated_at"),
+                    "preview": preview,
+                    "message_count": len(messages),
+                }
+            )
         return summaries
     except Exception as exc:
         _logger.error(
@@ -164,11 +166,13 @@ async def save_conversation(conversation: Conversation) -> None:
     try:
         client = _get_supabase()
         messages_data = [m.model_dump(mode="json") for m in conversation.messages]
-        client.table("conversations").update({
-            "messages": messages_data,
-            "legal_area": conversation.legal_area,
-            "updated_at": datetime.utcnow().isoformat(),
-        }).eq("id", conversation.id).execute()
+        client.table("conversations").update(
+            {
+                "messages": messages_data,
+                "legal_area": conversation.legal_area,
+                "updated_at": datetime.utcnow().isoformat(),
+            }
+        ).eq("id", conversation.id).execute()
         _logger.info(
             "conversation_saved",
             conversation_id=conversation.id,

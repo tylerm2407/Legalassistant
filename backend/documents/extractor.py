@@ -74,8 +74,7 @@ def _extract_pdf(file_bytes: bytes) -> str:
 
     except ImportError as exc:
         raise RuntimeError(
-            "pdfplumber is required for PDF extraction. "
-            "Install it with: pip install pdfplumber"
+            "pdfplumber is required for PDF extraction. Install it with: pip install pdfplumber"
         ) from exc
     except Exception as exc:
         _logger.error(

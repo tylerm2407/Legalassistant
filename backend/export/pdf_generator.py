@@ -123,10 +123,12 @@ def generate_demand_letter_document(
     """
     sections = []
     if legal_citations:
-        sections.append({
-            "heading": "Legal Citations",
-            "body": "\n".join(f"  - {cite}" for cite in legal_citations),
-        })
+        sections.append(
+            {
+                "heading": "Legal Citations",
+                "body": "\n".join(f"  - {cite}" for cite in legal_citations),
+            }
+        )
 
     return generate_text_document(
         title="Demand Letter",
@@ -153,10 +155,12 @@ def generate_rights_document(
     """
     sections = []
     if key_rights:
-        sections.append({
-            "heading": "Your Key Rights",
-            "body": "\n".join(f"  {i}. {right}" for i, right in enumerate(key_rights, 1)),
-        })
+        sections.append(
+            {
+                "heading": "Your Key Rights",
+                "body": "\n".join(f"  {i}. {right}" for i, right in enumerate(key_rights, 1)),
+            }
+        )
 
     return generate_text_document(
         title="Rights Summary",

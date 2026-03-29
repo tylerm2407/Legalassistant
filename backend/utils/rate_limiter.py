@@ -33,6 +33,7 @@ def _get_redis() -> object | None:
             return None
         try:
             import redis
+
             _redis_client = redis.from_url(redis_url, decode_responses=True)
             _redis_client.ping()
             _logger.info("redis_connected")

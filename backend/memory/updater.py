@@ -105,9 +105,7 @@ async def update_profile_from_conversation(
             return
 
         existing_facts_lower = {f.lower().strip() for f in profile.legal_facts}
-        unique_new_facts = [
-            f for f in new_facts if f.lower().strip() not in existing_facts_lower
-        ]
+        unique_new_facts = [f for f in new_facts if f.lower().strip() not in existing_facts_lower]
 
         if not unique_new_facts:
             _logger.info("all_facts_already_known", user_id=user_id)

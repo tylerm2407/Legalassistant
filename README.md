@@ -8,8 +8,7 @@ The average US lawyer charges $349/hour. The average American earns $52,000/year
 CaseMate closes that gap with AI that remembers your situation, knows your state's laws, and gives specific, actionable legal guidance for $20/month.
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/tylerm2407/Legalassistant/ci.yml?branch=main&label=CI)](https://github.com/tylerm2407/Legalassistant/actions)
-[![Test Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](tests/)
-[![Backend Tests](https://img.shields.io/badge/backend_tests-484-blue)](tests/)
+[![Backend Tests](https://img.shields.io/badge/backend_tests-509-blue)](tests/)
 [![Frontend Tests](https://img.shields.io/badge/frontend_tests-143-blue)](web/__tests__/)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-6B57FF?logo=claude)](https://claude.ai/code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -72,7 +71,7 @@ flowchart TD
 | **Hybrid Classifier** | Keyword-first classification with LLM fallback for ambiguous queries. ~0ms fast path, ~1s fallback. | Complete |
 | **Multi-Provider LLM Router** | Dual-model architecture with automatic failover: OpenAI GPT-4o (primary) + Anthropic Claude (fallback). Independent circuit breakers per provider, per-provider metrics, and transparent failover for zero-downtime AI. | Complete |
 | **Prompt Caching** | Anthropic prompt caching with static/dynamic content split via `cache_control` for reduced latency and cost. | Complete |
-| **Stripe Subscription Lifecycle** | Complete webhook handling (checkout, invoice, cancellation), subscription gate middleware, and free tier fallback. | Complete |
+| **Stripe Subscription Lifecycle** | Webhook handling (checkout, invoice, cancellation), subscription gate middleware, and free tier. Pro tier checkout integrated. | Complete |
 | **Real OCR Pipeline** | Document text extraction via pytesseract + Pillow for image-based legal documents. | Complete |
 | **Security Headers** | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy on all responses. | Complete |
 | **Realtime Sidebar** | Supabase realtime subscriptions for live profile updates in the legal profile sidebar. | Complete |
@@ -253,7 +252,7 @@ casemate/
 │   └── components/                # ChatInterface, ProfileSidebar, ActionGenerator, etc.
 ├── mobile/                        # Expo React Native app (Expo Router)
 ├── shared/                        # Shared TypeScript types
-├── tests/                         # Backend test suite (484 tests across 34 files)
+├── tests/                         # Backend test suite (509 tests across 37 files)
 ├── web/__tests__/                 # Frontend test suite (143 tests across 21 files)
 ├── supabase/                      # Database schema + RLS policies
 ├── docs/decisions/                # 25 Architecture Decision Records
@@ -313,7 +312,7 @@ pytest tests/ -v --cov=backend --cov-report=term-missing  # Verbose with line-by
 pytest tests/test_memory_injector.py -v           # Run a specific file
 ```
 
-**484 tests** across 31 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery, 13 end-to-end integration tests covering full API pipelines, and a live deployment smoke test suite.
+**509 tests** across 37 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery, 13 end-to-end integration tests covering full API pipelines, and a live deployment smoke test suite.
 
 ### Frontend (Jest)
 
@@ -366,8 +365,7 @@ Verify key README claims directly from the codebase:
 | Claim | Verification Command |
 |-------|---------------------|
 | 50-state coverage | `python -c "from backend.legal.state_laws import STATE_LAWS; print(len(STATE_LAWS))"` → 51 (50 states + federal) |
-| Backend test count | `pytest tests/ --co -q \| tail -1` → 484 tests collected |
-| Test coverage | `make test` → shows coverage % |
+| Backend test count | `pytest tests/ --co -q \| tail -1` → 509 tests collected |
 | Zero lint errors | `make lint` → All checks passed |
 | Zero type errors | `mypy backend/` → Success: no issues found |
 | Memory injection | Run demo, ask landlord question as MA renter → response cites M.G.L. |
@@ -378,11 +376,11 @@ Verify key README claims directly from the codebase:
 
 ## Completeness Evidence
 
-Every feature listed is implemented, tested, and deployable. No placeholders. No `TODO`s. No `pass` bodies.
+Every feature listed is implemented, tested, and deployable.
 
 | Dimension | Evidence | Verification |
 |-----------|----------|-------------|
-| **Backend Tests** | 484 pytest tests, 90% coverage | `make test` |
+| **Backend Tests** | 509 pytest tests | `make test` |
 | **Frontend Tests** | 143 Jest tests across 21 files | `cd web && npm test` |
 | **Integration Tests** | 13 end-to-end pipeline tests | `pytest tests/test_integration.py -v` |
 | **Smoke Tests** | 7 live deployment checks | `python scripts/smoke_test.py <url>` |
@@ -548,11 +546,10 @@ Comprehensive documentation for every CaseMate subsystem lives in `docs/`:
 
 | Tier | Price | Includes |
 |------|-------|----------|
-| **Free** | $0/mo | 5 questions/month, basic rights guides |
-| **Personal** | $20/mo | Unlimited chat, full memory, document analysis, action generation, deadlines |
-| **Family** | $35/mo | Everything in Personal for up to 4 family members |
+| **Free** | $0/mo | AI legal guidance, state-specific citations, document generation, conversation memory |
+| **Pro** | $30/mo | Everything in Free + priority responses, advanced templates, attorney referrals, unlimited conversations |
 
-**Unit economics:** $20/mo revenue per subscriber, ~$0.50/mo Claude API cost per active user = **97.5% variable margin per user** (excludes ~$70/mo fixed infrastructure costs — Supabase, Railway, Vercel). LTV of $240 (12-month average retention) with a CAC target under $30, yielding an 8:1 LTV:CAC ratio.
+**Unit economics:** $30/mo revenue per subscriber, ~$0.50/mo Claude API cost per active user = **98.3% variable margin per user** (excludes ~$70/mo fixed infrastructure costs — Supabase, Railway, Vercel). LTV of $360 (12-month average retention) with a CAC target under $30, yielding a 12:1 LTV:CAC ratio.
 
 ---
 
@@ -574,7 +571,6 @@ All data below is from social media polls (non-random, self-selected samples) an
 ## Roadmap
 
 - **App Store and Google Play launch** -- Submit all builds for review
-- **Stripe subscription integration** -- Payment flow live in production
 - **Mobile parity** -- Feature parity between web and Expo React Native app
 - **Premium tier** -- Attorney consultation credits, court filing assistance
 - **Multi-language support** -- Spanish as first additional language
@@ -601,7 +597,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
 
 ## Acknowledgments
 
-- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (627 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
+- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (652 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
 - [Anthropic Claude](https://anthropic.com) -- AI reasoning engine powering all legal analysis
 - [Supabase](https://supabase.com) -- Database, auth, and storage infrastructure
 - [Next.js](https://nextjs.org) -- Frontend framework

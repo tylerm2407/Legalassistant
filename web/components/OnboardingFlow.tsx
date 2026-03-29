@@ -132,32 +132,41 @@ export default function OnboardingFlow() {
       ? `${form.familyStatus}, ${form.dependents} dependents`
       : form.familyStatus;
 
+    const profileData = {
+      user_id: userId,
+      display_name: form.displayName.trim(),
+      state: form.state,
+      housing_situation: housing,
+      employment_type: employment,
+      family_status: family,
+      active_issues: form.currentIssue.trim()
+        ? [
+            {
+              issue_type: "general",
+              summary: form.currentIssue.trim(),
+              status: "open" as const,
+              started_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              notes: [],
+            },
+          ]
+        : [],
+      legal_facts: [],
+      documents: [],
+      member_since: new Date().toISOString(),
+      conversation_count: 0,
+      language_preference: form.languagePreference as "en" | "es",
+    };
+
+    // Save to localStorage so chat works without backend
     try {
-      await api.createProfile({
-        user_id: userId,
-        display_name: form.displayName.trim(),
-        state: form.state,
-        housing_situation: housing,
-        employment_type: employment,
-        family_status: family,
-        active_issues: form.currentIssue.trim()
-          ? [
-              {
-                issue_type: "general",
-                summary: form.currentIssue.trim(),
-                status: "open",
-                started_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                notes: [],
-              },
-            ]
-          : [],
-        legal_facts: [],
-        documents: [],
-        member_since: new Date().toISOString(),
-        conversation_count: 0,
-        language_preference: form.languagePreference as "en" | "es",
-      });
+      localStorage.setItem("casemate_profile", JSON.stringify(profileData));
+    } catch {
+      // localStorage unavailable — continue
+    }
+
+    try {
+      await api.createProfile(profileData);
     } catch {
       // Profile creation failed — continue to subscription regardless
     }

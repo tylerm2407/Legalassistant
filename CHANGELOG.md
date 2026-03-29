@@ -68,7 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Live deployment smoke test** (`scripts/smoke_test.py`) — automated health, metrics, auth-gated endpoint, and 404 checks against any deployment URL
 - **Multi-platform deployment configs** — Procfile, runtime.txt, railway.json, render.yaml, vercel.json for Railway, Render, and Vercel
 - **Completeness evidence table** in README with verification commands for every claim
-- Backend test count: 462 → 497+ tests, coverage: 91% → 90% (threshold: 90%)
+- Backend test count: 462 → 509 tests, coverage: 91% → 90.3% (threshold: 90%)
 
 ### Changed
 - CI/CD pipeline upgraded from placeholder deploy to real Railway + Vercel CLI deployment

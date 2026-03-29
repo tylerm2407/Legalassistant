@@ -127,87 +127,110 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // Phase 1: New conversation — use POST to get conversation_id
-    if (!conversationId) {
-      setIsLoading(true);
-      try {
-        const response = await api.chat({
-          userId: profile.user_id,
-          question,
-          conversationId,
-        });
-
-        setConversationId(response.conversation_id);
-        setLastLegalArea(response.legal_area);
-
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: response.answer,
-          timestamp: new Date(),
-          legalArea: response.legal_area,
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
-      } catch (err) {
-        const errorMessage: Message = {
-          role: "error",
-          content:
-            err instanceof Error
-              ? err.message
-              : t("somethingWentWrong"),
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
-
-    // Phase 2: Existing conversation — use SSE streaming
+    // Stream response from local Next.js API route → OpenAI GPT-4o
     setIsStreaming(true);
     setStreamingContent("");
 
-    const cleanup = api.streamChat({
-      conversationId,
-      message: question,
-      onToken: (chunk) => {
-        setStreamingContent((prev) => prev + chunk);
-      },
-      onDone: (meta) => {
-        setStreamingContent((current) => {
-          const finalContent = current;
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant" as const,
-              content: finalContent,
-              timestamp: new Date(),
-              legalArea: meta.legal_area,
-            },
-          ]);
-          return "";
-        });
-        setLastLegalArea(meta.legal_area);
-        setIsStreaming(false);
-        abortStreamRef.current = null;
-      },
-      onError: (message) => {
+    const controller = new AbortController();
+    abortStreamRef.current = () => controller.abort();
+
+    try {
+      // Build conversation history for context (exclude greeting and errors)
+      const history = messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: question,
+          profile: {
+            display_name: profile.display_name,
+            state: profile.state,
+            housing_situation: profile.housing_situation,
+            employment_type: profile.employment_type,
+            family_status: profile.family_status,
+            language_preference: profile.language_preference,
+            active_issues: profile.active_issues,
+            legal_facts: profile.legal_facts,
+          },
+          history,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(err.error || `Chat failed: ${res.status}`);
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (!jsonStr) continue;
+
+          try {
+            const event = JSON.parse(jsonStr);
+            if (event.type === "token") {
+              setStreamingContent((prev) => prev + event.content);
+            } else if (event.type === "done") {
+              setStreamingContent((current) => {
+                const finalContent = current;
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    role: "assistant" as const,
+                    content: finalContent,
+                    timestamp: new Date(),
+                    legalArea: event.legal_area,
+                  },
+                ]);
+                return "";
+              });
+              setLastLegalArea(event.legal_area || "");
+            } else if (event.type === "error") {
+              throw new Error(event.message || "Stream error");
+            }
+          } catch (parseErr) {
+            if (parseErr instanceof Error && parseErr.message !== "Stream error") {
+              // Ignore malformed SSE events
+            } else {
+              throw parseErr;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
         setStreamingContent("");
-        setIsStreaming(false);
-        abortStreamRef.current = null;
         setMessages((prev) => [
           ...prev,
           {
             role: "error" as const,
-            content: message,
+            content: err instanceof Error ? err.message : t("somethingWentWrong"),
             timestamp: new Date(),
           },
         ]);
-      },
-    });
-
-    abortStreamRef.current = cleanup;
+      }
+    } finally {
+      setIsStreaming(false);
+      abortStreamRef.current = null;
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {

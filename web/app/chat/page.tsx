@@ -7,12 +7,53 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 /**
+ * Load the user's legal profile, trying localStorage first then the backend API.
+ *
+ * This ensures the chat works even when the Python backend is unavailable.
+ * The profile is saved to localStorage during onboarding.
+ *
+ * @param userId - The authenticated user's ID
+ * @returns The user's LegalProfile, or null if not found
+ */
+async function loadProfile(userId: string): Promise<LegalProfile | null> {
+  // Try localStorage first (saved during onboarding)
+  try {
+    const raw = localStorage.getItem("casemate_profile");
+    if (raw) {
+      const profile = JSON.parse(raw) as LegalProfile;
+      if (profile.user_id === userId || profile.display_name) {
+        return profile;
+      }
+    }
+  } catch {
+    // localStorage parse failed — fall through
+  }
+
+  // Fall back to backend API
+  try {
+    const profile = await api.getProfile(userId);
+    if (profile) {
+      // Cache it for next time
+      try {
+        localStorage.setItem("casemate_profile", JSON.stringify(profile));
+      } catch {
+        // ignore
+      }
+      return profile;
+    }
+  } catch {
+    // Backend unavailable — fall through
+  }
+
+  return null;
+}
+
+/**
  * Chat page that loads the user's legal profile and renders the main chat interface.
  *
  * Wraps ChatPageInner in Suspense for loading states. The inner component
- * fetches the authenticated user's profile from the backend and passes it
- * to ChatInterface, which handles the conversation UI, profile sidebar,
- * and action generator.
+ * fetches the authenticated user's profile from localStorage (with backend fallback)
+ * and passes it to ChatInterface.
  */
 export default function ChatPage() {
   return (
@@ -34,9 +75,9 @@ export default function ChatPage() {
 /**
  * Inner chat page component that handles profile loading and error states.
  *
- * Fetches the authenticated user's legal profile on mount and renders either
- * a loading spinner, an error state with onboarding redirect, or the full
- * ChatInterface with the loaded profile.
+ * Loads the user's legal profile from localStorage first (for offline-first UX),
+ * then falls back to the backend API. If no profile exists anywhere, shows
+ * an onboarding redirect.
  */
 function ChatPageInner() {
   const { user, loading: authLoading } = useAuth();
@@ -45,14 +86,16 @@ function ChatPageInner() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (authLoading) return;
 
-    async function loadProfile() {
+    async function load() {
       setLoading(true);
       setError("");
 
+      const userId = user?.id || "local";
+
       try {
-        const p = await api.getProfile(user!.id);
+        const p = await loadProfile(userId);
         if (p) {
           setProfile(p);
         } else {
@@ -71,7 +114,7 @@ function ChatPageInner() {
       }
     }
 
-    loadProfile();
+    load();
   }, [user, authLoading]);
 
   if (authLoading || loading) {

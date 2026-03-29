@@ -22,7 +22,7 @@ make dev        # uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 make frontend   # cd web && npm run dev (port 3000)
 ```
 
-5. Verify health: `GET http://localhost:8000/health` should return `{"status": "ok", "version": "0.1.0"}`.
+5. Verify health: `GET http://localhost:8000/health` should return `{"status": "ok", "version": "0.3.0"}`.
 
 ## Dev Workflow
 
@@ -102,6 +102,17 @@ chore: update PROGRESS.md
 3. Commit with the format above. Commit every 45-60 minutes minimum.
 4. Open a PR with a clear description of what changed and why.
 5. All tests must pass and lint must be clean before merge.
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Tests pass but coverage seems low | Make sure you run `pytest tests/ --cov=backend --cov-report=term-missing`. The `--cov=backend` flag is required to measure backend coverage. |
+| Supabase connection error | Check that `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are set correctly in `.env`. Copy from `.env.example` if missing. |
+| "Redis not configured" warning | This is expected if `REDIS_URL` is not set. Rate limiting fails open — requests are allowed without Redis. No action needed for local development. |
+| How do I create the demo profile? | Run `make seed` — this runs `scripts/seed_demo.py` to create the Sarah Chen demo profile with 12 prior conversations. |
+| mypy errors on fresh install | Run `make install` first, then `mypy backend/`. The dev dependencies include type stubs. |
+| Frontend tests fail with module errors | Run `cd web && npm install` to ensure all frontend dependencies are installed. |
 
 ## Architecture
 

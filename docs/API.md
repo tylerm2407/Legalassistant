@@ -44,7 +44,7 @@ Core data models are in `backend/models/legal_profile.py` (`LegalProfile`, `Lega
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/health` | No | Returns `{"status": "ok", "version": "0.1.0"}` |
+| GET | `/health` | No | Returns `{"status": "ok", "version": "0.3.0"}` |
 
 ### Chat
 
@@ -120,6 +120,54 @@ Core data models are in `backend/models/legal_profile.py` (`LegalProfile`, `Lega
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/api/attorneys/search` | Yes | Search attorneys by `state` (required) and optional `legal_area`. |
+
+### Payments
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/payments/create-checkout-session` | Yes | Create a Stripe checkout session. Accepts `CreateCheckoutRequest` (price_id, success_url, cancel_url). Returns `CheckoutSessionResponse`. |
+| POST | `/api/payments/webhook` | No (Stripe signature) | Handle Stripe webhook events. Verifies `Stripe-Signature` header. |
+| GET | `/api/payments/subscription` | Yes | Get the user's current subscription status. Returns `SubscriptionStatus`. |
+| POST | `/api/payments/cancel` | Yes | Cancel subscription at period end. Returns updated `SubscriptionStatus`. |
+
+## Quick Examples
+
+### Send a chat message (curl)
+
+```bash
+curl -X POST http://localhost:8000/api/chat \
+  -H "Authorization: Bearer $SUPABASE_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "My landlord is keeping my security deposit"}'
+```
+
+### Get user profile (curl)
+
+```bash
+curl http://localhost:8000/api/profile/$USER_ID \
+  -H "Authorization: Bearer $SUPABASE_JWT"
+```
+
+### Generate a demand letter (Python)
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/actions/letter",
+    headers={"Authorization": f"Bearer {jwt_token}"},
+    json={"context": "Landlord withheld $800 security deposit without itemized deductions"},
+)
+letter = response.json()["letter"]
+print(letter["letter_text"])
+```
+
+### SSE streaming (curl)
+
+```bash
+curl -N http://localhost:8000/api/chat/$CONVERSATION_ID/stream \
+  -H "Authorization: Bearer $SUPABASE_JWT"
+```
 
 ## Error Responses
 

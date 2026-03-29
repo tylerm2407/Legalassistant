@@ -8,15 +8,54 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- README.md — product overview, demo, architecture summary, quick start
-- ARCHITECTURE.md — full system design, memory architecture, API contracts, folder structure
-- CLAUDE.md — Claude Code configuration, build order, code standards
-- docs/decisions/001 — Memory as the core differentiator
-- docs/decisions/002 — State-specific legal context injection
-- docs/decisions/003 — Profile auto-update strategy
-- docs/decisions/004 — Document pipeline design
-- docs/decisions/005 — Action generator scope
-- Project scaffold — full folder structure, Makefile, pyproject.toml, .env.example, CI workflow
+- Standalone waitlist app with Supabase auth account creation
+- MASTER_PROMPT.md optimized for Yconic rubric alignment
+- LICENSE (MIT), SECURITY.md, and ADRs 016–020 committed
+- Documentation verification section with reproducible commands
+- API usage examples (curl + Python) in docs/API.md
+- Troubleshooting FAQ in CONTRIBUTING.md
+
+### Changed
+- README badges updated to match actual test counts (246 backend, 139 frontend)
+- Model version references corrected to `claude-sonnet-4-20250514` throughout
+- Backend version bumped from 0.1.0 to 0.3.0 to match CHANGELOG
+- Market validation section now includes methodology disclaimer
+- Gross margin clarified as variable margin (excludes fixed infrastructure costs)
+- API reference table now includes 4 payment endpoints
+- ADR table expanded from 15 to 20 entries
+
+### Fixed
+- All code quality warnings eliminated (Any types, utcnow deprecation, missing docstrings, TODO cleanup)
+- Main app redirects to /auth correctly
+- Frontend test count corrected from 141 to 139
+
+---
+
+## [0.3.0] - 2026-03-29
+
+### Added
+- Backend test coverage increased from 40% to 89% (246 tests)
+  - Legal area module tests (40 parametrized tests for all 10 domains)
+  - Profile CRUD tests (8 tests for get/update operations)
+  - Document extractor tests (9 tests for PDF/text/HTML)
+- Frontend test suite with Jest + React Testing Library (139 tests across 19 suites)
+  - Component tests for all 12 feature components
+  - UI component tests (Button, Badge, Card, Input)
+  - Library tests (API client, auth context, Supabase client)
+- JSDoc documentation on all 34 frontend files (100+ doc blocks)
+- Mobile app upgraded from scaffolding to functional screens
+  - Login with auto-redirect and inline validation
+  - Chat with typed conversation history and typing indicators
+  - Profile with legal facts display and pull-to-refresh
+  - Rights browser with search, domain icons, and expandable guides
+- Architecture Decision Records 016-020
+- Enterprise documentation suite (SECURITY.md, CODE_OF_CONDUCT.md, LICENSE, GitHub templates)
+- Comprehensive API reference documentation
+
+### Changed
+- CONTRIBUTING.md upgraded with detailed setup, testing, and ADR process
+- README.md rewritten with architecture diagrams and comprehensive project overview
+- ARCHITECTURE.md expanded with Mermaid diagrams and security model
 
 ---
 

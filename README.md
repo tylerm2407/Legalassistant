@@ -1,365 +1,450 @@
+<div align="center">
+
 # CaseMate
 
-> The legal friend everyone deserves.
+**Personalized legal guidance powered by persistent memory.**
 
-![CI](https://github.com/tylerm2407/Legalassistant/actions/workflows/ci.yml/badge.svg)
-![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
-![Expo](https://img.shields.io/badge/Expo-React_Native-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+The average US lawyer charges $349/hour. The average American earns $52,000/year.
+CaseMate closes that gap with AI that remembers your situation, knows your state's laws, and gives specific, actionable legal guidance for $20/month.
 
-CaseMate is a personalized AI legal assistant that **remembers your full legal situation across every conversation** — your state, your housing, your employment, your ongoing disputes. It answers every legal question in the context of your actual life, not a generic stranger's.
+[![Build Status](https://img.shields.io/github/actions/workflow/status/tylerm2407/Legalassistant/ci.yml?branch=main&label=CI)](https://github.com/tylerm2407/Legalassistant/actions)
+[![Test Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen)](tests/)
+[![Backend Tests](https://img.shields.io/badge/backend_tests-246-blue)](tests/)
+[![Frontend Tests](https://img.shields.io/badge/frontend_tests-139-blue)](web/__tests__/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
 
-Most legal AI tools answer one question and forget you exist. CaseMate builds a **legal profile** that compounds over time — so the fifth conversation is smarter than the first, and you never have to re-explain your situation.
+[Architecture](ARCHITECTURE.md) · [API Docs](#api-reference) · [Contributing](CONTRIBUTING.md)
 
----
-
-## The problem
-
-The average hourly rate for a lawyer in the United States is $349. A person with a median income of $52,000/year cannot afford to call a lawyer every time a landlord, employer, or debt collector does something illegal. They Google it, get generic answers, and give up.
-
-The legal system is designed for people who can afford $349/hour. CaseMate changes that.
+</div>
 
 ---
 
-## Demo
+## The Problem
 
-1. Complete a 90-second legal intake (state, housing, employment, active issues)
-2. Ask any legal question — CaseMate already knows your situation
-3. Get a specific, jurisdiction-aware answer with your exact rights
-4. Generate a ready-to-send letter, rights summary, or next-steps checklist
+**130 million Americans** cannot afford a lawyer when they need one. The ABA reports that 50% of US households face at least one legal issue per year, and the Legal Services Corporation found that 86% of civil legal problems receive inadequate or no legal help. People Google their rights, get generic answers that ignore their state and situation, and give up.
 
-**Example:** A user in Massachusetts with a landlord dispute types *"my landlord is claiming I owe $800 for bathroom tiles."* CaseMate already knows: Massachusetts law, no move-in inspection was done, there's pre-existing water damage on file. It responds citing M.G.L. c.186 §15B, calculates the user is owed their deposit PLUS potential 3x damages, and offers to generate the demand letter — pre-filled, ready to send.
-
-That response would cost $700 at a law firm. CaseMate costs $20/month.
+CaseMate replaces the first hour with a lawyer for most common legal issues -- at 1/17th the cost of a single consultation.
 
 ---
 
-## How It Works
+## How CaseMate Works
 
-```
-User Question
-    │
-    ▼
-classify_legal_area(question)  ─── keyword-based, 10 domains
-    │
-    ▼
-get_profile(user_id)  ─── persistent LegalProfile from Supabase
-    │
-    ▼
-build_system_prompt(profile, question)  ─── injects state laws + facts
-    │
-    ▼
-Claude API  ─── personalized response with statute citations
-    │
-    ▼
-Background: extract new facts → update profile  ─── memory grows
+CaseMate is not a generic chatbot with a legal wrapper. Every response is assembled from three layers of context specific to the user asking the question.
+
+```mermaid
+flowchart TD
+    A["User asks a legal question"] --> B["classify_legal_area()"]
+    B -->|"Keyword classifier identifies domain\n(~0ms, no LLM call)"| C["Load LegalProfile from Supabase"]
+    C --> D["build_system_prompt()"]
+    D -->|"Assembles 3 layers"| E["Layer 1: User's legal profile\n(state, housing, employment, facts, issues)"]
+    D --> F["Layer 2: State-specific statutes\n(50 states x 10 legal domains)"]
+    D --> G["Layer 3: CaseMate response philosophy\n(cite statutes, calculate damages, next steps)"]
+    E --> H["Claude API"]
+    F --> H
+    G --> H
+    H --> I["Personalized, jurisdiction-aware response"]
+    I --> J["Background task: extract new facts"]
+    J --> K["Update LegalProfile in Supabase"]
+    K -->|"Memory compounds\nover time"| C
 ```
 
+**The compounding effect:** A user mentions their landlord skipped the move-in inspection in conversation 3. CaseMate extracts that as a legal fact. In conversation 7, when they ask about their security deposit, CaseMate already knows -- no re-explanation needed. The profile is a structured Pydantic model that grows with every interaction, not raw chat history that fills a context window and gets forgotten.
+
 ---
 
-## What CaseMate remembers
+## Key Features
 
-```json
-{
-  "state": "Massachusetts",
-  "housing": "renter | month-to-month | no signed lease",
-  "employment": "full-time W2 | tech industry",
-  "active_issues": [
-    {
-      "type": "landlord-tenant",
-      "summary": "Landlord claiming $800 deposit for pre-existing damage",
-      "status": "open",
-      "started": "2026-03-10"
-    }
-  ],
-  "legal_facts": [
-    "Landlord did not perform move-in inspection",
-    "Unit had pre-existing water damage documented",
-    "Gave 30 days written notice"
-  ],
-  "documents": ["lease_2024.pdf", "move_out_notice.png"],
-  "conversations": 12
-}
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Persistent Legal Memory** | Legal profile auto-updates from every conversation. Facts, issues, and documents compound over time. | Complete |
+| **State-Specific Legal Context** | 50 US states, 10 legal domains, 500+ statute entries organized by region. Real citations, not vague references. | Complete |
+| **Document Analysis** | Upload leases, contracts, court notices. PDF/image text extraction with AI-powered fact and red flag identification. | Complete |
+| **Action Generator** | Generate demand letters, rights summaries, and next-steps checklists -- pre-filled with your profile data and statute citations. | Complete |
+| **Deadline Tracking** | Auto-detected from conversations or manually created. Dashboard with status management (active/completed/dismissed/expired). | Complete |
+| **Guided Workflows** | 6 step-by-step legal process templates (eviction defense, wage claim filing, small claims, etc.). | Complete |
+| **Know Your Rights Library** | 19 comprehensive guides across 10 legal domains with rights, action steps, deadlines, and citations. | Complete |
+| **Attorney Referral Matching** | State and specialty-based attorney search with weighted relevance scoring algorithm. | Complete |
+| **PDF Export and Email** | Generate branded PDFs of letters, summaries, and checklists. Send directly via email. | Complete |
+| **Cross-Platform** | Web (Next.js 14) + iOS/Android (Expo React Native). | Complete |
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        WEB["Next.js 14\nApp Router + TypeScript + Tailwind"]
+        MOBILE["Expo React Native\nExpo Router"]
+    end
+
+    subgraph "Backend"
+        API["FastAPI\nPython 3.12"]
+        MEM["Memory Injector\nbuild_system_prompt()"]
+        UPD["Profile Auto-Updater\nBackground task"]
+        LEG["Legal Intelligence\n50 states x 10 domains"]
+        ACT["Action Generators\nLetters / Rights / Checklists"]
+        DOC["Document Pipeline\nPDF extraction + analysis"]
+        WF["Workflows + Deadlines\nGuided processes"]
+        REF["Attorney Referrals\nWeighted scoring"]
+        EXP["Export Engine\nPDF + Email"]
+    end
+
+    subgraph "External Services"
+        CLAUDE["Anthropic Claude API\nclaude-sonnet-4-20250514"]
+        SUPA["Supabase\nPostgres + Auth + Storage"]
+        STRIPE["Stripe\nSubscription billing"]
+        MC["Mailchimp\nWaitlist management"]
+    end
+
+    WEB -->|"REST + SSE"| API
+    MOBILE -->|"REST + SSE"| API
+    API --> MEM
+    API --> ACT
+    API --> DOC
+    API --> WF
+    API --> REF
+    API --> EXP
+    MEM --> LEG
+    MEM --> CLAUDE
+    UPD --> CLAUDE
+    DOC --> CLAUDE
+    ACT --> CLAUDE
+    API --> SUPA
+    UPD --> SUPA
+    DOC --> SUPA
+    API --> STRIPE
+    API --> MC
 ```
 
-Every answer CaseMate gives is personalized to this profile. Not a generic person. You.
+For the full technical deep dive -- data flow diagrams, database schema, memory injection internals, and the legal intelligence layer -- see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
-## Features
+## Tech Stack
 
-- **Persistent Memory** — Legal profile grows with every conversation
-- **State-Specific Guidance** — Real statute citations for all 50 US states, organized by region
-- **10 Legal Domains** — Landlord/tenant, employment, consumer, debt, small claims, contracts, traffic, family law, criminal records, immigration
-- **Action Generators** — Demand letters, rights summaries, next-steps checklists — all pre-filled from your profile
-- **Document Analysis** — Upload leases, notices, contracts — CaseMate extracts key facts and red flags
-- **Know Your Rights Library** — 19 pre-built guides with rights, action steps, deadlines, and statute citations
-- **Guided Workflows** — Step-by-step legal processes (eviction defense, wage claim filing, etc.)
-- **Attorney Referrals** — State and domain-specific attorney matching
-- **Deadline Tracking** — Auto-detected and manual legal deadlines
-- **Document Export** — Generate downloadable letters, summaries, and checklists
-- **Cross-Platform** — Web (Next.js) + iOS/Android (Expo React Native)
-
----
-
-## Legal areas covered
-
-| Area | Key capabilities |
-|------|-----------------|
-| Landlord-tenant | Deposits, illegal entry, habitability, eviction defense |
-| Employment rights | Wage theft, wrongful termination, non-compete enforceability |
-| Consumer protection | Debt collection violations, billing disputes, warranty claims |
-| Debt & collections | FDCPA violations, statute of limitations, negotiation |
-| Small claims | Filing guidance, evidence preparation, judgment enforcement |
-| Contract disputes | Reading agreements, breach analysis, demand letters |
-| Traffic violations | Defense options, DMV hearings, insurance impact |
-| Family law basics | Custody basics, support calculations, separation agreements |
-| Criminal records | Expungement eligibility, background check rights |
-| Immigration basics | Status questions, document requirements, rights during enforcement |
-
-State-specific law is applied to every answer. CaseMate knows you're in Massachusetts before you say a word.
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | Next.js 14, TypeScript, Tailwind CSS | SSR, App Router, type-safe UI |
+| Mobile | Expo, React Native, Expo Router | Cross-platform iOS/Android from shared TypeScript |
+| Backend | FastAPI, Python 3.12 | Async API, background tasks, SSE streaming |
+| AI | Anthropic Claude (claude-sonnet-4-20250514) | Legal reasoning with structured context injection |
+| Database | Supabase (PostgreSQL) | Structured profiles, conversations, documents, RLS |
+| Auth | Supabase Auth (JWT) | User authentication with Row Level Security |
+| File Storage | Supabase Storage | Document uploads tied to user auth |
+| Payments | Stripe | Subscription billing and webhook lifecycle |
+| Validation | Pydantic v2 | Strict typing on all models and API contracts |
+| PDF Extraction | pdfplumber | Text extraction from uploaded legal documents |
+| Logging | structlog | Structured logging with user_id context |
+| Deployment | Vercel (frontend) + Railway (backend) | Production hosting with CI/CD |
 
 ---
 
-## Architecture
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full technical design.
-
-The core insight: every API call to Claude injects the user's legal profile as structured context. The memory layer is not a feature — it is the product.
-
-```
-User question
-    +
-Legal profile (from Supabase)
-    +
-State-specific legal system prompt
-    =
-A personalized answer no generic chatbot can give
-```
-
----
-
-## Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
-| Mobile | Expo, React Native, Expo Router |
-| Backend | FastAPI, Python 3.12 |
-| AI | Anthropic Claude (claude-sonnet-4-6) |
-| Database | Supabase (profiles + conversations + documents) |
-| Auth | Supabase Auth (JWT) |
-| File storage | Supabase Storage (document uploads) |
-| Logging | structlog |
-| PDF | pdfplumber |
-| Deployment | Vercel (frontend) + Railway (backend) |
-
----
-
-## Quick start
+## Quick Start
 
 ### Prerequisites
 
 - Python 3.12+
 - Node.js 20+
-- Supabase account (for auth + database)
+- Supabase account (database + auth + storage)
 - Anthropic API key
 
-### Backend
+### 1. Clone and install
 
 ```bash
-cp .env.example .env  # Add your API keys
+git clone https://github.com/tylerm2407/Legalassistant.git
+cd Legalassistant
+
+# Backend
+cp .env.example .env          # Add your API keys (see .env.example for all variables)
 pip install -e ".[dev]"
-make dev              # Starts uvicorn on :8000
+
+# Frontend
+cd web && npm install && cd ..
+
+# Mobile (optional)
+cd mobile && npm install && cd ..
 ```
 
-### Web Frontend
-
-```bash
-cd web
-npm install
-npm run dev           # Starts Next.js on :3000
-```
-
-### Mobile
-
-```bash
-cd mobile
-npm install
-npx expo start        # Starts Expo dev server
-```
-
-### Run Tests
-
-```bash
-make test             # Run all tests with coverage
-make verify           # Lint + test
-```
-
----
-
-## Early Access / Waitlist
-
-CaseMate is currently in pre-launch. Join the waitlist on the landing page to get notified when we launch. Signups are synced to Mailchimp and backed up in Supabase.
-
----
-
-## Environment variables
+### 2. Configure environment
 
 ```bash
 # Required
 ANTHROPIC_API_KEY=sk-ant-...
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...   # for backend profile writes
-SUPABASE_JWT_SECRET=...            # for JWT verification
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+SUPABASE_JWT_SECRET=...
 
 # Frontend
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 
-# Mailchimp (waitlist signup)
-MAILCHIMP_API_KEY=                 # Mailchimp API key (Account → Extras → API keys)
-MAILCHIMP_SERVER_PREFIX=           # Datacenter prefix, e.g. "us21" (from API key suffix)
-MAILCHIMP_LIST_ID=                 # Audience/list ID (Audience → Settings → Audience ID)
-
-# Email export (optional)
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM=hello@casematelaw.com
-
 # Optional
-REDIS_URL=                         # for rate limiting (fail-open if empty)
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8081
+REDIS_URL=                    # Rate limiting (fail-open if empty)
+MAILCHIMP_API_KEY=            # Waitlist sync
 ```
 
----
+### 3. Run
 
-## API Endpoints
+```bash
+# Backend (port 8000)
+make dev
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Health check |
-| `POST` | `/api/chat` | Send legal question, get personalized answer |
-| `POST` | `/api/profile` | Create/update legal profile |
-| `GET` | `/api/profile/{user_id}` | Get user's legal profile |
-| `GET` | `/api/conversations` | List conversations |
-| `GET` | `/api/conversations/{id}` | Get conversation by ID |
-| `DELETE` | `/api/conversations/{id}` | Delete conversation |
-| `POST` | `/api/actions/letter` | Generate demand letter |
-| `POST` | `/api/actions/rights` | Generate rights summary |
-| `POST` | `/api/actions/checklist` | Generate next-steps checklist |
-| `POST` | `/api/documents` | Upload and analyze legal document |
-| `POST` | `/api/deadlines` | Create deadline |
-| `GET` | `/api/deadlines` | List deadlines |
-| `PATCH` | `/api/deadlines/{id}` | Update deadline |
-| `DELETE` | `/api/deadlines/{id}` | Delete deadline |
-| `GET` | `/api/rights/domains` | List legal rights domains |
-| `GET` | `/api/rights/guides` | List rights guides |
-| `GET` | `/api/rights/guides/{id}` | Get specific rights guide |
-| `GET` | `/api/workflows/templates` | List workflow templates |
-| `POST` | `/api/workflows` | Start a workflow |
-| `GET` | `/api/workflows` | List active workflows |
-| `GET` | `/api/workflows/{id}` | Get workflow by ID |
-| `PATCH` | `/api/workflows/{id}/steps` | Update workflow step |
-| `POST` | `/api/export/document` | Export document as file |
-| `POST` | `/api/export/email` | Export document via email |
-| `GET` | `/api/attorneys/search` | Search for attorneys |
-| `POST` | `/api/waitlist` | Join the waitlist (Mailchimp + Supabase) |
+# Frontend (port 3000)
+cd web && npm run dev
+
+# Verify everything works
+curl http://localhost:8000/health
+```
+
+### Makefile commands
+
+| Command | Description |
+|---------|-------------|
+| `make dev` | Start backend on port 8000 |
+| `make test` | Run full test suite with coverage |
+| `make lint` | Run ruff check + format check |
+| `make format` | Auto-fix lint and formatting |
+| `make verify` | Lint + test (run before every commit) |
+| `make seed` | Seed demo profile (Sarah Chen) |
+| `make install` | Install all dependencies |
 
 ---
 
 ## Project Structure
 
 ```
+casemate/
 ├── backend/
-│   ├── main.py                  # FastAPI app with all routes
-│   ├── models/                  # Pydantic models (LegalProfile, etc.)
-│   ├── memory/                  # Profile, injector, conversation store
-│   ├── legal/                   # Classifier + state law library
-│   ├── actions/                 # Demand letter, rights, checklist generators
-│   ├── documents/               # PDF extraction + Claude analysis
-│   ├── knowledge/               # Rights library (19 guides)
-│   ├── workflows/               # Guided legal workflows
-│   ├── deadlines/               # Deadline detection + tracking
-│   ├── referrals/               # Attorney matching
-│   ├── export/                  # PDF/email export
-│   └── utils/                   # Auth, client, logger, rate limiter, retry
-├── web/                         # Next.js 14 frontend
-├── mobile/                      # Expo React Native app
-├── shared/                      # Shared TypeScript types
-├── tests/                       # Pytest test suite (168 tests)
-├── supabase/                    # Database schema + RLS policies
-├── docs/                        # Architecture decisions
-└── scripts/                     # Demo seed scripts
+│   ├── main.py                    # FastAPI app, all route definitions
+│   ├── memory/                    # Profile injection, auto-updater, conversation store
+│   ├── legal/                     # Classifier, state laws (50 states), 10 legal domains
+│   │   ├── states/                # Regional state law files (northeast, southeast, etc.)
+│   │   └── areas/                 # One module per legal domain
+│   ├── actions/                   # Demand letter, rights summary, checklist generators
+│   ├── documents/                 # PDF/image extraction + Claude analysis
+│   ├── knowledge/                 # Know Your Rights library (19 guides)
+│   ├── workflows/                 # Guided legal workflow engine (6 templates)
+│   ├── deadlines/                 # Deadline detection + tracking
+│   ├── referrals/                 # Attorney matching with weighted scoring
+│   ├── export/                    # PDF generation + email delivery
+│   ├── models/                    # Pydantic models (LegalProfile, Conversation, etc.)
+│   └── utils/                     # Auth, Anthropic client, logger, rate limiter, retry
+├── web/                           # Next.js 14 frontend (App Router)
+│   ├── app/                       # Pages: landing, onboarding, chat, profile, deadlines, etc.
+│   └── components/                # ChatInterface, ProfileSidebar, ActionGenerator, etc.
+├── mobile/                        # Expo React Native app (Expo Router)
+├── shared/                        # Shared TypeScript types
+├── tests/                         # Backend test suite (246 tests across 22 files)
+├── web/__tests__/                 # Frontend test suite (139 tests across 19 files)
+├── supabase/                      # Database schema + RLS policies
+├── docs/decisions/                # 20 Architecture Decision Records
+└── scripts/                       # Demo seed scripts
 ```
 
 ---
 
-## Security
+## API Reference
 
-- **JWT Authentication** — All API endpoints require valid Supabase JWT
-- **CORS** — Configurable allowed origins
-- **Rate Limiting** — Redis-backed per-user rate limits (fail-open if Redis unavailable)
-- **Input Validation** — Pydantic models with field constraints (max lengths, required fields)
-- **File Size Limits** — 25MB max upload
-- **Row Level Security** — Supabase RLS policies ensure users only access their own data
-- **Prompt Injection Mitigation** — Profile context is structured data, not raw user input in system prompt
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Health check with version info |
+| `POST` | `/api/chat` | Send a legal question, receive a personalized response |
+| `POST` | `/api/profile` | Create or update legal profile |
+| `GET` | `/api/profile/{user_id}` | Retrieve user's legal profile |
+| `GET` | `/api/conversations` | List all conversations |
+| `GET` | `/api/conversations/{id}` | Get conversation by ID |
+| `DELETE` | `/api/conversations/{id}` | Delete a conversation |
+| `POST` | `/api/documents` | Upload and analyze a legal document |
+| `POST` | `/api/actions/letter` | Generate a demand letter |
+| `POST` | `/api/actions/rights` | Generate a rights summary |
+| `POST` | `/api/actions/checklist` | Generate a next-steps checklist |
+| `POST` | `/api/deadlines` | Create a deadline |
+| `GET` | `/api/deadlines` | List all deadlines |
+| `PATCH` | `/api/deadlines/{id}` | Update a deadline |
+| `DELETE` | `/api/deadlines/{id}` | Delete a deadline |
+| `GET` | `/api/rights/domains` | List legal rights domains |
+| `GET` | `/api/rights/guides` | List rights guides |
+| `GET` | `/api/rights/guides/{id}` | Get a specific rights guide |
+| `GET` | `/api/workflows/templates` | List workflow templates |
+| `POST` | `/api/workflows` | Start a guided workflow |
+| `GET` | `/api/workflows/{id}` | Get workflow by ID |
+| `PATCH` | `/api/workflows/{id}/steps` | Update a workflow step |
+| `POST` | `/api/export/document` | Export document as PDF |
+| `POST` | `/api/export/email` | Export document via email |
+| `GET` | `/api/attorneys/search` | Search for attorneys by state and specialty |
+| `POST` | `/api/payments/create-checkout-session` | Create a Stripe checkout session for subscription |
+| `POST` | `/api/payments/webhook` | Handle Stripe webhook events |
+| `GET` | `/api/payments/subscription` | Get current subscription status |
+| `POST` | `/api/payments/cancel` | Cancel subscription (at period end) |
+| `POST` | `/api/waitlist` | Join the waitlist (Mailchimp + Supabase) |
+
+All endpoints except `/health`, `/api/waitlist`, and `/api/payments/webhook` require a valid Supabase JWT. Request and response bodies are fully typed with Pydantic models -- no `Any` types, no bare `dict` returns.
 
 ---
 
 ## Testing
 
+### Backend (pytest)
+
 ```bash
-# Run all tests with verbose output and coverage
-pytest tests/ -v --cov=backend --cov-report=term-missing
+make test                                         # Full suite with coverage
+pytest tests/ -v --cov=backend --cov-report=term-missing  # Verbose with line-by-line coverage
+pytest tests/test_memory_injector.py -v           # Run a specific file
+```
 
-# Run specific test file
-pytest tests/test_api_endpoints.py -v
+**246 tests** across 22 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone).
 
-# Lint
-ruff check backend/ tests/
+### Frontend (Jest)
+
+```bash
+cd web && npm test                                # Full suite
+cd web && npm test -- --coverage                  # With coverage report
+```
+
+**139 tests** across 19 files covering all components, API client, auth, and Supabase integration.
+
+### Pre-commit verification
+
+```bash
+make verify    # Runs lint + full test suite. Required before every commit.
 ```
 
 ---
 
-## Business model
+## Verification
 
-| Tier | Price | Limits |
-|------|-------|--------|
-| Free | $0/month | 3 questions/month, basic profile |
-| Personal | $20/month | Unlimited questions, document upload, letter generation |
-| Family | $35/month | Up to 5 profiles, shared document vault |
+Verify key README claims directly from the codebase:
 
-At 1% penetration of Americans who cannot afford a lawyer: **$360M ARR**.
-
-## Early traction
-
-*All metrics are real data from platform analytics dashboards and Supabase database queries.*
-
-- **50,000+ total views** across all platforms — $0 ad spend
-- **~4,900 total engagements** across platforms (likes, comments, shares, saves)
-- **~1,250 followers** across TikTok (500), Instagram (350), Facebook (200), X (120), LinkedIn (80)
-- **300+ waitlist signups** in Supabase — real users waiting for launch
-- **16 content pieces** published across 4 platforms
-- **LinkedIn pricing poll (312 respondents):** 100% willing to pay — 50% validated our $20/mo price point
-- **16,852 total poll respondents** across 5 market validation polls — see [`USER_RESEARCH.md`](USER_RESEARCH.md)
-- **78% of 8,400 TikTok respondents** have needed a lawyer but couldn't afford one
-- **90% of Instagram respondents** open to AI-powered legal guidance
+| Claim | Verification Command |
+|-------|---------------------|
+| 50-state coverage | `python -c "from backend.legal.state_laws import STATE_LAWS; print(len(STATE_LAWS))"` → 51 (50 states + federal) |
+| Backend test count | `pytest tests/ --co -q \| tail -1` → 246 tests collected |
+| Test coverage | `make test` → shows coverage % |
+| Zero lint errors | `make lint` → All checks passed |
+| Zero type errors | `mypy backend/` → Success: no issues found |
+| Memory injection | Run demo, ask landlord question as MA renter → response cites M.G.L. |
+| Model version | `grep "claude-sonnet" backend/main.py` → claude-sonnet-4-20250514 |
 
 ---
 
-## Built at
+## Deployment
 
-**New England Inter-Collegiate AI Hackathon**
-225 Dyer Street · Providence, Rhode Island · March 28–29, 2026
+| Component | Platform | Configuration |
+|-----------|----------|---------------|
+| Frontend | Vercel | Auto-deploys from `main` branch. Framework preset: Next.js. |
+| Backend | Railway | Dockerfile-based deploy. Env vars configured in Railway dashboard. |
+| Database | Supabase | Managed Postgres with RLS policies in `supabase/` directory. |
+| Payments | Stripe | Webhook endpoint at `/api/payments/webhook`. |
 
-## Team
+Environment variables for production are configured in each platform's dashboard. See `.env.example` for the complete list with descriptions.
 
-Built by Tyler Moore and Owen Ash.
+---
 
-> *The average American faces 3–5 significant legal situations per year and handles most of them alone. CaseMate ends that.*
+## Architecture Decision Records
+
+All architectural decisions are documented with context, options considered, and rationale.
+
+| ADR | Decision | Summary |
+|-----|----------|---------|
+| [001](docs/decisions/001-memory-as-differentiator.md) | Memory as core differentiator | Persistent memory over more features. Memory is what makes people pay. |
+| [002](docs/decisions/002-state-specific-legal-context.md) | State-specific legal context | Jurisdiction-aware injection. MA law is not TX law. |
+| [003](docs/decisions/003-profile-auto-update-strategy.md) | Profile auto-update strategy | Background task post-response. Never blocks the user. |
+| [004](docs/decisions/004-document-pipeline-design.md) | Document pipeline design | Supabase Storage + extraction. Files tied to auth, facts to profile. |
+| [005](docs/decisions/005-action-generator-scope.md) | Action generator scope | Letters + rights + checklists cover 80% of user needs. |
+| [006](docs/decisions/006-deadline-auto-detection.md) | Deadline auto-detection | Extract time-sensitive deadlines from conversations automatically. |
+| [007](docs/decisions/007-guided-workflow-engine.md) | Guided workflow engine | Step-by-step templates for common legal processes. |
+| [008](docs/decisions/008-rate-limiting-strategy.md) | Rate limiting strategy | Redis-backed with fail-open. Never block users due to infra issues. |
+| [009](docs/decisions/009-keyword-classifier-over-llm.md) | Keyword classifier over LLM | ~0ms classification vs ~2s LLM call. Speed and cost win. |
+| [010](docs/decisions/010-supabase-over-vector-db.md) | Supabase over vector DB | Structured data, not embeddings. No RAG complexity needed. |
+| [011](docs/decisions/011-regional-state-law-organization.md) | Regional state law organization | 5 regional files + federal. Maintainable at scale. |
+| [012](docs/decisions/012-background-task-pattern.md) | Background task pattern | FastAPI background tasks for non-blocking profile updates. |
+| [013](docs/decisions/013-pdf-export-with-fpdf2.md) | PDF export with fpdf2 | Lightweight PDF generation for letters and summaries. |
+| [014](docs/decisions/014-attorney-scoring-algorithm.md) | Attorney scoring algorithm | Weighted specialization matching for relevant referrals. |
+| [015](docs/decisions/015-rights-library-static-content.md) | Rights library as static content | Pre-built guides for instant access, no LLM call needed. |
+| [016](docs/decisions/016-frontend-testing-strategy.md) | Frontend testing strategy | Jest + React Testing Library for component and integration tests. |
+| [017](docs/decisions/017-mobile-architecture-expo.md) | Mobile architecture (Expo) | Expo Router with shared TypeScript types and API client. |
+| [018](docs/decisions/018-deployment-architecture.md) | Deployment architecture | Vercel (frontend) + Railway (backend) + Supabase (DB). |
+| [019](docs/decisions/019-comprehensive-documentation-standards.md) | Documentation standards | Docstrings, JSDoc, ADRs, and structured changelogs. |
+| [020](docs/decisions/020-backend-test-coverage-threshold.md) | Backend test coverage threshold | 89% coverage minimum, 90%+ target on core modules. |
+
+---
+
+## Business Model
+
+| Tier | Price | Includes |
+|------|-------|----------|
+| **Free** | $0/mo | 5 questions/month, basic rights guides |
+| **Personal** | $20/mo | Unlimited chat, full memory, document analysis, action generation, deadlines |
+| **Family** | $35/mo | Everything in Personal for up to 4 family members |
+
+**Unit economics:** $20/mo revenue per subscriber, ~$0.50/mo Claude API cost per active user = **97.5% variable margin per user** (excludes ~$70/mo fixed infrastructure costs — Supabase, Railway, Vercel). LTV of $240 (12-month average retention) with a CAC target under $30, yielding an 8:1 LTV:CAC ratio.
+
+---
+
+## Market Validation
+
+All data below is from social media polls (non-random, self-selected samples) and platform analytics. Results are shown for directional insight, not statistical certainty. Full methodology, screenshots, and raw data in [USER_RESEARCH.md](USER_RESEARCH.md).
+
+| Signal | Data Point |
+|--------|-----------|
+| **Pricing validation** | 312 LinkedIn respondents -- 100% willing to pay, 50% chose $10-$20/mo range |
+| **Problem validation** | 8,400 TikTok respondents -- 78% have needed a lawyer but could not afford one |
+| **Product validation** | 1,200 Instagram respondents -- 90% would use AI for legal guidance |
+| **Qualitative feedback** | 400+ DMs and comments analyzed -- top pain point: landlord security deposits (28%) |
+| **Organic traction** | 50,000+ views, 300+ waitlist signups, 1,250 followers -- all at $0 ad spend |
+| **Market size** | $15.6B TAM, $3.1B SAM, $360M SOM at 1% penetration |
+
+---
+
+## Roadmap
+
+- **App Store and Google Play launch** -- Submit all builds for review
+- **Stripe subscription integration** -- Payment flow live in production
+- **Mobile parity** -- Feature parity between web and Expo React Native app
+- **Premium tier** -- Attorney consultation credits, court filing assistance
+- **Multi-language support** -- Spanish as first additional language
+- **Real-time statute updates** -- Automated pipeline for legislative changes
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
+
+- Run `make verify` before every commit (lint + full test suite must pass)
+- Every function gets a docstring. Every type gets an annotation. No `Any`.
+- Follow the commit format: `feat(scope): description`, `fix(scope): description`
+- Memory injection tests are priority one -- never ship a change that breaks the injector.
+
+---
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+## Acknowledgments
+
+- [Anthropic Claude](https://anthropic.com) -- AI reasoning engine powering all legal analysis
+- [Supabase](https://supabase.com) -- Database, auth, and storage infrastructure
+- [Next.js](https://nextjs.org) -- Frontend framework
+- [FastAPI](https://fastapi.tiangolo.com) -- Backend framework
+- [Expo](https://expo.dev) -- Cross-platform mobile framework
+
+---
+
+<div align="center">
+
+Built by **Tyler Moore** and **Owen Ash** at the New England Inter-Collegiate AI Hackathon.
+
+Providence, Rhode Island -- March 28-29, 2026.
+
+*The average American faces 3-5 significant legal situations per year and handles most of them alone. CaseMate ends that.*
+
+</div>

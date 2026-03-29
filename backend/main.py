@@ -6,8 +6,10 @@ and action generation (demand letters, rights summaries, checklists).
 
 from __future__ import annotations
 
+import json
 import os
-from collections.abc import Awaitable, Callable
+import time
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import TypedDict, cast
 
 import anthropic
@@ -16,6 +18,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, U
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from starlette.responses import StreamingResponse
 
 from backend.actions.checklist_generator import generate_checklist
 from backend.actions.letter_generator import generate_demand_letter
@@ -44,7 +47,7 @@ from backend.knowledge.rights_library import (
     get_guide_by_id,
     get_guides_by_domain,
 )
-from backend.legal.classifier import classify_legal_area
+from backend.legal.classifier import classify_legal_area, classify_with_confidence
 from backend.memory.conversation_store import (
     create_conversation,
     delete_conversation,
@@ -67,10 +70,13 @@ from backend.payments.subscription import (
 )
 from backend.referrals.matcher import find_attorneys, get_referral_suggestions
 from backend.utils.auth import verify_supabase_jwt
+from backend.utils.circuit_breaker import CircuitBreakerOpenError, anthropic_breaker
 from backend.utils.client import get_anthropic_client
 from backend.utils.logger import configure_logging, get_logger
 from backend.utils.rate_limiter import rate_limit
 from backend.utils.retry import retry_anthropic
+from backend.utils.telemetry import MetricsCollector, get_metrics_response, telemetry_middleware
+from backend.utils.token_budget import TokenBudgetManager, estimate_tokens
 from backend.workflows.engine import (
     WorkflowStepUpdateRequest,
     get_workflow,
@@ -90,7 +96,7 @@ _logger = get_logger(__name__)
 app = FastAPI(
     title="CaseMate — AI Legal Assistant",
     description="Personalized AI legal assistant that remembers your legal situation.",
-    version="0.1.0",
+    version="0.3.0",
 )
 
 # ---------- CORS ----------
@@ -108,6 +114,13 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+# ---------- Telemetry middleware — traces every request ----------
+
+app.middleware("http")(telemetry_middleware)
+
+# ---------- Token budget manager for context window optimization ----------
+
+_token_budget = TokenBudgetManager()
 
 # ---------- Middleware to stash user_id on request.state ----------
 
@@ -235,7 +248,17 @@ async def health_check() -> HealthResponse:
     Returns:
         HealthResponse with status 'ok' and the current service version.
     """
-    return HealthResponse(status="ok", version="0.1.0")
+    return HealthResponse(status="ok", version="0.3.0")
+
+
+@app.get("/metrics")
+async def metrics_endpoint() -> Response:
+    """Expose in-process metrics for Prometheus scraping or monitoring.
+
+    Returns counters (total requests, errors), histograms (latency p50/p95/p99),
+    and labeled counters (status code distribution, legal area classification).
+    """
+    return get_metrics_response()
 
 
 @app.post("/api/chat", response_model=ChatResponse)

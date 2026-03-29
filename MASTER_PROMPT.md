@@ -86,7 +86,7 @@ Three converging forces make this the optimal moment to build CaseMate:
 
 - **Subscription SaaS** — recurring monthly revenue via Stripe + RevenueCat
 - **Target:** $10K MRR within 1-2 months of launch
-- **Unit economics:** $20/mo per subscriber, ~$0.50/mo Claude API cost per active user (96% gross margin)
+- **Unit economics:** $20/mo per subscriber, ~$0.50/mo Claude API cost per active user (97.5% variable margin per user; excludes ~$70/mo fixed infrastructure)
 - **LTV projection:** 12-month average retention at $20/mo = $240 LTV, CAC target < $30
 
 ### Customer Acquisition Strategy
@@ -220,7 +220,7 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 Three force multipliers make this scope achievable for a 2-person team:
 
 1. **Clear dev/GTM split** — Owen compiles the 50-state legal knowledge base (Hours 1–8) while Tyler codes. Neither person blocks the other. The knowledge base is pure research, not code — it can be produced in parallel.
-2. **AI-assisted development** — Claude Code generates boilerplate, test scaffolding, and repetitive patterns (state law file structure, 10 area modules) at ~5x manual speed. The 168 tests are auto-generated alongside each module, not a separate QA phase.
+2. **AI-assisted development** — Claude Code generates boilerplate, test scaffolding, and repetitive patterns (state law file structure, 10 area modules) at ~5x manual speed. The 246 tests are auto-generated alongside each module, not a separate QA phase.
 3. **Shared codebase architecture** — The Expo mobile app uses shared TypeScript types and API client from the web app. It is a thin native shell over the same backend, not a separate codebase. Three platforms (web, iOS, Android) from one set of types and one API.
 
 ### Post-Hackathon Roadmap
@@ -367,10 +367,15 @@ All background tasks catch all exceptions and log them — they must never crash
 | `CORS_ALLOWED_ORIGINS` | No | Comma-separated origins (default: localhost:3000,8081) |
 | `NEXT_PUBLIC_API_URL` | Yes | Backend URL for web frontend |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase URL for web frontend |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key for web frontend |
+| `NEXT_PUBLIC_SUPABASE_KEY` | Yes | Supabase anon key for web frontend |
 | `MAILCHIMP_API_KEY` | No | Waitlist signup sync |
 | `MAILCHIMP_SERVER_PREFIX` | No | Datacenter prefix (e.g. "us21") |
 | `MAILCHIMP_LIST_ID` | No | Audience/list ID |
+| `STRIPE_SECRET_KEY` | No | Stripe secret key for payments |
+| `STRIPE_PUBLISHABLE_KEY` | No | Stripe publishable key (safe for frontend) |
+| `STRIPE_WEBHOOK_SECRET` | No | Stripe webhook signing secret |
+| `STRIPE_PRICE_ID_PERSONAL` | No | Stripe price ID for $20/mo Personal plan |
+| `STRIPE_PRICE_ID_FAMILY` | No | Stripe price ID for $35/mo Family plan |
 | `SMTP_HOST/PORT/USER/PASS/FROM` | No | Email export functionality |
 
 ---
@@ -494,6 +499,8 @@ casemate/
 ├── USER_RESEARCH.md                  ← User research findings
 ├── SOCIAL_MEDIA.md                   ← Social media content plan
 ├── CONTRIBUTING.md                   ← Contributor guidelines
+├── LICENSE                           ← Project license
+├── SECURITY.md                       ← Security documentation
 ├── Makefile                          ← make dev | make test | make lint | make verify
 ├── Dockerfile                        ← Python 3.12-slim backend container
 ├── docker-compose.yml                ← Multi-container orchestration
@@ -503,7 +510,7 @@ casemate/
 ├── pyproject.toml                    ← Python deps + ruff + mypy config
 │
 ├── backend/
-│   ├── main.py                       ← FastAPI app, 32 route definitions, CORS, middleware
+│   ├── main.py                       ← FastAPI app, 30 route definitions, CORS, middleware
 │   ├── models/
 │   │   ├── legal_profile.py          ← LegalProfile, LegalIssue, IssueStatus
 │   │   ├── conversation.py           ← Conversation, Message
@@ -572,7 +579,7 @@ casemate/
 │   ├── Dockerfile                    ← Web container for Docker Compose
 │   ├── app/
 │   │   ├── layout.tsx                ← Root layout
-│   │   ├── page.tsx                  ← Marketing landing page with WaitlistForm
+│   │   ├── page.tsx                  ← Server redirect to /auth
 │   │   ├── auth/page.tsx             ← Login/signup page
 │   │   ├── attorneys/page.tsx        ← Attorney search/referral page
 │   │   ├── chat/page.tsx             ← Main chat interface
@@ -621,7 +628,6 @@ casemate/
 │   │   ├── _layout.tsx               ← Root layout
 │   │   ├── index.tsx                 ← Splash/index screen
 │   │   ├── (auth)/
-│   │   │   ├── _layout.tsx           ← Auth group layout
 │   │   │   ├── login.tsx             ← Login screen
 │   │   │   └── onboarding.tsx        ← Mobile onboarding
 │   │   └── (app)/
@@ -657,7 +663,7 @@ casemate/
 │   ├── 001_user_profiles_rls.sql
 │   └── 002_conversations_deadlines_workflows_attorneys.sql
 │
-├── docs/                             ← 13 docs + 15 Architecture Decision Records
+├── docs/                             ← 13 docs + 20 Architecture Decision Records
 │   ├── API.md                        ← Full API route documentation
 │   ├── DATABASE.md                   ← Database schema and design
 │   ├── MEMORY_SYSTEM.md              ← Memory injection pattern
@@ -671,7 +677,7 @@ casemate/
 │   ├── DEPLOYMENT.md                 ← Deployment procedures
 │   ├── CI_CD.md                      ← CI/CD pipeline
 │   ├── email-campaigns.md            ← Mailchimp email campaign templates
-│   └── decisions/                    ← 15 Architecture Decision Records
+│   └── decisions/                    ← 20 Architecture Decision Records
 │       ├── 001-memory-as-differentiator.md
 │       ├── 002-state-specific-legal-context.md
 │       ├── 003-profile-auto-update-strategy.md
@@ -686,12 +692,17 @@ casemate/
 │       ├── 012-background-task-pattern.md
 │       ├── 013-pdf-export-with-fpdf2.md
 │       ├── 014-attorney-scoring-algorithm.md
-│       └── 015-rights-library-static-content.md
+│       ├── 015-rights-library-static-content.md
+│       ├── 016-frontend-testing-strategy.md
+│       ├── 017-mobile-architecture-expo.md
+│       ├── 018-deployment-architecture.md
+│       ├── 019-comprehensive-documentation-standards.md
+│       └── 020-backend-test-coverage-threshold.md
 │
 ├── scripts/
 │   └── seed_demo.py                  ← Seed Sarah Chen demo profile
 │
-└── tests/                            ← 22 backend test files (221 tests)
+└── tests/                            ← 22 backend test files (246 tests)
     ├── conftest.py                   ← Shared fixtures (mock_profile, mock_anthropic, mock_supabase)
     ├── test_memory_injector.py       ← Core memory injection tests
     ├── test_profile_crud.py          ← Profile CRUD operations
@@ -806,7 +817,7 @@ All 50 states plus federal defaults, organized by geographic region:
 **Southeast (14):** AL, AR, DE, FL, GA, KY, LA, MD, MS, NC, SC, TN, VA, WV
 **Midwest (12):** IA, IL, IN, KS, MI, MN, MO, NE, ND, OH, SD, WI
 **South Central (2):** OK, TX
-**West (14):** AK, AZ, CA, CO, HI, ID, MT, NM, NV, OR, UT, WA, WY
+**West (13):** AK, AZ, CA, CO, HI, ID, MT, NM, NV, OR, UT, WA, WY
 
 Each state entry maps domain keys to concise law descriptions with real statute citations (e.g., MA → landlord_tenant → "MA Gen. Laws ch. 186 §15B: Security deposit..."). Up to 10 domains per state. The `federal_defaults` key provides baseline federal law citations (FDCPA, FLSA, Title VII, etc.) that apply in all states.
 
@@ -1026,7 +1037,7 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 | GET | `/api/payments/subscription` | JWT | None | Get user's subscription status |
 | POST | `/api/payments/cancel` | JWT | None | Cancel user's subscription |
 
-**Total: 32 endpoints** (1 health + 31 API)
+**Total: 30 endpoints** (1 health + 29 API)
 
 ---
 
@@ -1113,9 +1124,9 @@ CaseMate serves a vulnerable population — people facing legal disputes who can
 
 - **Dark theme** with Tailwind CSS
 - **API proxy:** `next.config.mjs` rewrites `/api/*` to the backend URL (`NEXT_PUBLIC_API_URL`)
-- **Supabase client:** initialized with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- **Supabase client:** initialized with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY`
 - **Error handling:** `ErrorBoundary` component, `Skeleton` loading component
-- **Landing page** (`web/app/page.tsx`): imports `WaitlistForm` component for email capture
+- **Root page** (`web/app/page.tsx`): server redirect to `/auth` — the waitlist landing page is in `waitlist/app/page.tsx`
 
 ### Mobile (Expo React Native)
 
@@ -1150,7 +1161,7 @@ Hidden screens (accessible via navigation, not tabs): `rights`, `rights-guide`, 
 - **Framework:** pytest with `pytest-asyncio` (auto mode)
 - **Coverage:** `pytest-cov` with term-missing report
 - **22 backend test files** + **19 frontend test files** covering all modules
-- **221 backend tests**, 100% pass rate
+- **246 backend tests**, 100% pass rate
 - All tests run without real API calls or database connections
 - **Coverage target:** 90%+ line coverage on core modules (memory/, legal/, actions/)
 - **CI integration:** `make verify` runs `ruff check` + `ruff format --check` + full test suite before every commit
@@ -1164,7 +1175,7 @@ Four shared fixtures: `mock_profile` (Sarah Chen power-user profile with 8 facts
 
 All tests run without real API calls or database connections. Anthropic is patched at the client level; Supabase is patched at the singleton getter. No external dependencies required to run the full test suite.
 
-### Backend Test Files (22 files, 221 tests)
+### Backend Test Files (22 files, 246 tests)
 
 | File | Tests |
 | ---- | ----- |

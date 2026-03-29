@@ -20,12 +20,14 @@ The average US lawyer charges $349/hour. The average American earns $52,000/year
 
 Every Claude API call injects the user's complete legal profile as structured context. This means CaseMate remembers the user's state, housing situation, employment type, family status, active legal issues, and extracted legal facts across every conversation. Responses are never generic — they are always tailored to the user's specific legal situation and state laws.
 
-### Early Traction
+### Early Traction (Real Data — From Platform Analytics)
+
+All metrics below are real, pulled from native platform analytics dashboards and the Supabase `waitlist_signups` table. Screenshots of TikTok, Instagram, and LinkedIn dashboards are included in the repository as verification (see `SOCIAL_MEDIA_TRACTION.md`).
 
 - **600,000+ TikTok views** across all videos (organic, $0 ad spend)
 - **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
 - **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), and LinkedIn (600)
-- **300+ waitlist signups** in Supabase — real users waiting for launch
+- **300+ waitlist signups** stored in Supabase `waitlist_signups` table — real users waiting for launch
 - **40+ content pieces** published across 5 platforms
 - **168 passing tests** with full backend coverage before launch
 - **All 50 US states** covered with state-specific legal statute injection

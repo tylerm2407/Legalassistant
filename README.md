@@ -339,6 +339,8 @@ At 1% penetration of Americans who cannot afford a lawyer: **$360M ARR**.
 
 ## Early traction
 
+*All metrics are real data from platform analytics dashboards and Supabase database queries. Screenshots included in [`SOCIAL_MEDIA_TRACTION.md`](SOCIAL_MEDIA_TRACTION.md).*
+
 - **600,000+ TikTok views** across all videos (@casemate_legal) — $0 ad spend
 - **56,000+ total engagements** across platforms (likes, comments, shares, saves)
 - **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), LinkedIn (600)

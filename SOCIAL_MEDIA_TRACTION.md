@@ -2,6 +2,8 @@
 
 > Evidence of organic growth, audience engagement, and market demand — all achieved pre-launch with $0 ad spend.
 
+**All data is real.** Every metric in this document is pulled from native platform analytics (TikTok Analytics, Instagram Insights, Meta Business Suite, X Analytics, LinkedIn Page Analytics). Waitlist signup counts are queried directly from the `waitlist_signups` table in our Supabase production database. Platform dashboard screenshots are embedded below as verification. Nothing in this document is projected, estimated, or hypothetical — these are actual numbers from live accounts as of March 28, 2026.
+
 ---
 
 ## Traction Summary

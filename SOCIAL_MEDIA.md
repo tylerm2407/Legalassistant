@@ -12,6 +12,8 @@
 
 ## Early Traction
 
+> **Data source:** All metrics below are pulled directly from each platform's native analytics dashboard (TikTok Analytics, Instagram Insights, Meta Business Suite, X Analytics, LinkedIn Page Analytics). Waitlist signups are queried from the `waitlist_signups` table in Supabase. Screenshots of platform dashboards are included in [`SOCIAL_MEDIA_TRACTION.md`](SOCIAL_MEDIA_TRACTION.md) as evidence.
+
 ### TikTok (Primary Growth Channel)
 - **600,000+ views** across all videos
 - **38,000+ likes**, **2,100+ comments**, **6,500+ shares**

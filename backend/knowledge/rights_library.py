@@ -908,6 +908,1464 @@ RIGHTS_GUIDES: list[RightsGuide] = [
             "taken, or if you're considering bankruptcy. Legal aid may help if you can't afford an attorney."
         ),
     ),
+    # --- LANDLORD / TENANT (additional) ---
+    RightsGuide(
+        id="tenant_lease_termination",
+        domain="landlord_tenant",
+        title="Lease Termination & Breaking a Lease",
+        description="Your rights and obligations when ending a lease early",
+        explanation=(
+            "Breaking a lease before it expires can have financial consequences, but tenants "
+            "have more options than they realize. Many states allow early termination for "
+            "specific reasons — military deployment, domestic violence, uninhabitable conditions, "
+            "or landlord harassment. Even without a legal excuse, most states require the landlord "
+            "to mitigate damages by trying to re-rent the unit, which limits what you actually owe."
+        ),
+        your_rights=[
+            "You can terminate early for legally recognized reasons (military, DV, uninhabitable conditions)",
+            "Your landlord has a legal duty to mitigate damages by attempting to re-rent the unit",
+            "You cannot be charged for the full remaining lease if the landlord re-rents quickly",
+            "Early termination clauses in your lease must be reasonable and enforceable",
+            "You are entitled to written notice of any charges the landlord intends to deduct",
+            "Retaliation for exercising your rights (like reporting code violations) is illegal",
+        ],
+        action_steps=[
+            "Review your lease for an early termination clause — note the fee and notice requirements",
+            "Check your state's legal reasons for penalty-free termination (SCRA, DV statutes, habitability)",
+            "Give written notice to your landlord with the date you intend to vacate",
+            "Document the condition of the unit with photos and video before move-out",
+            "Request a move-out inspection and get the landlord's signature on the condition report",
+            "Send your forwarding address in writing so the landlord can return your deposit or send an itemized statement",
+        ],
+        deadlines=[
+            "Notice period: Usually 30-60 days before your intended move-out date",
+            "Security deposit return: 14-45 days after move-out depending on state",
+            "Statute of limitations to sue for wrongful charges: Typically 2-6 years",
+        ],
+        common_mistakes=[
+            "Just abandoning the unit without notice — you remain liable for rent until the lease ends",
+            "Not documenting unit condition — the landlord can claim you caused damage",
+            "Assuming you owe the entire remaining rent — the landlord must try to re-rent",
+            "Not sending notice in writing — verbal notice is hard to prove",
+        ],
+        when_to_get_a_lawyer=(
+            "If your landlord is demanding the full remaining rent, refuses to mitigate, or you "
+            "need to break a lease due to domestic violence or habitability issues."
+        ),
+    ),
+    RightsGuide(
+        id="tenant_rent_increase",
+        domain="landlord_tenant",
+        title="Rent Increases & Rent Control",
+        description="Know when rent increases are legal and how to challenge them",
+        explanation=(
+            "Rent increases are a common source of conflict between tenants and landlords. "
+            "In most states, landlords can raise rent by any amount when a lease expires — but "
+            "they must follow specific rules about notice periods and timing. Some cities and "
+            "states have rent control or rent stabilization laws that cap how much rent can "
+            "increase. Even without rent control, a rent increase can be illegal if it's "
+            "retaliatory (punishing you for complaining) or discriminatory."
+        ),
+        your_rights=[
+            "You cannot receive a rent increase during a fixed-term lease unless the lease allows it",
+            "Your landlord must give you advance written notice (typically 30-90 days) before increasing rent",
+            "Retaliatory rent increases (after you report code violations) are illegal in most states",
+            "Discriminatory rent increases targeting protected classes violate fair housing laws",
+            "In rent-controlled areas, increases are capped at a specific percentage annually",
+            "You have the right to verify that your unit is subject to or exempt from rent control",
+        ],
+        action_steps=[
+            "Check if your city or state has rent control — search '[your city] rent control ordinance'",
+            "Verify the notice period required in your state for rent increases",
+            "Review your lease to see if mid-lease increases are permitted",
+            "If the increase seems retaliatory, document the timeline (complaint date vs. increase date)",
+            "Negotiate with your landlord — offer a longer lease term in exchange for a smaller increase",
+            "If the increase is illegal, send a written objection citing the specific law violated",
+        ],
+        deadlines=[
+            "Notice requirement: 30 days for month-to-month; 60-90 days in some states",
+            "Rent board petition: Usually 30 days from receiving the increase notice (rent-controlled areas)",
+            "Fair housing complaint: 1 year from the discriminatory act (HUD) or 2 years in court",
+        ],
+        common_mistakes=[
+            "Assuming all rent increases are legal — they must follow notice and timing rules",
+            "Not checking for rent control in your area — many tenants don't know it applies to them",
+            "Paying the increased rent without objecting — this can be treated as acceptance",
+            "Confusing rent stabilization with rent control — they have different rules",
+        ],
+        when_to_get_a_lawyer=(
+            "If you believe a rent increase is retaliatory or discriminatory, if your unit "
+            "is rent-controlled and the increase exceeds the cap, or if you're being forced out "
+            "by an unreasonable increase."
+        ),
+    ),
+    # --- CONSUMER PROTECTION (additional) ---
+    RightsGuide(
+        id="consumer_identity_theft",
+        domain="consumer_protection",
+        title="Identity Theft Recovery",
+        description="Steps to take when someone steals your identity",
+        explanation=(
+            "Identity theft occurs when someone uses your personal information — Social Security "
+            "number, credit card, or bank account — without your permission. Federal law limits "
+            "your liability for unauthorized charges to $50 on credit cards (and $0 if reported "
+            "before use). The Fair Credit Reporting Act gives you the right to dispute fraudulent "
+            "accounts, place fraud alerts, and freeze your credit for free. Acting quickly is "
+            "critical because delays can make it harder to prove fraud."
+        ),
+        your_rights=[
+            "You can place a free fraud alert on your credit report (lasts 1 year, renewable)",
+            "You can freeze and unfreeze your credit for free at all three bureaus",
+            "You are entitled to free copies of your credit report when you're a fraud victim",
+            "Creditors must investigate and remove accounts you dispute as fraudulent",
+            "You are not liable for debts incurred by the identity thief",
+            "You can get an Identity Theft Report from the FTC that gives you additional rights",
+        ],
+        action_steps=[
+            "File an identity theft report at IdentityTheft.gov — this generates your FTC report and recovery plan",
+            "Place a fraud alert with one credit bureau (Equifax, Experian, or TransUnion) — they notify the others",
+            "Freeze your credit at all three bureaus to prevent new accounts from being opened",
+            "File a police report with your local department — some creditors require this",
+            "Contact each company where fraud occurred and dispute the unauthorized accounts",
+            "Review your credit reports from all three bureaus and dispute every fraudulent entry",
+            "Change passwords and enable two-factor authentication on all financial accounts",
+        ],
+        deadlines=[
+            "Credit card fraud: Report within 60 days of your statement to limit liability",
+            "Debit card fraud: Report within 2 business days to limit liability to $50",
+            "Credit report disputes: Bureaus must investigate within 30 days of your dispute",
+            "FTC report: File as soon as possible — no deadline but earlier is stronger evidence",
+        ],
+        common_mistakes=[
+            "Waiting to report — the longer you wait, the harder it is to prove fraud and limit liability",
+            "Only freezing one credit bureau — thieves can open accounts using the other two",
+            "Not filing an FTC Identity Theft Report — this document gives you legal rights that a police report alone doesn't",
+            "Paying fraudulent debts to 'make them go away' — this can be treated as acknowledging the debt",
+        ],
+        when_to_get_a_lawyer=(
+            "If a creditor refuses to remove fraudulent accounts after you've disputed them, "
+            "if you're being sued for debts the identity thief incurred, or if the theft involves "
+            "tax fraud or criminal charges filed in your name."
+        ),
+    ),
+    RightsGuide(
+        id="consumer_warranty_rights",
+        domain="consumer_protection",
+        title="Product Warranties & Defective Goods",
+        description="Your rights when products break or don't work as advertised",
+        explanation=(
+            "Every product you buy comes with legal protections, even without a written warranty. "
+            "The implied warranty of merchantability means the product must work for its intended "
+            "purpose. The Magnuson-Moss Warranty Act protects consumers from deceptive warranty "
+            "practices and ensures that written warranties are clear and enforceable. Sellers "
+            "cannot void your warranty just because you used a third-party repair service or "
+            "non-OEM parts."
+        ),
+        your_rights=[
+            "Products must be fit for their ordinary purpose (implied warranty of merchantability)",
+            "Written warranties must clearly state what is and isn't covered",
+            "A seller cannot require you to use only their repair service to keep a warranty valid",
+            "You can sue for breach of warranty in small claims court for defective products",
+            "Extended warranty add-ons must provide benefits beyond the manufacturer's warranty",
+            "You have the right to a refund, replacement, or repair for defective goods",
+        ],
+        action_steps=[
+            "Save your receipt and any warranty documentation for every major purchase",
+            "Contact the seller or manufacturer in writing describing the defect and requesting a remedy",
+            "Give the seller a reasonable opportunity to repair or replace the product",
+            "If the seller refuses, file a complaint with your state attorney general's consumer protection division",
+            "For products under $10,000, consider filing in small claims court",
+            "Document the defect with photos, videos, and records of all communication attempts",
+        ],
+        deadlines=[
+            "Implied warranty: Typically 4 years from purchase (varies by state)",
+            "Written warranty: As stated in the warranty document",
+            "Breach of warranty lawsuit: 4 years from when you knew or should have known about the breach",
+            "Chargeback on credit card: 60 days from the statement with the charge",
+        ],
+        common_mistakes=[
+            "Throwing away the receipt — you need proof of purchase to claim warranty rights",
+            "Assuming 'as is' means no rights — implied warranties still apply in many states",
+            "Not giving the seller a chance to fix the problem before escalating",
+            "Buying extended warranties that duplicate coverage you already have",
+        ],
+        when_to_get_a_lawyer=(
+            "If a defective product caused injury or significant property damage, if the seller "
+            "is refusing to honor a clear warranty, or if the product defect is part of a wider "
+            "pattern affecting many consumers (potential class action)."
+        ),
+    ),
+    RightsGuide(
+        id="consumer_scam_recovery",
+        domain="consumer_protection",
+        title="Scam Recovery & Fraud Reporting",
+        description="What to do after being scammed and how to recover your money",
+        explanation=(
+            "Scams cost Americans over $10 billion per year. Whether it's a fake online store, "
+            "a phishing email, a romance scam, or a contractor who took your money and disappeared, "
+            "you have more recovery options than you think. Credit card chargebacks, bank fraud "
+            "claims, FTC complaints, and state attorney general actions can all help recover funds. "
+            "The key is acting fast — most recovery windows are time-limited."
+        ),
+        your_rights=[
+            "Credit card payments can be disputed as chargebacks within 60 days",
+            "Bank transfers may be reversible if reported within 2 business days (debit) or quickly (wire)",
+            "You can file complaints with the FTC, CFPB, state AG, and FBI's IC3",
+            "Businesses that engage in deceptive practices violate state consumer protection laws",
+            "You may be entitled to treble (3x) damages under your state's unfair business practices act",
+            "Payment platforms (PayPal, Venmo, Zelle) have their own fraud dispute processes",
+        ],
+        action_steps=[
+            "Stop all communication with the scammer immediately",
+            "Contact your bank or credit card company to dispute the charges or freeze the account",
+            "Document everything — save emails, texts, receipts, screenshots, and transaction records",
+            "File a report at ReportFraud.ftc.gov and with your state attorney general",
+            "File a report with IC3.gov (FBI) if the scam involved the internet",
+            "Check if other victims have reported the same scam — you may be able to join a group action",
+        ],
+        deadlines=[
+            "Credit card chargeback: 60 days from the statement date",
+            "Debit card fraud: 2 business days for $50 max liability; 60 days for $500 max",
+            "Wire transfer recall: Contact bank immediately — success rate drops rapidly after 24 hours",
+            "State AG complaint: No strict deadline but file as soon as possible",
+        ],
+        common_mistakes=[
+            "Continuing to engage with the scammer hoping to recover money — this often leads to more losses",
+            "Not disputing credit card charges because you 'authorized' the payment — fraud is still disputable",
+            "Waiting too long to contact your bank — every day reduces your recovery chances",
+            "Being embarrassed and not reporting — reports help law enforcement catch repeat offenders",
+        ],
+        when_to_get_a_lawyer=(
+            "If you lost a significant amount of money, if the scammer is an identifiable business, "
+            "or if your bank or credit card company wrongly denies your fraud claim."
+        ),
+    ),
+    # --- TRAFFIC & DRIVING (additional) ---
+    RightsGuide(
+        id="traffic_accident_rights",
+        domain="traffic_violations",
+        title="Car Accident Rights",
+        description="What to do after a car accident and protecting your legal rights",
+        explanation=(
+            "After a car accident, the steps you take in the first hours and days can make or break "
+            "your ability to recover damages. You have the right to file an insurance claim, seek "
+            "medical treatment, and pursue compensation for injuries, property damage, and lost wages. "
+            "Insurance companies are not on your side — their goal is to minimize payouts. "
+            "Understanding your rights prevents you from accidentally waiving claims or accepting "
+            "lowball settlements."
+        ),
+        your_rights=[
+            "You have the right to file a police report at the scene",
+            "You can seek medical treatment and the at-fault party's insurance should cover it",
+            "You are not required to give a recorded statement to the other driver's insurance company",
+            "You can choose your own repair shop — the insurance company cannot force you to use theirs",
+            "You are entitled to compensation for medical bills, lost wages, pain and suffering, and property damage",
+            "You have the right to reject a settlement offer and negotiate or file a lawsuit",
+        ],
+        action_steps=[
+            "Call 911 and get a police report — this is critical evidence for your claim",
+            "Exchange insurance and contact information with the other driver",
+            "Document everything: take photos of all vehicles, injuries, road conditions, and traffic signs",
+            "Get contact info from witnesses",
+            "See a doctor within 72 hours even if you feel fine — some injuries take days to appear",
+            "Report the accident to your insurance company but do not admit fault",
+            "Do NOT give a recorded statement to the other driver's insurance without legal advice",
+        ],
+        deadlines=[
+            "Police report: File within 24 hours to 10 days depending on state",
+            "Insurance claim: Report to your insurer as soon as possible (most policies require 'prompt' notice)",
+            "Personal injury lawsuit: Statute of limitations is 1-6 years depending on state (commonly 2-3)",
+            "Property damage claim: 2-6 years depending on state",
+        ],
+        common_mistakes=[
+            "Admitting fault at the scene — let the investigation determine liability",
+            "Not seeing a doctor — insurance companies use gaps in treatment to deny claims",
+            "Accepting the first settlement offer — initial offers are almost always too low",
+            "Posting about the accident on social media — insurance adjusters check your accounts",
+        ],
+        when_to_get_a_lawyer=(
+            "If you were injured, if liability is disputed, if the insurance company is offering "
+            "a low settlement, or if the accident involved a commercial vehicle or government entity."
+        ),
+    ),
+    RightsGuide(
+        id="traffic_license_suspension",
+        domain="traffic_violations",
+        title="License Suspension & Reinstatement",
+        description="Your rights when your driver's license is suspended or revoked",
+        explanation=(
+            "A suspended license can affect your ability to work, care for your family, and "
+            "handle daily life. Suspensions can result from unpaid tickets, DUI, too many points, "
+            "failure to appear in court, or even unpaid child support. In many cases, you can get "
+            "a restricted or hardship license that allows you to drive to work and essential "
+            "appointments while your suspension is active. Understanding the reinstatement process "
+            "and your hearing rights is critical."
+        ),
+        your_rights=[
+            "You must receive written notice of the suspension with the reason and effective date",
+            "You have the right to a hearing to contest the suspension in most states",
+            "You may qualify for a restricted or hardship license for work and medical appointments",
+            "Suspensions for unpaid fines can sometimes be lifted by setting up a payment plan",
+            "You can check your driving record to verify the accuracy of points and violations",
+            "Some states offer diversion programs that dismiss violations and prevent point accumulation",
+        ],
+        action_steps=[
+            "Request your driving record from the DMV to understand exactly why you're suspended",
+            "Check if you qualify for a hardship or restricted license in your state",
+            "If the suspension is for unpaid fines, contact the court about a payment plan",
+            "Request an administrative hearing to contest the suspension if you believe it's in error",
+            "Complete any required steps (defensive driving course, SR-22 insurance, substance abuse program)",
+            "Apply for reinstatement as soon as you're eligible — don't wait",
+        ],
+        deadlines=[
+            "Hearing request: Usually 10-30 days from the suspension notice",
+            "Reinstatement application: As soon as suspension period ends (varies by offense)",
+            "SR-22 insurance: Must be maintained for 1-5 years depending on state and offense",
+        ],
+        common_mistakes=[
+            "Driving on a suspended license — this creates new criminal charges and extends the suspension",
+            "Ignoring the suspension notice — you lose your right to a hearing",
+            "Not checking for outstanding fines in other jurisdictions that may block reinstatement",
+            "Assuming the suspension automatically ends — most states require you to actively apply for reinstatement",
+        ],
+        when_to_get_a_lawyer=(
+            "If the suspension resulted from a DUI, if you need to keep your license for work, "
+            "or if you believe the suspension was issued in error."
+        ),
+    ),
+    # --- TRAFFIC VIOLATIONS (additional) ---
+    RightsGuide(
+        id="traffic_dui_dwi",
+        domain="traffic_violations",
+        title="DUI/DWI Charges & Your Rights",
+        description="What to know if you're charged with driving under the influence",
+        explanation=(
+            "A DUI or DWI charge is one of the most serious traffic offenses and can result in "
+            "license suspension, heavy fines, mandatory substance abuse programs, and even jail time. "
+            "However, you have significant legal rights throughout the process. The prosecution must "
+            "prove impairment beyond a reasonable doubt, and there are specific procedures law enforcement "
+            "must follow during traffic stops and chemical testing. Errors in these procedures can be "
+            "grounds for dismissal or reduced charges."
+        ),
+        your_rights=[
+            "You have the right to remain silent during a traffic stop beyond providing your license and registration",
+            "You can refuse field sobriety tests in most states without automatic penalties",
+            "Breathalyzer and blood test results can be challenged based on calibration, procedure, and timing",
+            "You have the right to an independent blood test after a law enforcement chemical test",
+            "You are entitled to a DMV administrative hearing separate from the criminal case",
+            "First-time offenders may qualify for diversion programs that avoid a criminal conviction",
+        ],
+        action_steps=[
+            "Write down everything you remember about the stop, testing, and arrest as soon as possible",
+            "Request the DMV administrative hearing within the deadline (usually 7-10 days)",
+            "Obtain the police report and any dashcam or bodycam footage",
+            "Do not discuss the case on social media or with anyone except your lawyer",
+            "Research first-offender diversion programs available in your state",
+            "Consult with a DUI attorney — many offer free initial consultations",
+        ],
+        deadlines=[
+            "DMV hearing request: 7-10 days from arrest in most states",
+            "Court arraignment: Usually within 30-45 days of the arrest",
+            "License suspension: Automatic after 30 days if you don't request a hearing",
+        ],
+        common_mistakes=[
+            "Assuming a failed breathalyzer means automatic conviction — these results are challengeable",
+            "Missing the DMV hearing deadline — this results in automatic license suspension",
+            "Pleading guilty at arraignment without consulting an attorney first",
+            "Not requesting discovery including calibration records and officer training certifications",
+        ],
+        when_to_get_a_lawyer=(
+            "Always consult a DUI attorney. The consequences of a conviction are severe and long-lasting, "
+            "and an experienced attorney can often get charges reduced or dismissed based on procedural errors."
+        ),
+    ),
+    # --- FAMILY LAW (additional) ---
+    RightsGuide(
+        id="family_domestic_violence",
+        domain="family_law",
+        title="Domestic Violence Protection Orders",
+        description="How to get a protective order and your rights as a survivor",
+        explanation=(
+            "Every state provides a legal mechanism for survivors of domestic violence, stalking, "
+            "and harassment to obtain a protection order (also called a restraining order). These "
+            "orders can require the abuser to stay away from you, leave a shared home, and have "
+            "no contact with you or your children. Emergency orders can be granted the same day "
+            "you file — sometimes within hours. Violating a protection order is a criminal offense."
+        ),
+        your_rights=[
+            "You can petition for a protection order without a lawyer and without paying filing fees",
+            "Emergency or temporary orders can be issued the same day, often without the abuser present",
+            "The order can include stay-away provisions, exclusive use of the home, and temporary custody",
+            "Violating a protection order is a criminal offense — call 911 if it's violated",
+            "You have the right to a full hearing where both sides present evidence",
+            "Your address can be kept confidential through address confidentiality programs",
+        ],
+        action_steps=[
+            "Go to your local courthouse and ask for domestic violence protection order forms",
+            "Document all incidents: dates, descriptions, photos of injuries, threatening messages",
+            "Request an emergency/temporary order — a judge can grant this immediately",
+            "Attend the full hearing (usually within 10-21 days) to make the order permanent",
+            "Give a copy of the order to local police, your employer, your children's school",
+            "Create a safety plan including a go-bag, safe location, and emergency contacts",
+            "Contact the National DV Hotline (1-800-799-7233) for support and local resources",
+        ],
+        deadlines=[
+            "Emergency order: Can be filed and granted same-day",
+            "Temporary order: Usually lasts 10-21 days until the full hearing",
+            "Permanent order: Typically lasts 1-5 years and can be renewed",
+            "Criminal charges: Report violations immediately — each violation is a separate offense",
+        ],
+        common_mistakes=[
+            "Not documenting abuse — written records, photos, and witness statements strengthen your case",
+            "Voluntarily contacting the abuser while the order is active — this doesn't void the order but can complicate it",
+            "Not attending the full hearing — the temporary order expires and the case is dismissed",
+            "Assuming a protection order will solve everything — combine with a safety plan",
+        ],
+        when_to_get_a_lawyer=(
+            "Immediately if there are children involved, if you need to remove the abuser from a "
+            "shared home, or if the abuser has hired an attorney. Many legal aid organizations "
+            "provide free representation for DV survivors."
+        ),
+    ),
+    RightsGuide(
+        id="family_child_support",
+        domain="family_law",
+        title="Child Support Rights & Obligations",
+        description="Understanding child support calculations, modifications, and enforcement",
+        explanation=(
+            "Child support is a legal obligation to financially support your children. Every state "
+            "uses a formula (income shares model or percentage of income model) to calculate the "
+            "amount. Support orders can be modified when circumstances change significantly — job "
+            "loss, income increase, or changes in custody. Non-payment has serious consequences "
+            "including wage garnishment, license suspension, and even jail. Both paying and "
+            "receiving parents have important rights."
+        ),
+        your_rights=[
+            "Child support must be calculated using your state's formula based on actual income",
+            "You can request a modification when circumstances change significantly",
+            "The paying parent cannot reduce payments unilaterally — a court must approve changes",
+            "The receiving parent can enforce through wage garnishment, tax intercept, and license suspension",
+            "Support obligations continue regardless of visitation disputes — the two are legally separate",
+            "Both parents have the right to request a review of the support amount every 3 years",
+        ],
+        action_steps=[
+            "Use your state's child support calculator to estimate the correct amount",
+            "File for child support through your local child support enforcement agency (free service)",
+            "If you need a modification, file a motion with the court — don't just stop paying",
+            "Keep records of all payments made and received",
+            "If the other parent isn't paying, contact your state's child support enforcement agency",
+            "Report any significant income changes to the court promptly",
+        ],
+        deadlines=[
+            "New order: Can be filed at any time after establishing paternity",
+            "Modification: File as soon as circumstances change — modifications aren't retroactive in most states",
+            "Enforcement: Unpaid support accrues as a judgment — there's usually no statute of limitations on collecting arrears",
+            "Review request: Every 3 years either parent can request a review",
+        ],
+        common_mistakes=[
+            "Stopping payments without a court order — arrears accumulate and can't be forgiven retroactively",
+            "Not filing for modification after job loss — the court can't reduce what it doesn't know about",
+            "Withholding visitation because of non-payment — custody and support are legally separate issues",
+            "Not keeping payment records — always pay through the court system or keep detailed records",
+        ],
+        when_to_get_a_lawyer=(
+            "If paternity is disputed, if income is complex (self-employment, multiple jobs, bonuses), "
+            "if the other parent is hiding income, or if you're facing contempt charges for non-payment."
+        ),
+    ),
+    RightsGuide(
+        id="family_grandparent_rights",
+        domain="family_law",
+        title="Grandparent Visitation Rights",
+        description="When grandparents can seek court-ordered visitation with grandchildren",
+        explanation=(
+            "Grandparent visitation rights vary significantly by state. Generally, grandparents "
+            "can petition for court-ordered visitation when the nuclear family has been disrupted — "
+            "divorce, death of a parent, incarceration, or when the child has lived with the "
+            "grandparent. The U.S. Supreme Court ruled in Troxel v. Granville (2000) that fit "
+            "parents have a fundamental right to make decisions about their children, so courts "
+            "give significant weight to parental decisions. You must show that visitation serves "
+            "the child's best interests."
+        ),
+        your_rights=[
+            "Most states allow grandparents to petition for visitation when the family unit has been disrupted",
+            "You may have stronger rights if you previously had a custodial or caregiver relationship with the child",
+            "Courts must consider the best interests of the child, including the existing grandparent-child bond",
+            "Some states allow grandparent custody petitions when both parents are unfit",
+            "You have the right to a hearing where you can present evidence of your relationship with the child",
+            "Mediation may be required or available before a court hearing",
+        ],
+        action_steps=[
+            "Research your specific state's grandparent visitation statute",
+            "Document your existing relationship with the grandchild (photos, records of time spent together)",
+            "Attempt to resolve the dispute informally or through mediation first",
+            "File a petition for visitation in the family court where the child lives",
+            "Prepare evidence showing the visits serve the child's best interests",
+            "Consider whether your situation meets your state's threshold for filing (disrupted family, existing bond, etc.)",
+        ],
+        deadlines=[
+            "Filing: No specific deadline, but courts favor petitions filed while the relationship is still active",
+            "After adoption: In many states, adoption terminates grandparent visitation rights — act before finalization",
+        ],
+        common_mistakes=[
+            "Assuming you have an automatic right to visitation — the law heavily favors parental decisions",
+            "Not documenting the existing relationship before conflict arises",
+            "Filing in the wrong state — you must file where the child lives",
+            "Badmouthing the parents — courts view this negatively in best-interests analysis",
+        ],
+        when_to_get_a_lawyer=(
+            "For almost all grandparent visitation cases. These are legally complex and courts apply "
+            "strict constitutional standards. A family law attorney familiar with your state's "
+            "specific statute is essential."
+        ),
+    ),
+    # --- CRIMINAL RECORDS (additional) ---
+    RightsGuide(
+        id="criminal_arrest_rights",
+        domain="criminal_records",
+        title="Rights During Arrest & Police Encounters",
+        description="Know your constitutional rights during interactions with law enforcement",
+        explanation=(
+            "Your constitutional rights during police encounters come from the 4th, 5th, and 6th "
+            "Amendments. You have the right to remain silent, the right to refuse consent to searches, "
+            "and the right to an attorney. These rights apply whether you're stopped on the street, "
+            "pulled over in a car, or arrested. Knowing and calmly asserting these rights can "
+            "significantly affect the outcome of your case. Anything you say can and will be used "
+            "against you — this is not just a TV line."
+        ),
+        your_rights=[
+            "You have the right to remain silent — you don't have to answer questions beyond identifying yourself",
+            "You have the right to refuse consent to a search of your person, car, or home",
+            "You have the right to an attorney — and to have one present during questioning",
+            "If you can't afford an attorney, one will be appointed for you",
+            "You have the right to know why you're being arrested",
+            "You have the right to make a phone call within a reasonable time after arrest",
+            "You have the right to be free from excessive force",
+        ],
+        action_steps=[
+            "Stay calm and keep your hands visible — your safety is the priority",
+            "Clearly state: 'I am exercising my right to remain silent'",
+            "If asked to consent to a search, clearly say: 'I do not consent to a search'",
+            "Ask: 'Am I free to leave?' — if yes, walk away calmly",
+            "If arrested, say: 'I want to speak to a lawyer' and then stop talking",
+            "Remember badge numbers, patrol car numbers, and officer names if possible",
+            "Write down everything that happened as soon as possible after the encounter",
+        ],
+        deadlines=[
+            "Arraignment: You must be brought before a judge within 48-72 hours of arrest",
+            "Bail hearing: Typically at arraignment or within 48 hours",
+            "Complaint filing deadline: If police violated your rights, you typically have 180 days to 3 years to file a civil rights complaint",
+        ],
+        common_mistakes=[
+            "Talking to police without a lawyer — even innocent explanations can be used against you",
+            "Physically resisting arrest — this creates additional charges even if the arrest is unlawful",
+            "Consenting to a search and then trying to challenge it later — refusing is much stronger legally",
+            "Not asking for a lawyer clearly and repeatedly — ambiguous requests don't trigger your rights",
+        ],
+        when_to_get_a_lawyer=(
+            "Immediately after any arrest. Do not answer any questions, sign anything, or agree "
+            "to anything until you have spoken with an attorney. If you can't afford one, a public "
+            "defender will be assigned."
+        ),
+    ),
+    RightsGuide(
+        id="criminal_record_sealing",
+        domain="criminal_records",
+        title="Record Sealing & Certificates of Rehabilitation",
+        description="Options beyond expungement for clearing or reducing the impact of a criminal record",
+        explanation=(
+            "Beyond expungement, many states offer additional ways to reduce the impact of a criminal "
+            "record. Record sealing hides the record from public view but doesn't destroy it. "
+            "Certificates of rehabilitation or relief are official documents showing you've been "
+            "rehabilitated, which can help with employment, housing, and professional licensing. "
+            "Some states also offer pardons, which forgive the conviction entirely. Each option has "
+            "different eligibility requirements and effects."
+        ),
+        your_rights=[
+            "Many states allow sealing of arrest records that didn't lead to conviction",
+            "Juvenile records are often automatically sealed when you turn 18",
+            "Certificates of rehabilitation can remove barriers to professional licensing",
+            "Sealed records generally don't appear on standard background checks",
+            "You can legally answer 'no' to most questions about sealed or expunged records",
+            "Some states have 'ban the box' laws that delay when employers can ask about criminal history",
+        ],
+        action_steps=[
+            "Research your state's specific options: expungement, sealing, certificates, pardons",
+            "Obtain your complete criminal record from the state repository",
+            "Check eligibility requirements — waiting periods, offense types, completion of sentence",
+            "Gather evidence of rehabilitation: employment history, community service, education, references",
+            "File the appropriate petition with the court that handled your case",
+            "Attend the hearing prepared with your rehabilitation evidence and personal statement",
+        ],
+        deadlines=[
+            "Waiting period: Typically 1-10 years after completing your sentence, depending on offense and state",
+            "Juvenile records: Many states seal automatically at age 18 or 21",
+            "Pardon application: Usually no deadline but requires significant time since conviction",
+        ],
+        common_mistakes=[
+            "Assuming expungement is the only option — sealing and certificates are often easier to obtain",
+            "Not checking all jurisdictions where you have records",
+            "Filing too early before the waiting period has passed",
+            "Not preparing evidence of rehabilitation — courts want to see you've changed",
+        ],
+        when_to_get_a_lawyer=(
+            "If your record includes felonies, if you have records in multiple states, or if "
+            "you've been denied a job or license due to your record. Many legal aid organizations "
+            "offer free record-clearing clinics."
+        ),
+    ),
+    RightsGuide(
+        id="criminal_probation_rights",
+        domain="criminal_records",
+        title="Probation & Parole Rights",
+        description="Understanding your rights and obligations while on probation or parole",
+        explanation=(
+            "Probation and parole allow you to serve part or all of your sentence in the community "
+            "under supervision. While your rights are limited compared to someone not under supervision, "
+            "you still have important legal protections. You have the right to know your conditions, "
+            "the right to a hearing before revocation, and the right to due process. Understanding "
+            "what your probation officer can and cannot do is critical to successfully completing "
+            "your supervision."
+        ),
+        your_rights=[
+            "You must receive written notice of all conditions of your probation or parole",
+            "You have the right to a hearing before your probation or parole is revoked",
+            "You have the right to present evidence and witnesses at a revocation hearing",
+            "Probation officers need reasonable suspicion (not a warrant) for searches in most states",
+            "You have the right to request a modification of conditions if circumstances change",
+            "You may be eligible for early termination after completing a portion of your probation",
+        ],
+        action_steps=[
+            "Keep a copy of all your conditions and review them carefully",
+            "Maintain a log of all meetings, payments, and completed requirements",
+            "Communicate proactively with your probation officer about any issues or changes",
+            "Complete all required programs (drug testing, community service, classes) on time",
+            "If you can't meet a condition, ask your PO or the court for a modification BEFORE violating",
+            "After completing 50-75% of your term, ask your attorney about early termination",
+        ],
+        deadlines=[
+            "Reporting: As scheduled with your probation/parole officer — never miss without prior approval",
+            "Restitution payments: As ordered by the court — falling behind can trigger revocation",
+            "Early termination: Usually eligible after completing half to two-thirds of the term",
+            "Revocation hearing: Must be held within a reasonable time after the alleged violation",
+        ],
+        common_mistakes=[
+            "Missing appointments without calling ahead — this is a technical violation that can lead to revocation",
+            "Not understanding all your conditions — read every line and ask about anything unclear",
+            "Associating with prohibited persons — this includes social media contact in some jurisdictions",
+            "Assuming a minor violation won't matter — even technical violations can result in incarceration",
+        ],
+        when_to_get_a_lawyer=(
+            "Immediately if you're facing a revocation hearing. You have the right to an attorney "
+            "at revocation hearings, and the consequences of revocation can be severe."
+        ),
+    ),
+    RightsGuide(
+        id="criminal_juvenile_records",
+        domain="criminal_records",
+        title="Juvenile Records & Rights",
+        description="Special protections for juvenile offenders and how to clear juvenile records",
+        explanation=(
+            "The juvenile justice system is designed around rehabilitation, not punishment. Juvenile "
+            "records carry significant protections that adult records don't — they're usually "
+            "confidential, often eligible for automatic sealing, and most states limit how they "
+            "can be used against you as an adult. However, these records can still affect college "
+            "admissions, military service, and some careers if not properly sealed. Understanding "
+            "your state's rules can help you ensure your juvenile record doesn't follow you."
+        ),
+        your_rights=[
+            "Juvenile court proceedings are generally closed to the public",
+            "Juvenile records are confidential and not part of the public record in most states",
+            "Many states automatically seal juvenile records at age 18 or 21",
+            "You generally don't have to disclose sealed juvenile records on job or school applications",
+            "Juvenile adjudications are not 'convictions' in most legal contexts",
+            "You may have the right to have your juvenile record destroyed (not just sealed) in some states",
+        ],
+        action_steps=[
+            "Check if your state automatically seals juvenile records or if you need to petition",
+            "Contact the juvenile court that handled your case to request your records",
+            "If not automatically sealed, file a petition to seal or expunge your juvenile record",
+            "Verify that sealed records don't appear on background checks by running one on yourself",
+            "If records appear despite being sealed, contact the reporting agency to dispute",
+            "Keep a copy of the sealing order to show employers or schools if needed",
+        ],
+        deadlines=[
+            "Automatic sealing: Usually at age 18 or 21 depending on state",
+            "Petition to seal: Available immediately in some states, or after a waiting period of 1-5 years",
+            "Record destruction: Some states allow petition after a longer period (5-10 years)",
+        ],
+        common_mistakes=[
+            "Assuming juvenile records disappeared automatically — not all states auto-seal",
+            "Not checking if your record was actually sealed — errors happen",
+            "Disclosing sealed records when not legally required to do so",
+            "Not knowing that some serious juvenile offenses may not be eligible for sealing",
+        ],
+        when_to_get_a_lawyer=(
+            "If your juvenile record is preventing you from getting a job, into school, or into the "
+            "military. Legal aid organizations often handle juvenile record clearing for free."
+        ),
+    ),
+    # --- SMALL CLAIMS COURT (additional) ---
+    RightsGuide(
+        id="small_claims_defending",
+        domain="small_claims",
+        title="Defending Yourself in Small Claims Court",
+        description="How to respond when someone sues you in small claims court",
+        explanation=(
+            "Being sued in small claims court can be stressful, but defendants actually win more "
+            "often than you'd think. Small claims court is designed for self-representation — no "
+            "lawyers needed (and some states don't even allow them). The plaintiff bears the "
+            "burden of proof and must convince the judge by a 'preponderance of the evidence.' "
+            "You have the right to present your side, bring evidence, and file a counterclaim "
+            "if the plaintiff actually owes you money."
+        ),
+        your_rights=[
+            "You must receive proper notice of the lawsuit with enough time to prepare a defense",
+            "You have the right to present evidence, call witnesses, and cross-examine the plaintiff",
+            "You can file a counterclaim if the plaintiff owes you money",
+            "You can request a continuance (postponement) if you need more time to prepare",
+            "The plaintiff must prove their case — you don't have to prove you're innocent",
+            "You can appeal an unfavorable decision in most states",
+        ],
+        action_steps=[
+            "Read the complaint carefully — understand exactly what the plaintiff is claiming",
+            "File your written response (answer) by the deadline stated in the summons",
+            "Gather your evidence: contracts, receipts, photos, text messages, emails",
+            "Prepare a clear, organized timeline of events",
+            "If you have a claim against the plaintiff, file a counterclaim before the hearing",
+            "Bring 3 copies of all evidence to court — one for you, the judge, and the plaintiff",
+            "Practice explaining your side in under 5 minutes — judges appreciate brevity",
+        ],
+        deadlines=[
+            "Response deadline: Usually 10-30 days after being served (check your summons)",
+            "Counterclaim deadline: Usually must be filed before the hearing date",
+            "Appeal deadline: Typically 30 days after the judgment",
+        ],
+        common_mistakes=[
+            "Not showing up — the plaintiff automatically wins a default judgment",
+            "Being disrespectful to the judge — address them as 'Your Honor' and stay calm",
+            "Bringing irrelevant evidence — focus only on what proves your case",
+            "Not filing a counterclaim when you have one — you lose the chance to recover your losses",
+        ],
+        when_to_get_a_lawyer=(
+            "If the amount is near the small claims limit in your state, if the case involves "
+            "complex legal issues, or if you want to appeal an unfavorable judgment."
+        ),
+    ),
+    RightsGuide(
+        id="small_claims_collecting",
+        domain="small_claims",
+        title="Collecting a Small Claims Judgment",
+        description="How to actually get paid after winning in small claims court",
+        explanation=(
+            "Winning in small claims court is only half the battle — the court doesn't collect "
+            "the money for you. If the losing party doesn't pay voluntarily, you become a "
+            "'judgment creditor' with legal tools to enforce the judgment. These include wage "
+            "garnishment, bank levies, property liens, and asset seizure. Most people don't "
+            "realize that small claims judgments are valid for 5-20 years and can be renewed, "
+            "so you can wait until the debtor has assets or income to collect."
+        ),
+        your_rights=[
+            "You can garnish the debtor's wages (usually 25% of disposable earnings)",
+            "You can levy the debtor's bank accounts to seize funds",
+            "You can place a lien on the debtor's real property",
+            "You can request a debtor's examination to discover their assets and income",
+            "Judgments accrue interest (typically 5-10% annually depending on state)",
+            "Judgments can be renewed before they expire, extending your collection window",
+        ],
+        action_steps=[
+            "Wait the required period after judgment (usually 30 days for appeals period to expire)",
+            "Send the debtor a formal demand letter with a copy of the judgment",
+            "If they don't pay, file for a debtor's examination to discover their assets",
+            "Apply for a wage garnishment order if the debtor is employed",
+            "Apply for a bank levy if you know where they bank",
+            "File a judgment lien against any real property they own",
+            "Consider hiring a collection agency — they typically take 25-50% but handle all the work",
+        ],
+        deadlines=[
+            "Waiting period: 30 days after judgment before enforcement (appeals window)",
+            "Judgment duration: 5-20 years depending on state",
+            "Renewal: Must be renewed before expiration — check your state's deadline",
+            "Debtor's exam: Can be requested multiple times (usually annually)",
+        ],
+        common_mistakes=[
+            "Assuming the court will collect for you — collection is 100% your responsibility",
+            "Not doing a debtor's examination — you can't garnish what you don't know about",
+            "Letting the judgment expire without renewing it",
+            "Accepting a payment plan without putting it in writing with consequences for default",
+        ],
+        when_to_get_a_lawyer=(
+            "If the debtor has significant assets but is hiding them, if the judgment is large, "
+            "or if the debtor has moved to another state (domesticating judgments across state "
+            "lines requires legal knowledge)."
+        ),
+    ),
+    RightsGuide(
+        id="small_claims_mediation",
+        domain="small_claims",
+        title="Mediation & Alternative Dispute Resolution",
+        description="Resolving disputes without going to court",
+        explanation=(
+            "Mediation is a structured negotiation process where a neutral mediator helps both "
+            "parties reach a voluntary agreement. Many courts require mediation before trial, and "
+            "for good reason — mediation resolves disputes faster, cheaper, and more flexibly than "
+            "a court judgment. Unlike a judge, a mediator helps you create a solution both sides "
+            "can live with. Agreements reached in mediation can be made legally binding and "
+            "enforceable just like a court judgment."
+        ),
+        your_rights=[
+            "Mediation is voluntary — no one can force you to accept an agreement you don't like",
+            "What you say in mediation is confidential and cannot be used against you in court",
+            "You can bring a lawyer or support person to mediation",
+            "If mediation fails, you still have the right to a court hearing",
+            "Mediated agreements can be filed with the court and become enforceable as court orders",
+            "Many courts and community organizations offer free or low-cost mediation services",
+        ],
+        action_steps=[
+            "Check if your court requires mediation before trial — many small claims courts do",
+            "Contact your local community mediation center for free or low-cost services",
+            "Prepare a clear summary of the dispute and what resolution you want",
+            "Bring all relevant documents and evidence to the mediation session",
+            "Listen to the other side — understanding their position helps you negotiate",
+            "If you reach an agreement, get it in writing and file it with the court",
+        ],
+        deadlines=[
+            "Court-ordered mediation: Must be completed before your trial date",
+            "Filing mediated agreement: Usually no deadline but best to file immediately",
+            "Enforcing a mediated agreement: Same deadlines as any contract (varies by state)",
+        ],
+        common_mistakes=[
+            "Going in with a 'win everything' mindset — mediation works through compromise",
+            "Not preparing your case as thoroughly as you would for court",
+            "Refusing mediation when the court offers it — judges look favorably on parties who try to resolve things",
+            "Not putting the agreement in writing — verbal mediation agreements are hard to enforce",
+        ],
+        when_to_get_a_lawyer=(
+            "Generally not needed for mediation of small claims disputes. Consider one if the "
+            "dispute involves complex legal issues or if the amount at stake is significant."
+        ),
+    ),
+    RightsGuide(
+        id="small_claims_evidence",
+        domain="small_claims",
+        title="Gathering & Presenting Evidence",
+        description="How to build a strong case with compelling evidence for small claims court",
+        explanation=(
+            "The outcome of your small claims case depends almost entirely on the evidence you "
+            "present. Judges decide based on the 'preponderance of evidence' — meaning whichever "
+            "side is more convincing wins. Organized, relevant evidence presented clearly will beat "
+            "emotional arguments every time. The good news is that small claims court has relaxed "
+            "rules of evidence compared to regular court, so you can present text messages, emails, "
+            "photos, and printouts that might not be admissible elsewhere."
+        ),
+        your_rights=[
+            "You can subpoena witnesses and documents to support your case",
+            "Small claims courts have relaxed evidence rules — most relevant documents are admissible",
+            "You can present photos, videos, text messages, emails, and social media posts as evidence",
+            "You have the right to cross-examine the other party and their witnesses",
+            "You can request documents from the other side before the hearing in some states",
+            "Hearsay rules are relaxed in small claims court in most jurisdictions",
+        ],
+        action_steps=[
+            "Organize evidence chronologically — create a timeline of events",
+            "Label each piece of evidence (Exhibit A, B, C) and prepare 3 copies of everything",
+            "Print text messages and emails — don't rely on showing your phone screen",
+            "Get witness statements in writing if witnesses can't attend the hearing",
+            "Take photos with timestamps showing the damage, defect, or condition at issue",
+            "Prepare a brief opening statement that tells your story in 3-5 minutes",
+            "Practice presenting your evidence in order — judges appreciate organized parties",
+        ],
+        deadlines=[
+            "Evidence submission: Some courts require evidence to be submitted before the hearing",
+            "Subpoenas: Must be served a reasonable time before the hearing (typically 10-15 days)",
+            "Witness lists: Some courts require advance notice of witnesses you plan to call",
+        ],
+        common_mistakes=[
+            "Showing up with a disorganized stack of papers — organize and label everything",
+            "Relying on your memory instead of documents — written evidence is always stronger",
+            "Bringing irrelevant evidence — focus only on what directly supports your claim",
+            "Not bringing enough copies — you need one for you, the judge, and the other party",
+        ],
+        when_to_get_a_lawyer=(
+            "If you need help subpoenaing important evidence, if the other side is represented, "
+            "or if the case depends on expert testimony (like a mechanic's assessment of car damage)."
+        ),
+    ),
+    # --- CONTRACT DISPUTES (additional) ---
+    RightsGuide(
+        id="contract_freelance_disputes",
+        domain="contract_disputes",
+        title="Freelance & Independent Contractor Payment Disputes",
+        description="Your rights when a client doesn't pay for work you've completed",
+        explanation=(
+            "Freelancers and independent contractors are entitled to payment for completed work, "
+            "even without a written contract. An oral agreement or even an email thread can "
+            "constitute a binding contract. Many states and cities have passed freelance protection "
+            "laws (like NYC's Freelance Isn't Free Act) that impose penalties on clients who don't "
+            "pay on time. If a client refuses to pay, you have multiple enforcement options from "
+            "demand letters to small claims court."
+        ),
+        your_rights=[
+            "You are entitled to payment for all completed work, even without a written contract",
+            "Oral agreements and email confirmations can be legally binding contracts",
+            "Many states impose penalties on late payment, including interest and attorney fees",
+            "You can file a mechanic's lien if you performed construction or improvement work",
+            "Freelance protection laws in some states/cities provide double damages for non-payment",
+            "You have the right to withhold delivery of final work product until payment is received",
+        ],
+        action_steps=[
+            "Send a formal demand letter with an itemized invoice and a payment deadline (usually 10-30 days)",
+            "Document all work performed: emails, contracts, deliverables, time logs, and communications",
+            "Check if your state or city has a freelance protection law with additional penalties",
+            "File a complaint with your state labor department if applicable",
+            "File in small claims court if the amount is within the limit (varies by state: $2,500-$25,000)",
+            "Report the client to the Better Business Bureau and leave honest reviews on business platforms",
+        ],
+        deadlines=[
+            "Demand letter: Send as soon as payment is overdue",
+            "Small claims filing: Statute of limitations is 2-6 years for written contracts, 2-4 for oral",
+            "Freelance protection law claims: Usually 6 years in states that have them",
+            "Mechanic's lien: Must be filed within 30-120 days depending on state",
+        ],
+        common_mistakes=[
+            "Not having a written agreement — always get scope, timeline, and payment terms in writing",
+            "Continuing to do work for a non-paying client hoping they'll pay eventually",
+            "Not keeping time records and delivery confirmations",
+            "Accepting 'exposure' or promises of future work instead of pursuing payment",
+        ],
+        when_to_get_a_lawyer=(
+            "If the amount owed exceeds small claims limits, if you need to file a mechanic's lien, "
+            "or if the client is a large company with legal representation."
+        ),
+    ),
+    RightsGuide(
+        id="contract_rental_agreements",
+        domain="contract_disputes",
+        title="Service Contracts & Subscription Disputes",
+        description="Your rights with gym memberships, phone plans, and other service contracts",
+        explanation=(
+            "Service contracts — gym memberships, phone plans, cable packages, subscription boxes — "
+            "are among the most common sources of consumer disputes. Many of these contracts contain "
+            "automatic renewal clauses, early termination fees, and arbitration clauses that companies "
+            "rely on to prevent you from canceling. Federal and state laws provide significant "
+            "protections including cooling-off periods, requirements for clear cancellation "
+            "procedures, and limits on automatic renewals."
+        ),
+        your_rights=[
+            "The FTC's Cooling-Off Rule gives you 3 days to cancel contracts signed at your home or workplace",
+            "Automatic renewal terms must be clearly disclosed before you sign up",
+            "Many states require companies to provide a simple cancellation method (online if you signed up online)",
+            "Early termination fees must be reasonable and proportional to actual damages",
+            "You can dispute charges through your credit card company if the company won't cancel",
+            "Unconscionable contract terms (extremely unfair) can be voided by courts",
+        ],
+        action_steps=[
+            "Review your contract for cancellation terms, notice requirements, and termination fees",
+            "Cancel in writing and keep a copy — certified mail or email with read receipt",
+            "If the company won't cancel, file a complaint with your state attorney general",
+            "Dispute any unauthorized charges with your credit card company",
+            "Check if your state has specific laws for your type of service (gym membership laws, etc.)",
+            "If you're stuck in a contract due to deceptive practices, file a complaint with the FTC",
+        ],
+        deadlines=[
+            "Cooling-off period: 3 days from signing for door-to-door/home sales",
+            "Contract cancellation notice: As specified in the contract (typically 30 days before renewal)",
+            "Credit card dispute: 60 days from the statement date",
+            "State AG complaint: Usually within 1-3 years of the incident",
+        ],
+        common_mistakes=[
+            "Not reading the auto-renewal clause before signing — this is where companies trap you",
+            "Canceling by phone only without written confirmation — you have no proof if they keep charging",
+            "Paying early termination fees without checking if they're legally enforceable",
+            "Not checking your credit card statements for charges after you think you've canceled",
+        ],
+        when_to_get_a_lawyer=(
+            "If the company is charging you thousands in termination fees, if they refuse to honor "
+            "a legitimate cancellation, or if the contract involves a significant ongoing obligation."
+        ),
+    ),
+    RightsGuide(
+        id="contract_home_improvement",
+        domain="contract_disputes",
+        title="Home Improvement & Contractor Disputes",
+        description="Your rights when contractors do poor work, abandon the job, or overcharge",
+        explanation=(
+            "Home improvement projects are one of the most common sources of contract disputes. "
+            "Contractors who abandon jobs, do substandard work, or demand payment beyond the agreed "
+            "price are unfortunately common. Most states require contractors to be licensed, provide "
+            "written contracts for jobs over a certain amount, and offer homeowners specific "
+            "protections. The key to resolving these disputes is documentation — contracts, change "
+            "orders, photos, and payment records."
+        ),
+        your_rights=[
+            "Contractors must be licensed in most states — unlicensed contractors may not be able to enforce contracts",
+            "Written contracts are required for home improvement jobs over a certain amount (typically $500-$1,000)",
+            "You have the right to a detailed written estimate before work begins",
+            "Change orders must be agreed to in writing before additional work is performed",
+            "Most states provide a contractor recovery fund if a licensed contractor defrauds you",
+            "You have a right to file a complaint with your state's contractor licensing board",
+        ],
+        action_steps=[
+            "Verify the contractor's license through your state's licensing board website",
+            "Document everything with photos before, during, and after the work",
+            "Put all agreements and changes in writing — never rely on verbal promises",
+            "If the work is defective, get a written assessment from another licensed contractor",
+            "Send a written demand letter detailing the defects and the remedy you're requesting",
+            "File a complaint with the contractor licensing board — this can result in disciplinary action",
+            "File in small claims court or hire an attorney depending on the amount at stake",
+        ],
+        deadlines=[
+            "Cooling-off period: 3 days to cancel a home improvement contract signed at your home",
+            "Contractor licensing board complaint: Varies by state (typically 1-4 years)",
+            "Breach of contract lawsuit: 4-6 years depending on state",
+            "Construction defect claims: Statutes of repose range from 5-12 years after completion",
+        ],
+        common_mistakes=[
+            "Paying the full amount before work is completed — structure payments as milestones",
+            "Not getting everything in writing — 'we'll figure it out as we go' is a recipe for disputes",
+            "Hiring an unlicensed contractor to save money — you lose most legal protections",
+            "Not checking references and previous work — always verify before hiring",
+        ],
+        when_to_get_a_lawyer=(
+            "If the project cost exceeds $10,000, if there are structural defects, if the contractor "
+            "filed a mechanic's lien on your property, or if you need to pursue the contractor's bond."
+        ),
+    ),
+    RightsGuide(
+        id="contract_online_purchases",
+        domain="contract_disputes",
+        title="Online Purchase Disputes & Chargebacks",
+        description="Your rights when online orders go wrong — wrong items, non-delivery, or fraud",
+        explanation=(
+            "Online purchases are protected by a combination of federal law (Fair Credit Billing Act, "
+            "FTC Mail Order Rule), state consumer protection laws, and payment platform policies. "
+            "If a seller doesn't ship your order within the promised time (or 30 days if no timeframe "
+            "was given), you have the right to cancel for a full refund. Credit card chargebacks are "
+            "your most powerful tool — they reverse charges and put the burden on the seller to prove "
+            "they fulfilled the order."
+        ),
+        your_rights=[
+            "Sellers must ship within the promised timeframe or within 30 days (FTC Mail Order Rule)",
+            "You can cancel for a full refund if the seller misses the shipping deadline",
+            "Credit card purchases can be disputed via chargeback for non-delivery, wrong item, or fraud",
+            "You are not liable for unauthorized credit card charges over $50 (and most banks offer $0 liability)",
+            "Debit card purchases have chargeback rights too, though with shorter timelines",
+            "PayPal, Venmo, and other platforms have their own buyer protection programs",
+        ],
+        action_steps=[
+            "Contact the seller first — email with a clear description of the problem and your desired resolution",
+            "Give the seller a reasonable time to respond (7-14 days)",
+            "If no resolution, file a chargeback with your credit card company",
+            "File a complaint with the FTC at ReportFraud.ftc.gov",
+            "Leave honest reviews to warn other consumers",
+            "If the amount is significant, file a complaint with your state attorney general",
+        ],
+        deadlines=[
+            "Credit card chargeback: 60 days from the statement date",
+            "Debit card dispute: 60 days from the statement date (but report sooner for lower liability)",
+            "PayPal dispute: 180 days from the transaction date",
+            "FTC complaint: No strict deadline but file promptly",
+        ],
+        common_mistakes=[
+            "Waiting too long to dispute — the 60-day chargeback window is strict",
+            "Only contacting the seller and not filing a chargeback — do both simultaneously if the seller is unresponsive",
+            "Using debit instead of credit for online purchases — credit cards offer stronger fraud protection",
+            "Accepting store credit when you're entitled to a full refund",
+        ],
+        when_to_get_a_lawyer=(
+            "If the purchase was very expensive, if the seller is threatening legal action over "
+            "your chargeback, or if you're the victim of a large-scale online fraud scheme."
+        ),
+    ),
+    # --- IMMIGRATION (additional) ---
+    RightsGuide(
+        id="immigration_workplace_rights",
+        domain="immigration",
+        title="Immigrant Workers' Rights",
+        description="Employment rights that protect all workers regardless of immigration status",
+        explanation=(
+            "All workers in the United States have core employment rights regardless of immigration "
+            "status. This includes minimum wage, overtime pay, safe working conditions, and protection "
+            "from discrimination. Employers cannot threaten to call immigration authorities to avoid "
+            "paying wages or in retaliation for workplace complaints. Federal agencies like the DOL "
+            "and EEOC enforce these rights and generally do not ask about immigration status when "
+            "investigating workplace violations."
+        ),
+        your_rights=[
+            "You are entitled to minimum wage and overtime pay regardless of immigration status",
+            "OSHA workplace safety protections apply to all workers",
+            "Employers cannot retaliate against you for reporting safety violations or wage theft",
+            "Employers cannot threaten to report your immigration status to avoid paying wages",
+            "Anti-discrimination laws (Title VII, ADA) protect all workers",
+            "Workers' compensation covers on-the-job injuries regardless of immigration status",
+            "You have the right to file a wage claim with the Department of Labor",
+        ],
+        action_steps=[
+            "Keep your own records of hours worked, pay received, and any agreements with your employer",
+            "If your employer isn't paying correctly, file a wage complaint with the Department of Labor",
+            "Report unsafe working conditions to OSHA — complaints can be anonymous",
+            "If threatened with immigration enforcement, contact a workers' rights organization immediately",
+            "Document any retaliation (firing, schedule changes, threats) with dates and details",
+            "Contact a legal aid organization that specializes in immigrant workers' rights",
+        ],
+        deadlines=[
+            "Federal wage claim: 2 years (3 years for willful violations) under FLSA",
+            "OSHA complaint: 30 days from the safety violation or retaliation",
+            "EEOC discrimination charge: 180-300 days from the discriminatory act",
+            "State wage claims: Varies by state, typically 2-4 years",
+        ],
+        common_mistakes=[
+            "Believing you have no rights because of your immigration status — you have core labor rights",
+            "Not keeping your own pay records — don't rely solely on the employer's records",
+            "Being afraid to report — federal labor agencies generally don't check immigration status",
+            "Accepting cash payment below minimum wage — this is illegal regardless of your status",
+        ],
+        when_to_get_a_lawyer=(
+            "If your employer is threatening deportation, if you're owed significant back wages, "
+            "if you've been injured at work, or if you face retaliation for exercising your rights. "
+            "Many legal aid organizations offer free services for immigrant workers."
+        ),
+    ),
+    RightsGuide(
+        id="immigration_ice_encounters",
+        domain="immigration",
+        title="Rights During ICE Encounters",
+        description="Know your constitutional rights during immigration enforcement encounters",
+        explanation=(
+            "The Constitution protects everyone in the United States — citizens and non-citizens alike — "
+            "during encounters with law enforcement, including Immigration and Customs Enforcement (ICE). "
+            "You have the right to remain silent, the right to refuse entry to your home without a "
+            "judicial warrant (not an ICE administrative warrant), and the right to an attorney. "
+            "Knowing and asserting these rights calmly and clearly can significantly affect the "
+            "outcome of an encounter."
+        ),
+        your_rights=[
+            "You have the right to remain silent — you do not have to answer questions about your immigration status",
+            "You do not have to open your door unless ICE has a judicial warrant signed by a judge",
+            "An ICE administrative warrant (Form I-200) does NOT give them the right to enter your home",
+            "You have the right to speak with a lawyer before signing any documents",
+            "You have the right to refuse to sign any documents — especially voluntary departure forms",
+            "You have the right to contact your consulate if detained",
+            "You have the right to a hearing before an immigration judge in most cases",
+        ],
+        action_steps=[
+            "Stay calm — do not run, argue, or physically resist",
+            "Ask if they have a judicial warrant — if not, you do not have to open the door",
+            "State clearly: 'I am exercising my right to remain silent'",
+            "Do not sign anything without speaking to a lawyer first",
+            "Memorize or carry a 'know your rights' card with key phrases in your language",
+            "Have an emergency plan: designate someone to care for children and contact a lawyer",
+            "Contact a local immigration legal services organization before any encounter if possible",
+        ],
+        deadlines=[
+            "Bond hearing: Can be requested after detention — timing varies",
+            "Appeal of removal order: 30 days to file with the Board of Immigration Appeals",
+            "Asylum application: Must be filed within 1 year of arrival in the U.S.",
+            "Voluntary departure: If granted, you must leave by the date or face penalties",
+        ],
+        common_mistakes=[
+            "Opening the door to ICE without asking for a judicial warrant first",
+            "Answering questions about your immigration status or country of origin",
+            "Signing voluntary departure forms without understanding the consequences",
+            "Carrying false documents — this creates additional criminal charges",
+            "Not having an emergency plan for dependents in case of detention",
+        ],
+        when_to_get_a_lawyer=(
+            "Immediately if you or a family member is detained. If you can't afford an attorney, "
+            "contact your local legal aid society, the National Immigrant Justice Center, or "
+            "the ACLU immigrants' rights hotline."
+        ),
+    ),
+    RightsGuide(
+        id="immigration_visa_basics",
+        domain="immigration",
+        title="Visa Types & Status Protection",
+        description="Understanding common visa categories and how to maintain legal status",
+        explanation=(
+            "Maintaining legal immigration status is critical — even minor violations can have "
+            "serious consequences for future applications. The U.S. visa system includes dozens "
+            "of categories for work, family, students, and humanitarian purposes. Each visa type "
+            "has specific rules about what you can and cannot do, how long you can stay, and how "
+            "to extend or change status. Understanding your specific visa's requirements is the "
+            "single most important thing you can do to protect your immigration status."
+        ),
+        your_rights=[
+            "You have the right to apply for extension or change of status before your current status expires",
+            "You can maintain status while a timely-filed extension or change is pending",
+            "You have the right to travel on a valid visa with proper documentation",
+            "You have the right to work if your visa category authorizes employment",
+            "You can apply for adjustment of status to permanent residence if eligible",
+            "You have the right to due process in any removal proceedings",
+        ],
+        action_steps=[
+            "Know your visa expiration date AND your I-94 date — these are often different",
+            "File for extension or change of status at least 45 days before your I-94 expires",
+            "Keep copies of all immigration documents, forms, receipts, and correspondence",
+            "Report address changes to USCIS within 10 days using Form AR-11",
+            "Check your visa conditions carefully — some prohibit certain types of employment",
+            "Consult an immigration attorney before any major life changes (job change, marriage, etc.)",
+        ],
+        deadlines=[
+            "Extension filing: Before your I-94 expires — late filings are not accepted",
+            "Address change notification: Within 10 days of moving (Form AR-11)",
+            "H-1B lottery: Typically March registration period each year",
+            "Green card lottery (DV): Usually October-November each year",
+            "Adjustment of status: While in valid status (with some exceptions)",
+        ],
+        common_mistakes=[
+            "Confusing visa stamp expiration with I-94 expiration — the I-94 controls how long you can stay",
+            "Overstaying even by one day — this can trigger 3-year or 10-year bars on re-entry",
+            "Working without authorization — even one day of unauthorized employment can affect future applications",
+            "Not keeping copies of everything — immigration cases depend heavily on documentation",
+            "Failing to report address changes — this is a legal requirement that many people overlook",
+        ],
+        when_to_get_a_lawyer=(
+            "Before making any changes to your employment, before traveling internationally, "
+            "if your status is about to expire, or if you receive any notice from USCIS or immigration court. "
+            "Immigration law is extremely complex — professional guidance is almost always worth the cost."
+        ),
+    ),
+    RightsGuide(
+        id="immigration_asylum_basics",
+        domain="immigration",
+        title="Asylum & Refugee Protections",
+        description="Understanding the asylum process and your rights as an asylum seeker",
+        explanation=(
+            "Asylum is a form of protection that allows individuals who have been persecuted or "
+            "fear persecution in their home country to remain in the United States. You can apply "
+            "for asylum based on persecution due to race, religion, nationality, membership in a "
+            "particular social group, or political opinion. The process involves filing Form I-589, "
+            "attending an interview with an asylum officer, and potentially appearing before an "
+            "immigration judge. Asylum seekers have significant legal rights throughout this process."
+        ),
+        your_rights=[
+            "You can apply for asylum regardless of how you entered the United States",
+            "You have the right to an interpreter during your asylum interview",
+            "You have the right to present evidence and witnesses supporting your claim",
+            "You cannot be returned to a country where you face persecution (non-refoulement)",
+            "You can apply for work authorization 150 days after filing your asylum application",
+            "Your spouse and unmarried children under 21 can be included in your application",
+            "You have the right to appeal a denial to the Board of Immigration Appeals",
+        ],
+        action_steps=[
+            "File Form I-589 within 1 year of arriving in the United States",
+            "Gather all evidence of persecution: documents, photos, news articles, country condition reports",
+            "Obtain a psychological evaluation if you have trauma — this strengthens credible fear claims",
+            "Get declarations from witnesses who can corroborate your story",
+            "Prepare a detailed personal declaration describing what happened to you and why you fear return",
+            "Find a legal representative — many organizations provide free asylum legal services",
+        ],
+        deadlines=[
+            "Filing deadline: Within 1 year of arrival in the U.S. (exceptions exist for changed or extraordinary circumstances)",
+            "Work authorization: Can apply 150 days after filing; granted 180 days after filing if no decision",
+            "Appeal of denial: 30 days to file with the Board of Immigration Appeals",
+            "Court appearances: Never miss an immigration court date — this results in an in absentia removal order",
+        ],
+        common_mistakes=[
+            "Missing the 1-year filing deadline — this is the most common reason for asylum denial",
+            "Not being detailed enough in your personal declaration — specificity is critical",
+            "Inconsistencies between your application and interview — be honest and consistent",
+            "Not bringing evidence of country conditions — this corroborates your individual claim",
+            "Missing court dates — this results in automatic deportation orders",
+        ],
+        when_to_get_a_lawyer=(
+            "For every asylum case. Represented asylum seekers are significantly more likely to "
+            "win their cases. Many legal aid organizations, law school clinics, and pro bono "
+            "programs provide free asylum representation."
+        ),
+    ),
+    # --- DEBT & COLLECTIONS (additional) ---
+    RightsGuide(
+        id="debt_statute_limitations",
+        domain="debt_collections",
+        title="Statute of Limitations on Debt",
+        description="When old debts expire and collectors can no longer sue you",
+        explanation=(
+            "Every debt has a statute of limitations — a deadline after which the creditor can no "
+            "longer sue you to collect. This period varies by state and type of debt (credit card, "
+            "medical, auto loan) but typically ranges from 3 to 6 years. After the statute expires, "
+            "the debt is 'time-barred.' Collectors can still contact you about it, but they cannot "
+            "file a lawsuit. Crucially, making a payment or even acknowledging the debt in writing "
+            "can restart the clock in many states."
+        ),
+        your_rights=[
+            "Collectors cannot sue you for time-barred debts",
+            "You have the right to raise the statute of limitations as a defense if sued on old debt",
+            "Collectors must stop contacting you if you send a written cease-and-desist letter",
+            "A time-barred debt cannot be reported on your credit report after 7 years from first delinquency",
+            "Collectors must tell you if they know a debt is time-barred (required in some states)",
+            "Paying a time-barred debt does not improve your credit score in most cases",
+        ],
+        action_steps=[
+            "Determine when you last made a payment — this typically starts the statute of limitations clock",
+            "Look up your state's statute of limitations for your specific type of debt",
+            "If contacted about old debt, do NOT acknowledge owing it or make any payment",
+            "Send a written request for debt validation within 30 days of first contact",
+            "If sued on time-barred debt, file an answer raising the statute of limitations defense",
+            "Send a cease-and-desist letter if you want the collector to stop contacting you",
+        ],
+        deadlines=[
+            "Statute of limitations: 3-6 years from last payment (varies by state and debt type)",
+            "Credit reporting: 7 years from the date of first delinquency",
+            "Debt validation request: 30 days from the collector's initial written notice",
+            "Answer to lawsuit: Typically 20-30 days from being served (check your state)",
+        ],
+        common_mistakes=[
+            "Making a small payment on old debt — this restarts the statute of limitations in most states",
+            "Acknowledging the debt in writing — even saying 'I know I owe this' can restart the clock",
+            "Ignoring a lawsuit on time-barred debt — you must still file an answer or you get a default judgment",
+            "Confusing the credit reporting period (7 years) with the statute of limitations (3-6 years)",
+        ],
+        when_to_get_a_lawyer=(
+            "If you're being sued on old debt, if a collector is threatening legal action on "
+            "time-barred debt, or if you're unsure whether the statute has expired."
+        ),
+    ),
+    RightsGuide(
+        id="debt_medical_bills",
+        domain="debt_collections",
+        title="Medical Debt Rights & Protections",
+        description="Special protections for medical debt and strategies to reduce what you owe",
+        explanation=(
+            "Medical debt has unique protections that other types of debt don't. The No Surprises "
+            "Act protects you from surprise bills for emergency services and out-of-network providers "
+            "at in-network facilities. Hospitals that receive federal funding must offer financial "
+            "assistance programs. Medical debt under $500 can no longer appear on credit reports, "
+            "and paid medical debt must be removed. Most importantly, medical bills are highly "
+            "negotiable — hospitals routinely accept 20-60% of the original bill."
+        ),
+        your_rights=[
+            "You cannot be balance-billed for emergency services at any hospital",
+            "The No Surprises Act protects you from out-of-network surprise bills at in-network facilities",
+            "Nonprofit hospitals must offer financial assistance programs (charity care)",
+            "Medical debt under $500 cannot appear on your credit report",
+            "Paid medical collections must be removed from your credit report",
+            "New medical debt cannot appear on your credit report for 1 year after the date of service",
+            "You have the right to an itemized bill and to dispute any errors",
+        ],
+        action_steps=[
+            "Request an itemized bill — billing errors are common (estimated 80% of medical bills contain errors)",
+            "Review each charge and dispute anything that doesn't match the services you received",
+            "Ask about the hospital's financial assistance program before paying anything",
+            "Negotiate — offer to pay 20-40% of the total if you can pay in a lump sum",
+            "Set up a payment plan directly with the provider — they usually offer interest-free plans",
+            "If the bill goes to collections, request debt validation and verify the amount is correct",
+            "Check if you qualify for Medicaid retroactively — some states allow this for up to 3 months",
+        ],
+        deadlines=[
+            "No Surprises Act dispute: 30 days from receiving the bill",
+            "Financial assistance application: Before the bill goes to collections (varies by hospital)",
+            "Credit reporting: Medical debt can't appear until 1 year after the date of service",
+            "Medicaid retroactive coverage: Up to 3 months before your application date",
+        ],
+        common_mistakes=[
+            "Paying the full amount without negotiating — medical bills are almost always negotiable",
+            "Not requesting an itemized bill — you can't find errors without seeing the charges",
+            "Putting medical debt on a credit card — this converts negotiable medical debt to high-interest credit card debt",
+            "Not applying for financial assistance — many people who qualify never apply",
+        ],
+        when_to_get_a_lawyer=(
+            "If you received a surprise bill over $1,000, if a hospital is refusing to offer "
+            "financial assistance despite being a nonprofit, or if a collector is violating the "
+            "FDCPA in pursuing medical debt."
+        ),
+    ),
+    # --- EMPLOYMENT (additional) ---
+    RightsGuide(
+        id="employment_fmla_leave",
+        domain="employment_rights",
+        title="Family & Medical Leave (FMLA)",
+        description="Your right to unpaid job-protected leave for medical and family reasons",
+        explanation=(
+            "The Family and Medical Leave Act (FMLA) gives eligible employees up to 12 weeks of "
+            "unpaid, job-protected leave per year for serious health conditions, the birth or "
+            "adoption of a child, or caring for a family member with a serious health condition. "
+            "Your employer must maintain your health insurance during leave and restore you to the "
+            "same or equivalent position when you return. Many employees don't know they qualify, "
+            "and many employers illegally deny or retaliate against FMLA requests."
+        ),
+        your_rights=[
+            "Up to 12 weeks of unpaid, job-protected leave per year (26 weeks for military caregiver leave)",
+            "Your employer must maintain your group health insurance during FMLA leave",
+            "You must be restored to the same or equivalent position upon return",
+            "Your employer cannot retaliate against you for requesting or taking FMLA leave",
+            "You can take FMLA leave intermittently (e.g., a few hours per week for treatment)",
+            "Both mothers and fathers are eligible for FMLA leave for birth/adoption of a child",
+        ],
+        action_steps=[
+            "Check eligibility: you must have worked 12+ months, 1,250+ hours, at a company with 50+ employees",
+            "Give your employer 30 days' notice when the leave is foreseeable",
+            "Get medical certification from your healthcare provider on the DOL form",
+            "Put your leave request in writing and keep a copy",
+            "Document any negative treatment or comments from your employer about taking leave",
+            "If denied, file a complaint with the Department of Labor's Wage and Hour Division",
+        ],
+        deadlines=[
+            "Notice to employer: 30 days for foreseeable leave; as soon as practicable for emergencies",
+            "Medical certification: Employer must give you 15 days to provide it",
+            "Leave entitlement: 12 weeks within a 12-month period",
+            "DOL complaint: 2 years from the violation (3 years for willful violations)",
+        ],
+        common_mistakes=[
+            "Not realizing you're eligible — check the requirements before assuming you don't qualify",
+            "Not requesting leave in writing — verbal requests are harder to prove",
+            "Not getting medical certification — your employer can deny leave without it",
+            "Quitting instead of taking FMLA — you may be entitled to protected leave",
+        ],
+        when_to_get_a_lawyer=(
+            "If your employer denies your FMLA request, if you're fired or demoted during or after "
+            "taking leave, or if your employer retaliates against you for using FMLA."
+        ),
+    ),
+    RightsGuide(
+        id="employment_sexual_harassment",
+        domain="employment_rights",
+        title="Sexual Harassment in the Workplace",
+        description="Recognizing, documenting, and reporting workplace sexual harassment",
+        explanation=(
+            "Sexual harassment in the workplace is illegal under Title VII of the Civil Rights Act "
+            "and virtually every state's civil rights laws. It includes two types: quid pro quo "
+            "(sexual favors demanded in exchange for job benefits) and hostile work environment "
+            "(severe or pervasive conduct that makes the workplace intimidating or offensive). "
+            "Your employer is legally required to investigate complaints and take corrective action. "
+            "Retaliation for reporting harassment is itself illegal and often results in larger "
+            "damages than the original harassment."
+        ),
+        your_rights=[
+            "You have the right to a workplace free from sexual harassment",
+            "Your employer must investigate harassment complaints promptly and thoroughly",
+            "Your employer cannot retaliate against you for reporting or participating in an investigation",
+            "You can file a charge with the EEOC without fear of retaliation",
+            "Harassers can be held personally liable in some states",
+            "You may be entitled to back pay, compensatory damages, and punitive damages",
+            "The harasser's conduct doesn't have to be sexual — gender-based bullying also qualifies",
+        ],
+        action_steps=[
+            "Document every incident: date, time, location, what happened, who witnessed it",
+            "Save all evidence: emails, texts, photos, voicemails",
+            "Report to your employer through the proper channels (HR, supervisor, compliance hotline)",
+            "Put your complaint in writing and keep a personal copy",
+            "If your employer doesn't act, file a charge with the EEOC or your state civil rights agency",
+            "Do not quit — if you're forced out, it may be constructive discharge (treated as wrongful termination)",
+        ],
+        deadlines=[
+            "EEOC charge: 180 days from the last incident (300 days in states with local agencies)",
+            "State agency complaint: Varies by state, typically 180 days to 3 years",
+            "Lawsuit: Must receive 'right to sue' letter from EEOC first, then 90 days to file",
+            "Internal complaint: Report as soon as possible — delays can weaken your case",
+        ],
+        common_mistakes=[
+            "Not documenting incidents — your memory fades but written records don't",
+            "Quitting before filing a complaint — this can limit your legal options",
+            "Only telling friends/family instead of reporting formally — you need an official record",
+            "Assuming it's not 'bad enough' — if it makes your work environment hostile, it counts",
+        ],
+        when_to_get_a_lawyer=(
+            "If your employer fails to investigate or take corrective action, if you face retaliation "
+            "for reporting, if the harassment involves assault, or if you're considering filing an "
+            "EEOC charge. Many employment attorneys offer free consultations."
+        ),
+    ),
 ]
 
 

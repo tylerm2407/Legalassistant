@@ -242,9 +242,29 @@ export const api = {
         housing_situation: profile.housing_situation,
         employment_type: profile.employment_type,
         family_status: profile.family_status,
+        language_preference: profile.language_preference || "en",
       }),
     });
     if (!res.ok) throw new Error(`Profile create failed: ${res.status}`);
+    const data = await res.json();
+    return data.profile || data;
+  },
+
+  /**
+   * Updates an existing legal profile with partial data via PATCH.
+   *
+   * @param updates - Partial profile fields to update (e.g. language_preference)
+   * @returns The updated legal profile
+   * @throws {Error} If the profile update fails
+   */
+  async updateProfile(updates: Partial<LegalProfile>): Promise<LegalProfile> {
+    const headers = await getAuthHeaders();
+    const res = await fetchWithRetry(`${API_BASE}/profile/update`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error(`Profile update failed: ${res.status}`);
     const data = await res.json();
     return data.profile || data;
   },
@@ -312,6 +332,35 @@ export const api = {
       body: JSON.stringify({ context: context || "" }),
     });
     if (!res.ok) throw new Error(`Checklist generation failed: ${res.status}`);
+    return res.json();
+  },
+
+  /**
+   * Transcribes an audio file using the OpenAI Whisper API via the backend.
+   *
+   * Sends the audio blob to POST /api/audio/transcribe and returns the
+   * transcript text.
+   *
+   * @param audioBlob - The audio Blob to transcribe (max 25MB)
+   * @returns Object with transcript text and language
+   * @throws {Error} If the transcription fails
+   */
+  async transcribeAudio(audioBlob: Blob): Promise<{ transcript: string; language: string }> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: Record<string, string> = {};
+    if (session?.access_token) {
+      headers["Authorization"] = `Bearer ${session.access_token}`;
+    }
+
+    const formData = new FormData();
+    formData.append("file", audioBlob, "recording.webm");
+
+    const res = await fetchWithRetry(`${API_BASE}/audio/transcribe`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+    if (!res.ok) throw new Error(`Audio transcription failed: ${res.status}`);
     return res.json();
   },
 
@@ -579,17 +628,19 @@ export const api = {
   },
 
   /**
-   * Searches for attorneys matching the user's state and legal area.
+   * Searches for attorneys matching the user's state, legal area, and zip code.
    *
    * @param state - Two-letter US state code to search within
    * @param legalArea - Optional legal domain to filter by (e.g., "landlord_tenant")
+   * @param zipCode - Optional 5-digit zip code for proximity matching
    * @returns Array of attorney referral suggestions with match reasons and relevance scores
    * @throws {Error} If the search fails
    */
-  async findAttorneys(state: string, legalArea?: string): Promise<ReferralSuggestion[]> {
+  async findAttorneys(state: string, legalArea?: string, zipCode?: string): Promise<ReferralSuggestion[]> {
     const headers = await getAuthHeaders();
     let url = `${API_BASE}/attorneys/search?state=${state}`;
     if (legalArea) url += `&legal_area=${legalArea}`;
+    if (zipCode) url += `&zip_code=${zipCode}`;
     const res = await fetchWithRetry(url, { headers });
     if (!res.ok) throw new Error(`Failed to search attorneys: ${res.status}`);
     const data = await res.json();

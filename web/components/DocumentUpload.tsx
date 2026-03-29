@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
 import { api } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
 
 /** MIME types accepted for document upload and legal analysis. */
 const ACCEPTED_TYPES = [
@@ -65,6 +66,7 @@ export default function DocumentUpload({
   const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -78,12 +80,12 @@ export default function DocumentUpload({
 
   async function uploadFile(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError("Unsupported file type. Please upload PDF, images, or text files.");
+      setError(t("unsupportedFileType"));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError("File too large. Maximum size is 10MB.");
+      setError(t("fileTooLarge"));
       return;
     }
 
@@ -112,7 +114,7 @@ export default function DocumentUpload({
     } catch (err) {
       clearInterval(progressInterval);
       setError(
-        err instanceof Error ? err.message : "Upload failed. Please try again."
+        err instanceof Error ? err.message : t("uploadFailed")
       );
     } finally {
       setUploading(false);
@@ -162,7 +164,7 @@ export default function DocumentUpload({
           />
         </svg>
         <p className="text-sm text-gray-400 mb-1">
-          Drag and drop a document here, or
+          {t("dragAndDrop")}
         </p>
         <input
           ref={fileInputRef}
@@ -177,10 +179,10 @@ export default function DocumentUpload({
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
-          Browse Files
+          {t("browseFiles")}
         </Button>
         <p className="text-xs text-gray-500 mt-2">
-          PDF, images, or text files up to 10MB
+          {t("fileTypeHint")}
         </p>
       </div>
 
@@ -188,7 +190,7 @@ export default function DocumentUpload({
       {uploading && (
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-400">Uploading...</span>
+            <span className="text-xs text-gray-400">{t("uploading")}</span>
             <span className="text-xs text-gray-500">{progress}%</span>
           </div>
           <div className="w-full bg-white/10 rounded-full h-1.5">
@@ -212,7 +214,7 @@ export default function DocumentUpload({
         <Card>
           <Card.Header>
             <h3 className="text-sm font-semibold text-white">
-              Document Analysis: {result.filename}
+              {t("documentAnalysis")}: {result.filename}
             </h3>
           </Card.Header>
           <Card.Body>
@@ -220,7 +222,7 @@ export default function DocumentUpload({
               {/* Summary */}
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                  Summary
+                  {t("summary")}
                 </p>
                 <p className="text-sm text-gray-300">{result.summary}</p>
               </div>
@@ -229,7 +231,7 @@ export default function DocumentUpload({
               {result.key_facts.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Key Facts
+                    {t("keyFacts")}
                   </p>
                   <ul className="space-y-1">
                     {result.key_facts.map((fact: string, i: number) => (
@@ -249,7 +251,7 @@ export default function DocumentUpload({
               {result.red_flags.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-1">
-                    Red Flags
+                    {t("redFlags")}
                   </p>
                   <ul className="space-y-1">
                     {result.red_flags.map((flag: string, i: number) => (
@@ -266,7 +268,7 @@ export default function DocumentUpload({
               )}
             </div>
             <p className="trust-disclaimer">
-              Documents are analyzed locally and not shared with third parties.
+              {t("docDisclaimer")}
             </p>
           </Card.Body>
         </Card>

@@ -9,10 +9,15 @@ from __future__ import annotations
 import json
 import os
 import time
+
+from dotenv import load_dotenv
+
+load_dotenv()  # Load .env before any os.environ.get() calls
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import TypedDict, cast
 
 import anthropic
+import openai
 from anthropic.types import TextBlock
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +37,7 @@ from backend.deadlines.tracker import (
     list_deadlines,
     update_deadline,
 )
+from backend.audio.transcriber import transcribe_audio
 from backend.documents.analyzer import analyze_document
 from backend.documents.extractor import extract_text
 from backend.export.email_sender import send_document_email
@@ -87,6 +93,7 @@ from backend.utils.audit_log import AuditEventType, record_audit_event
 from backend.utils.auth import verify_supabase_jwt
 from backend.utils.circuit_breaker import CircuitBreakerOpenError, anthropic_breaker
 from backend.utils.client import get_anthropic_client
+from backend.utils.openai_client import get_openai_client
 from backend.utils.lifecycle import get_lifecycle_manager, lifecycle_middleware
 from backend.utils.logger import configure_logging, get_logger
 from backend.utils.rate_limiter import rate_limit
@@ -144,6 +151,10 @@ _OPENAPI_TAGS: list[dict[str, str]] = [
             "Upload legal documents (PDF, images) for text extraction and "
             "AI-powered analysis. Extracted facts are injected into the profile."
         ),
+    },
+    {
+        "name": "Audio",
+        "description": "Audio recording transcription via the OpenAI Whisper API.",
     },
     {
         "name": "Conversations",
@@ -236,7 +247,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in _allowed_origins],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -394,6 +405,7 @@ class ProfileRequest(BaseModel):
     housing_situation: str = Field(..., max_length=500)
     employment_type: str = Field(..., max_length=200)
     family_status: str = Field(..., max_length=500)
+    language_preference: str = Field(default="en", max_length=5)
 
 
 class ActionRequest(BaseModel):
@@ -603,40 +615,22 @@ async def chat(
         )
 
     try:
+        oai_client = get_openai_client()
+        oai_messages: list[dict[str, str]] = [
+            {"role": "system", "content": system_prompt},
+            *api_messages,
+        ]
 
-        @anthropic_breaker
-        @retry_anthropic
-        async def _call_claude() -> str:
-            """Call the Claude API with circuit breaker + retry protection."""
-            response = await client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=4096,
-                system=[
-                    {"type": "text", "text": static_prefix, "cache_control": {"type": "ephemeral"}},
-                    {"type": "text", "text": dynamic_suffix},
-                ],
-                messages=as_anthropic_messages(api_messages),
-            )
-            first_block = response.content[0] if response.content else None
-            return first_block.text if isinstance(first_block, TextBlock) else ""
-
-        assistant_response = await _call_claude()
-
-    except CircuitBreakerOpenError as exc:
-        _logger.warning(
-            "circuit_breaker_open",
-            user_id=user_id,
-            service=exc.service_name,
-            retry_after=exc.retry_after,
+        oai_response = await oai_client.chat.completions.create(
+            model="gpt-4o",
+            max_tokens=4096,
+            messages=oai_messages,  # type: ignore[arg-type]
         )
-        raise HTTPException(
-            status_code=503,
-            detail="AI service temporarily unavailable. Please try again shortly.",
-            headers={"Retry-After": str(int(exc.retry_after))},
-        ) from exc
-    except anthropic.APIError as exc:
+        assistant_response = oai_response.choices[0].message.content or ""
+
+    except openai.APIError as exc:
         _logger.error(
-            "claude_api_error",
+            "openai_api_error",
             user_id=user_id,
             error_type=type(exc).__name__,
             error_message=str(exc),
@@ -754,8 +748,8 @@ async def chat_stream(
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found.")
 
-    sse_client = get_anthropic_client()
-    classification = await classify_with_llm_fallback(message, client=sse_client)
+    anthropic_client = get_anthropic_client()
+    classification = await classify_with_llm_fallback(message, client=anthropic_client)
     legal_area = classification.domain
     system_prompt = build_system_prompt(profile, message)
     static_prefix, dynamic_suffix = build_system_prompt_parts(profile, message)
@@ -768,7 +762,7 @@ async def chat_stream(
     api_messages = budget_result.messages
 
     async def _generate_sse() -> AsyncGenerator[str, None]:
-        """Generate Server-Sent Events from the Claude streaming API.
+        """Generate Server-Sent Events from the OpenAI streaming API.
 
         Yields SSE-formatted strings with token chunks and metadata.
         """
@@ -777,18 +771,24 @@ async def chat_stream(
         full_response_parts: list[str] = []
 
         try:
-            async with sse_client.messages.stream(
-                model="claude-sonnet-4-20250514",
+            oai_client = get_openai_client()
+            oai_messages: list[dict[str, str]] = [
+                {"role": "system", "content": system_prompt},
+                *api_messages,
+            ]
+
+            stream = await oai_client.chat.completions.create(
+                model="gpt-4o",
                 max_tokens=4096,
-                system=[
-                    {"type": "text", "text": static_prefix, "cache_control": {"type": "ephemeral"}},
-                    {"type": "text", "text": dynamic_suffix},
-                ],
-                messages=as_anthropic_messages(api_messages),
-            ) as stream:
-                async for text in stream.text_stream:
-                    full_response_parts.append(text)
-                    event_data = json.dumps({"type": "token", "content": text})
+                messages=oai_messages,  # type: ignore[arg-type]
+                stream=True,
+            )
+
+            async for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta and delta.content:
+                    full_response_parts.append(delta.content)
+                    event_data = json.dumps({"type": "token", "content": delta.content})
                     yield f"data: {event_data}\n\n"
 
             assistant_response = "".join(full_response_parts)
@@ -824,17 +824,7 @@ async def chat_stream(
             )
             yield f"data: {done_data}\n\n"
 
-        except CircuitBreakerOpenError as exc:
-            error_data = json.dumps(
-                {
-                    "type": "error",
-                    "message": "AI service temporarily unavailable.",
-                    "retry_after": int(exc.retry_after),
-                }
-            )
-            yield f"data: {error_data}\n\n"
-
-        except anthropic.APIError as exc:
+        except openai.APIError as exc:
             _logger.error("stream_api_error", user_id=user_id, error=str(exc))
             error_data = json.dumps(
                 {
@@ -887,6 +877,7 @@ async def upsert_profile(
         housing_situation=request.housing_situation,
         employment_type=request.employment_type,
         family_status=request.family_status,
+        language_preference=request.language_preference,
     )
 
     try:
@@ -900,6 +891,69 @@ async def upsert_profile(
     except (ValueError, RuntimeError) as exc:
         _logger.error(
             "profile_upsert_error",
+            user_id=user_id,
+            error_message=str(exc),
+        )
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post(
+    "/api/profile/update",
+    tags=["Profile"],
+    responses={
+        404: {"model": NotFoundResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
+async def patch_profile(
+    request: Request,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, object]:
+    """Partially update a user's legal profile.
+
+    Accepts a JSON body with any subset of profile fields to update.
+    Fetches the existing profile, merges the updates, and upserts.
+
+    Args:
+        request: The raw request containing partial profile fields.
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with the updated profile data.
+
+    Raises:
+        HTTPException: 404 if no existing profile is found.
+        HTTPException: 500 if the update operation fails.
+    """
+    body = await request.json()
+    _logger.info("profile_patch_request", user_id=user_id, fields=list(body.keys()))
+
+    existing = await get_profile(user_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Profile not found.")
+
+    # Merge updates into existing profile
+    update_data = existing.model_dump()
+    allowed_fields = {
+        "display_name", "state", "housing_situation",
+        "employment_type", "family_status", "language_preference",
+    }
+    for key, value in body.items():
+        if key in allowed_fields:
+            update_data[key] = value
+
+    try:
+        merged_profile = LegalProfile.model_validate(update_data)
+        updated = await update_profile(merged_profile)
+        await record_audit_event(
+            AuditEventType.PROFILE_UPDATED,
+            user_id,
+            {"fields": list(body.keys()), "action": "patch"},
+        )
+        return {"profile": updated.model_dump(mode="json")}
+    except (ValueError, RuntimeError) as exc:
+        _logger.error(
+            "profile_patch_error",
             user_id=user_id,
             error_message=str(exc),
         )
@@ -1225,6 +1279,96 @@ async def upload_document(
             error_message=str(exc),
         )
         raise HTTPException(status_code=500, detail="Failed to analyze document.") from exc
+
+
+# ---------- Audio Transcription Endpoints ----------
+
+_AUDIO_MAX_BYTES = 25 * 1024 * 1024  # 25 MB — Whisper API limit
+
+_ALLOWED_AUDIO_TYPES: set[str] = {
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/mp4",
+    "audio/m4a",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/webm",
+    "audio/ogg",
+    "video/mp4",
+    "video/webm",
+}
+
+
+@app.post(
+    "/api/audio/transcribe",
+    tags=["Audio"],
+    responses={
+        400: {"model": BadRequestResponse},
+        413: {"model": PayloadTooLargeResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
+async def transcribe_audio_endpoint(
+    file: UploadFile,
+    user_id: str = Depends(verify_supabase_jwt),
+) -> dict[str, str]:
+    """Transcribe an audio file using the OpenAI Whisper API.
+
+    Accepts an uploaded audio file (mp3, mp4, mpeg, mpga, m4a, wav, webm),
+    sends it to the Whisper API for speech-to-text transcription, and returns
+    the transcript text.
+
+    Args:
+        file: The uploaded audio file (max 25MB).
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        Dict with ``transcript`` (the transcribed text) and ``language``.
+
+    Raises:
+        HTTPException: 400 if the file type is not a supported audio format.
+        HTTPException: 413 if the file exceeds 25MB.
+        HTTPException: 500 if transcription fails.
+    """
+    _logger.info(
+        "audio_transcribe_request",
+        user_id=user_id,
+        filename=file.filename,
+        content_type=file.content_type,
+    )
+
+    # Validate content type
+    content_type = (file.content_type or "").lower()
+    if not content_type or content_type not in _ALLOWED_AUDIO_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio format: {content_type}. "
+            "Accepted formats: mp3, mp4, mpeg, mpga, m4a, wav, webm.",
+        )
+
+    # Read and check size
+    contents = await file.read()
+    if len(contents) > _AUDIO_MAX_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Audio file too large. Maximum size is {_AUDIO_MAX_BYTES // (1024 * 1024)}MB.",
+        )
+
+    if len(contents) == 0:
+        raise HTTPException(status_code=400, detail="Empty audio file.")
+
+    try:
+        transcript = await transcribe_audio(contents, language="en")
+        return {"transcript": transcript, "language": "en"}
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except Exception as exc:
+        _logger.error(
+            "audio_transcription_error",
+            user_id=user_id,
+            error=str(exc),
+        )
+        raise HTTPException(status_code=500, detail="Failed to transcribe audio.") from exc
 
 
 # ---------- Deadline Endpoints ----------
@@ -1734,23 +1878,25 @@ async def export_email(
 async def search_attorneys(
     state: str,
     legal_area: str | None = None,
+    zip_code: str | None = None,
     user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, object]:
-    """Search for attorneys by state and legal area.
+    """Search for attorneys by state, legal area, and zip code.
 
     Args:
         state: Two-letter state code.
         legal_area: Optional legal domain filter.
+        zip_code: Optional 5-digit zip code for proximity matching.
         user_id: Authenticated user ID from JWT.
 
     Returns:
         Dict with attorney referral suggestions.
     """
     if legal_area:
-        suggestions = await get_referral_suggestions(state, legal_area)
+        suggestions = await get_referral_suggestions(state, legal_area, zip_code=zip_code)
         return {"suggestions": [s.model_dump() for s in suggestions]}
 
-    attorneys = await find_attorneys(state)
+    attorneys = await find_attorneys(state, zip_code=zip_code)
     return {
         "suggestions": [
             {

@@ -17,6 +17,7 @@ export interface Attorney {
   id: string;
   name: string;
   state: string;
+  zip_code: string;
   specializations: string[];
   rating: number;
   cost_range: string;

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
-import { api } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * A single step within a guided legal workflow.
@@ -29,16 +29,18 @@ interface WorkflowStep {
 /**
  * Props for the WorkflowWizard component.
  *
- * @property workflowId - Unique identifier for this workflow instance in Supabase
+ * @property workflowId - Unique identifier for this workflow instance
  * @property title - Display title for the workflow (e.g., "Security Deposit Recovery")
  * @property steps - Array of workflow steps with instructions, documents, tips, and deadlines
  * @property initialStep - Zero-based index of the step to display initially
+ * @property onStepComplete - Callback fired when a step is marked complete
  */
 interface WorkflowWizardProps {
   workflowId: string;
   title: string;
   steps: WorkflowStep[];
   initialStep: number;
+  onStepComplete: (workflowId: string, stepIndex: number) => void;
 }
 
 /**
@@ -59,6 +61,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepStatuses, setStepStatuses] = useState<string[]>(steps.map((s: WorkflowStep) => s.status));
   const [updating, setUpdating] = useState(false);
+  const { t } = useTranslation();
 
   const step = steps[currentStep];
 
@@ -103,7 +106,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
         ))}
       </div>
       <p className="text-xs text-gray-500">
-        Step {currentStep + 1} of {steps.length}
+        {t("step")} {currentStep + 1} {t("of")} {steps.length}
       </p>
 
       {/* Current step */}
@@ -113,7 +116,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
             <h2 className="text-base font-semibold text-white">{step.title}</h2>
             {stepStatuses[currentStep] === "completed" && (
               <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                Completed
+                {t("completed")}
               </span>
             )}
           </div>
@@ -124,7 +127,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
 
             {step.required_documents.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Required Documents</h3>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("requiredDocuments")}</h3>
                 <ul className="space-y-1">
                   {step.required_documents.map((doc: string, i: number) => (
                     <li key={i} className="text-sm text-gray-300 flex gap-2">
@@ -140,7 +143,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
 
             {step.tips.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tips</h3>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("tips")}</h3>
                 <ul className="space-y-1">
                   {step.tips.map((tip: string, i: number) => (
                     <li key={i} className="text-sm text-blue-300 flex gap-2">
@@ -154,7 +157,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
 
             {step.deadlines.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-2">Deadlines</h3>
+                <h3 className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-2">{t("deadlines")}</h3>
                 <ul className="space-y-1">
                   {step.deadlines.map((deadline: string, i: number) => (
                     <li key={i} className="text-sm text-yellow-400 flex gap-2">
@@ -179,7 +182,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
           onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
         >
-          Previous
+          {t("previous")}
         </Button>
         <div className="flex gap-2">
           {stepStatuses[currentStep] !== "completed" && (
@@ -188,7 +191,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
               onClick={completeStep}
               disabled={updating}
             >
-              {updating ? "Saving..." : "Mark Complete"}
+              {updating ? t("saving") : t("markCompleteBtn")}
             </Button>
           )}
           {currentStep < steps.length - 1 && (
@@ -197,7 +200,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
               size="sm"
               onClick={() => setCurrentStep(currentStep + 1)}
             >
-              Next
+              {t("next")}
             </Button>
           )}
         </div>

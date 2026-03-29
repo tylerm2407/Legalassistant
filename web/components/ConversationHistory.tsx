@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * Summary of a past conversation for display in the history sidebar.
@@ -52,6 +53,7 @@ export default function ConversationHistory({
 }: ConversationHistoryProps) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadConversations();
@@ -88,7 +90,7 @@ export default function ConversationHistory({
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          New conversation
+          {t("newConversation")}
         </button>
       </div>
 
@@ -98,7 +100,7 @@ export default function ConversationHistory({
             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : conversations.length === 0 ? (
-          <p className="text-xs text-gray-500 text-center py-8 px-4">No previous conversations</p>
+          <p className="text-xs text-gray-500 text-center py-8 px-4">{t("noPreviousConversations")}</p>
         ) : (
           <div className="p-2 space-y-1">
             {conversations.map((c: ConversationSummary) => (

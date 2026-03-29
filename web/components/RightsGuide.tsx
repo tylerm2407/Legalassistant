@@ -2,6 +2,7 @@
 
 import React from "react";
 import Card from "./ui/Card";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * Complete rights guide data from the CaseMate knowledge base.
@@ -51,6 +52,7 @@ interface RightsGuideProps {
  * @param props.guide - The complete rights guide data to display
  */
 export default function RightsGuide({ guide }: RightsGuideProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       {/* Title */}
@@ -65,7 +67,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
       {/* Explanation */}
       <Card>
         <Card.Header>
-          <h2 className="text-sm font-semibold text-white">What You Need to Know</h2>
+          <h2 className="text-sm font-semibold text-white">{t("whatYouNeedToKnow")}</h2>
         </Card.Header>
         <Card.Body>
           <p className="text-sm text-gray-300 leading-relaxed">{guide.explanation}</p>
@@ -75,7 +77,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
       {/* Your Rights */}
       <Card>
         <Card.Header>
-          <h2 className="text-sm font-semibold text-white">Your Rights</h2>
+          <h2 className="text-sm font-semibold text-white">{t("yourRights")}</h2>
         </Card.Header>
         <Card.Body>
           <ul className="space-y-2">
@@ -94,7 +96,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
       {/* Action Steps */}
       <Card>
         <Card.Header>
-          <h2 className="text-sm font-semibold text-white">Action Steps</h2>
+          <h2 className="text-sm font-semibold text-white">{t("actionSteps")}</h2>
         </Card.Header>
         <Card.Body>
           <ol className="space-y-3">
@@ -114,7 +116,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
       {guide.deadlines.length > 0 && (
         <Card>
           <Card.Header>
-            <h2 className="text-sm font-semibold text-white">Important Deadlines</h2>
+            <h2 className="text-sm font-semibold text-white">{t("importantDeadlines")}</h2>
           </Card.Header>
           <Card.Body>
             <ul className="space-y-2">
@@ -135,7 +137,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
       {guide.common_mistakes.length > 0 && (
         <Card>
           <Card.Header>
-            <h2 className="text-sm font-semibold text-red-400">Common Mistakes to Avoid</h2>
+            <h2 className="text-sm font-semibold text-red-400">{t("commonMistakes")}</h2>
           </Card.Header>
           <Card.Body>
             <ul className="space-y-2">
@@ -155,7 +157,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
       {/* When to Get a Lawyer */}
       <Card>
         <Card.Header>
-          <h2 className="text-sm font-semibold text-white">When to Get a Lawyer</h2>
+          <h2 className="text-sm font-semibold text-white">{t("whenToGetLawyer")}</h2>
         </Card.Header>
         <Card.Body>
           <p className="text-sm text-gray-300 leading-relaxed">{guide.when_to_get_a_lawyer}</p>
@@ -167,7 +169,7 @@ export default function RightsGuide({ guide }: RightsGuideProps) {
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
         </svg>
-        This is legal information, not legal advice. Consult a licensed attorney for your specific situation.
+        {t("rightsDisclaimer")}
       </p>
     </div>
   );

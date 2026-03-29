@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Button from "./ui/Button";
 import LegalProfileSidebar from "./LegalProfileSidebar";
 import ConversationHistory from "./ConversationHistory";
 import ActionGenerator from "./ActionGenerator";
+import AudioRecorder from "./AudioRecorder";
 import type { LegalProfile, Message } from "@/lib/types";
 import { api } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
+import translations from "@/lib/i18n/translations";
 
 /**
  * Renders a single chat message bubble with role-based styling.
@@ -86,10 +89,13 @@ interface ChatInterfaceProps {
  * @param props.profile - The authenticated user's complete legal profile from Supabase
  */
 export default function ChatInterface({ profile }: ChatInterfaceProps) {
+  const { t, locale } = useTranslation();
+  const greeting = translations.chatGreeting[locale];
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `Hi ${profile.display_name}! I'm CaseMate, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
+      content: typeof greeting === "function" ? greeting(profile.display_name, profile.state) : greeting,
       timestamp: new Date(),
     },
   ]);
@@ -100,6 +106,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [showHistory, setShowHistory] = useState(true);
   const [streamingContent, setStreamingContent] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [showRecorder, setShowRecorder] = useState(false);
   const abortStreamRef = useRef<(() => void) | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -147,7 +154,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
           content:
             err instanceof Error
               ? err.message
-              : "Something went wrong. Please try again.",
+              : t("somethingWentWrong"),
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
@@ -210,6 +217,14 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     }
   }
 
+  const handleTranscript = useCallback((text: string) => {
+    setShowRecorder(false);
+    const trimmed = text.trim();
+    if (trimmed) {
+      setInput(trimmed);
+    }
+  }, []);
+
   function handleStopStream() {
     if (abortStreamRef.current) {
       abortStreamRef.current();
@@ -221,7 +236,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             ...prev,
             {
               role: "assistant" as const,
-              content: current + "\n\n[Stopped]",
+              content: current + `\n\n${t("stopped")}`,
               timestamp: new Date(),
             },
           ]);
@@ -233,12 +248,13 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   }
 
   function handleNewConversation() {
+    const greet = translations.chatGreeting[locale];
     setConversationId(undefined);
     setLastLegalArea("");
     setMessages([
       {
         role: "assistant",
-        content: `Hi ${profile.display_name}! I'm CaseMate, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
+        content: typeof greet === "function" ? greet(profile.display_name, profile.state) : greet,
         timestamp: new Date(),
       },
     ]);
@@ -286,7 +302,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             <button
               onClick={() => setShowHistory(!showHistory)}
               className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-              title={showHistory ? "Hide history" : "Show history"}
+              title={showHistory ? t("hideHistory") : t("showHistory")}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -294,7 +310,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             </button>
             <div>
               <h1 className="text-lg font-semibold text-white">CaseMate</h1>
-              <p className="text-xs text-gray-500">AI Legal Assistant</p>
+              <p className="text-xs text-gray-500">{t("chatSubtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -304,10 +320,10 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               </span>
             )}
             <nav className="flex items-center gap-1 ml-3">
-              <a href="/rights" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Rights</a>
-              <a href="/workflows" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Workflows</a>
-              <a href="/deadlines" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Deadlines</a>
-              <a href="/attorneys" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Attorneys</a>
+              <a href="/rights" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navRights")}</a>
+              <a href="/workflows" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navWorkflows")}</a>
+              <a href="/deadlines" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navDeadlines")}</a>
+              <a href="/attorneys" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navAttorneys")}</a>
             </nav>
           </div>
         </header>
@@ -336,21 +352,42 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
 
         {/* Input */}
         <div className="bg-white/[0.03] backdrop-blur-xl border-t border-white/10 px-6 py-4 shrink-0">
+          {showRecorder && (
+            <div className="max-w-4xl mx-auto mb-3">
+              <AudioRecorder
+                onTranscript={handleTranscript}
+                onClose={() => setShowRecorder(false)}
+              />
+            </div>
+          )}
           <div className="flex items-end gap-3 max-w-4xl mx-auto">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Describe your legal question..."
+              placeholder={t("chatPlaceholder")}
               rows={1}
               className="flex-1 px-4 py-2.5 bg-white/[0.03] text-white border border-white/10 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:border-blue-500/50 focus:ring-blue-500/20 focus:shadow-glow-sm placeholder:text-gray-600"
             />
+            <button
+              onClick={() => setShowRecorder(!showRecorder)}
+              className={`p-2.5 rounded-xl border transition-colors ${
+                showRecorder
+                  ? "bg-red-500/20 border-red-500/30 text-red-400"
+                  : "bg-white/[0.03] border-white/10 text-gray-400 hover:text-white hover:bg-white/[0.06]"
+              }`}
+              title={showRecorder ? t("closeRecorder") : t("voiceInput")}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+            </button>
             {isStreaming ? (
               <Button
                 onClick={handleStopStream}
                 size="md"
               >
-                Stop
+                {t("stop")}
               </Button>
             ) : (
               <Button
@@ -358,7 +395,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
                 disabled={!input.trim() || isLoading}
                 size="md"
               >
-                Send
+                {t("send")}
               </Button>
             )}
           </div>
@@ -366,7 +403,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
             </svg>
-            AI assistant — not legal advice. Your data is encrypted and private.
+            {t("chatDisclaimer")}
           </p>
         </div>
       </div>

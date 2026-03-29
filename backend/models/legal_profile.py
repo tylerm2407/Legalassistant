@@ -11,6 +11,8 @@ import json
 from datetime import UTC, datetime
 from enum import StrEnum
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -57,6 +59,7 @@ class LegalProfile(BaseModel):
         housing_situation: Renter/owner/etc with relevant details.
         employment_type: Classification affecting applicable rights.
         family_status: Relevant for family law and dependent questions.
+        language_preference: ISO language code for response language ("en" or "es").
         active_issues: Ongoing legal disputes tracked over time.
         legal_facts: Specific facts extracted from conversations.
         documents: References to uploaded documents in Supabase Storage.
@@ -70,6 +73,7 @@ class LegalProfile(BaseModel):
     housing_situation: str
     employment_type: str
     family_status: str
+    language_preference: Literal["en", "es"] = "en"
     active_issues: list[LegalIssue] = Field(default_factory=list)
     legal_facts: list[str] = Field(default_factory=list)
     documents: list[str] = Field(default_factory=list)
@@ -89,6 +93,7 @@ class LegalProfile(BaseModel):
             "housing": self.housing_situation,
             "employment": self.employment_type,
             "family": self.family_status,
+            "language": self.language_preference,
         }
         if self.active_issues:
             data["active_issues"] = [

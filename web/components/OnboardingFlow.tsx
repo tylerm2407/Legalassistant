@@ -6,6 +6,8 @@ import Button from "./ui/Button";
 import Input from "./ui/Input";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useTranslation } from "@/lib/i18n";
+import translations from "@/lib/i18n/translations";
 
 /** All 50 US states used in the state selection dropdown during onboarding. */
 const US_STATES = [
@@ -20,7 +22,7 @@ const US_STATES = [
 ];
 
 /** Total number of steps in the onboarding intake wizard. */
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 /**
  * Form state for the onboarding intake wizard.
@@ -37,6 +39,7 @@ const TOTAL_STEPS = 5;
  * @property familyStatus - Marital/relationship status
  * @property dependents - Number of dependents (affects family law rights)
  * @property currentIssue - Optional description of an active legal issue
+ * @property languagePreference - Preferred response language ("en" or "es")
  */
 interface FormData {
   displayName: string;
@@ -48,6 +51,7 @@ interface FormData {
   familyStatus: string;
   dependents: string;
   currentIssue: string;
+  languagePreference: string;
 }
 
 /**
@@ -63,10 +67,12 @@ interface FormData {
  * 3. Employment type (W-2, 1099, etc.)
  * 4. Family status and dependents
  * 5. Current legal issue (optional)
+ * 6. Language preference (optional — defaults to English)
  */
 export default function OnboardingFlow() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t, locale } = useTranslation();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -80,6 +86,7 @@ export default function OnboardingFlow() {
     familyStatus: "",
     dependents: "",
     currentIssue: "",
+    languagePreference: "en",
   });
 
   function update(field: keyof FormData, value: string) {
@@ -98,6 +105,8 @@ export default function OnboardingFlow() {
         return form.familyStatus.length > 0;
       case 5:
         return true;
+      case 6:
+        return true;
       default:
         return false;
     }
@@ -108,7 +117,7 @@ export default function OnboardingFlow() {
     setError("");
     const userId = user?.id;
     if (!userId) {
-      setError("You must be signed in. Redirecting...");
+      setError(t("mustBeSignedIn"));
       router.push("/auth");
       return;
     }
@@ -147,6 +156,7 @@ export default function OnboardingFlow() {
         documents: [],
         member_since: new Date().toISOString(),
         conversation_count: 0,
+        language_preference: form.languagePreference as "en" | "es",
       });
     } catch {
       // Profile creation failed — continue to subscription regardless
@@ -156,26 +166,28 @@ export default function OnboardingFlow() {
     router.push(`/subscription?userId=${userId}`);
   }
 
+  const stepOfLabel = translations.stepOf[locale];
+
   function renderStep() {
     switch (step) {
       case 1:
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">
-              Let&apos;s get to know you
+              {t("letsGetToKnowYou")}
             </h2>
             <p className="text-sm text-gray-400">
-              CaseMate uses this information to give you personalized guidance.
+              {t("onboardingPersonalizeNote")}
             </p>
             <Input
-              label="Your Name"
-              placeholder="e.g. Sarah Chen"
+              label={t("yourName")}
+              placeholder={t("namePlaceholder")}
               value={form.displayName}
               onChange={(e) => update("displayName", e.target.value)}
             />
             <div>
               <label htmlFor="onboarding-state" className="block text-sm font-medium text-gray-300 mb-1">
-                State
+                {t("state")}
               </label>
               <select
                 id="onboarding-state"
@@ -183,9 +195,9 @@ export default function OnboardingFlow() {
                 onChange={(e) => update("state", e.target.value)}
                 className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
               >
-                <option value="">Select your state</option>
+                <option value="" className="text-black bg-white">{t("selectYourState")}</option>
                 {US_STATES.map((s: string) => (
-                  <option key={s} value={s}>
+                  <option key={s} value={s} className="text-black bg-white">
                     {s}
                   </option>
                 ))}
@@ -198,18 +210,21 @@ export default function OnboardingFlow() {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">
-              Housing Situation
+              {t("housingSituationTitle")}
             </h2>
             <p className="text-sm text-gray-400">
-              This helps CaseMate understand tenant/homeowner rights that apply to
-              you.
+              {t("housingNote")}
             </p>
             <div className="space-y-2">
-              {["Renter", "Homeowner", "Other"].map((opt: string) => (
+              {[
+                { value: "renter", label: t("renter") },
+                { value: "homeowner", label: t("homeowner") },
+                { value: "other", label: t("other") },
+              ].map((opt) => (
                 <label
-                  key={opt}
+                  key={opt.value}
                   className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                    form.housingSituation === opt.toLowerCase()
+                    form.housingSituation === opt.value
                       ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
                       : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
                   }`}
@@ -217,18 +232,18 @@ export default function OnboardingFlow() {
                   <input
                     type="radio"
                     name="housing"
-                    value={opt.toLowerCase()}
-                    checked={form.housingSituation === opt.toLowerCase()}
+                    value={opt.value}
+                    checked={form.housingSituation === opt.value}
                     onChange={(e) => update("housingSituation", e.target.value)}
                     className="text-blue-500"
                   />
-                  <span className="text-sm text-gray-200">{opt}</span>
+                  <span className="text-sm text-gray-200">{opt.label}</span>
                 </label>
               ))}
             </div>
             <Input
-              label="Details (optional)"
-              placeholder="e.g. apartment, month-to-month lease"
+              label={t("detailsOptional")}
+              placeholder={t("housingDetailPlaceholder")}
               value={form.housingDetails}
               onChange={(e) => update("housingDetails", e.target.value)}
             />
@@ -239,10 +254,10 @@ export default function OnboardingFlow() {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">
-              Employment Type
+              {t("employmentTypeTitle")}
             </h2>
             <p className="text-sm text-gray-400">
-              Employment status affects your rights in many legal areas.
+              {t("employmentNote")}
             </p>
             <div className="space-y-2">
               {["W-2 Employee", "1099 Contractor", "Unemployed", "Student", "Retired"].map(
@@ -271,8 +286,8 @@ export default function OnboardingFlow() {
               )}
             </div>
             <Input
-              label="Details (optional)"
-              placeholder="e.g. tech industry, part-time"
+              label={t("detailsOptional")}
+              placeholder={t("employmentDetailPlaceholder")}
               value={form.employmentDetails}
               onChange={(e) => update("employmentDetails", e.target.value)}
             />
@@ -283,18 +298,24 @@ export default function OnboardingFlow() {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">
-              Family Status
+              {t("familyStatusTitle")}
             </h2>
             <p className="text-sm text-gray-400">
-              Family situation can affect custody, benefits, and housing rights.
+              {t("familyNote")}
             </p>
             <div className="space-y-2">
-              {["Single", "Married", "Divorced", "Widowed", "Domestic Partnership"].map(
-                (opt: string) => (
+              {[
+                { value: "single", label: t("single") },
+                { value: "married", label: t("married") },
+                { value: "divorced", label: t("divorced") },
+                { value: "widowed", label: t("widowed") },
+                { value: "domestic partnership", label: t("domesticPartnership") },
+              ].map(
+                (opt) => (
                   <label
-                    key={opt}
+                    key={opt.value}
                     className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                      form.familyStatus === opt.toLowerCase()
+                      form.familyStatus === opt.value
                         ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
                         : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
                     }`}
@@ -302,18 +323,18 @@ export default function OnboardingFlow() {
                     <input
                       type="radio"
                       name="family"
-                      value={opt.toLowerCase()}
-                      checked={form.familyStatus === opt.toLowerCase()}
+                      value={opt.value}
+                      checked={form.familyStatus === opt.value}
                       onChange={(e) => update("familyStatus", e.target.value)}
                       className="text-blue-500"
                     />
-                    <span className="text-sm text-gray-200">{opt}</span>
+                    <span className="text-sm text-gray-200">{opt.label}</span>
                   </label>
                 )
               )}
             </div>
             <Input
-              label="Number of Dependents (optional)"
+              label={t("numberOfDependents")}
               placeholder="e.g. 2"
               type="number"
               min="0"
@@ -327,19 +348,51 @@ export default function OnboardingFlow() {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">
-              Current Legal Issue
+              {t("currentLegalIssue")}
             </h2>
             <p className="text-sm text-gray-400">
-              Optionally describe a legal issue you&apos;re dealing with. You can
-              always add this later.
+              {t("legalIssueNote")}
             </p>
             <textarea
               value={form.currentIssue}
               onChange={(e) => update("currentIssue", e.target.value)}
               rows={5}
-              placeholder="e.g. My landlord hasn't returned my security deposit after 45 days..."
+              placeholder={t("legalIssuePlaceholder")}
               className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 resize-none placeholder:text-gray-600"
             />
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-white">
+              {t("preferredLanguage")}
+            </h2>
+            <p className="text-sm text-gray-400">
+              {t("languageNote")}
+            </p>
+            <div className="flex gap-3">
+              {(
+                [
+                  { code: "en", label: t("english") },
+                  { code: "es", label: t("spanish") },
+                ] as const
+              ).map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => update("languagePreference", lang.code)}
+                  className={`flex-1 py-3 px-4 rounded-lg border text-sm font-medium transition-all ${
+                    form.languagePreference === lang.code
+                      ? "border-blue-500 bg-blue-500/10 text-white shadow-glow-sm"
+                      : "border-white/10 text-gray-400 hover:border-white/20 hover:bg-white/[0.03]"
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
           </div>
         );
 
@@ -355,7 +408,7 @@ export default function OnboardingFlow() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-400">
-              Step {step} of {TOTAL_STEPS}
+              {typeof stepOfLabel === "function" ? stepOfLabel(step, TOTAL_STEPS) : `${t("step")} ${step} ${t("of")} ${TOTAL_STEPS}`}
             </span>
             <span className="text-sm text-gray-500">
               {Math.round((step / TOTAL_STEPS) * 100)}%
@@ -368,7 +421,7 @@ export default function OnboardingFlow() {
             />
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Your information is stored securely and used only to personalize your legal guidance.
+            {t("onboardingSecureNotice")}
           </p>
         </div>
 
@@ -389,16 +442,16 @@ export default function OnboardingFlow() {
               onClick={() => setStep((s) => s - 1)}
               disabled={step === 1}
             >
-              Back
+              {t("back")}
             </Button>
 
             {step < TOTAL_STEPS ? (
               <Button onClick={() => setStep((s) => s + 1)} disabled={!canAdvance()}>
-                Next
+                {t("next")}
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Setting up..." : "Continue"}
+                {submitting ? t("settingUp") : t("continue_")}
               </Button>
             )}
           </div>

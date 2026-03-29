@@ -3,6 +3,7 @@
 import React from "react";
 import Card from "./ui/Card";
 import Badge from "./ui/Badge";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * Attorney profile data for referral display.
@@ -10,6 +11,7 @@ import Badge from "./ui/Badge";
  * @property id - Unique attorney identifier
  * @property name - Attorney's full name
  * @property state - Two-letter state code where the attorney is licensed
+ * @property zip_code - Attorney's office zip code (5 digits)
  * @property specializations - Legal practice areas (e.g., ["landlord_tenant", "consumer_protection"])
  * @property rating - Average rating from 0 to 5
  * @property cost_range - Display string for typical fee range (e.g., "$200-$400/hr")
@@ -23,6 +25,7 @@ interface Attorney {
   id: string;
   name: string;
   state: string;
+  zip_code: string;
   specializations: string[];
   rating: number;
   cost_range: string;
@@ -59,6 +62,7 @@ interface AttorneyCardProps {
  * @param props.relevanceScore - Numeric relevance ranking
  */
 export default function AttorneyCard({ attorney, matchReason, relevanceScore }: AttorneyCardProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <Card.Body>
@@ -67,7 +71,7 @@ export default function AttorneyCard({ attorney, matchReason, relevanceScore }: 
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-base font-semibold text-white">{attorney.name}</h3>
               {attorney.accepts_free_consultations && (
-                <Badge variant="success" size="sm">Free consult</Badge>
+                <Badge variant="success" size="sm">{t("freeConsult")}</Badge>
               )}
             </div>
             <p className="text-xs text-blue-400 mb-2">{matchReason}</p>
@@ -91,7 +95,7 @@ export default function AttorneyCard({ attorney, matchReason, relevanceScore }: 
                   {attorney.rating.toFixed(1)}
                 </span>
               )}
-              <span>{attorney.state}</span>
+              <span>{attorney.state}{attorney.zip_code ? ` ${attorney.zip_code}` : ""}</span>
             </div>
           </div>
           <div className="flex flex-col gap-2 shrink-0">
@@ -100,7 +104,7 @@ export default function AttorneyCard({ attorney, matchReason, relevanceScore }: 
                 href={`tel:${attorney.phone}`}
                 className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
               >
-                Call
+                {t("call")}
               </a>
             )}
             {attorney.email && (
@@ -108,7 +112,7 @@ export default function AttorneyCard({ attorney, matchReason, relevanceScore }: 
                 href={`mailto:${attorney.email}`}
                 className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
               >
-                Email
+                {t("email")}
               </a>
             )}
             {attorney.website && (
@@ -118,7 +122,7 @@ export default function AttorneyCard({ attorney, matchReason, relevanceScore }: 
                 rel="noopener noreferrer"
                 className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
               >
-                Website
+                {t("website")}
               </a>
             )}
           </div>

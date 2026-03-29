@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Badge from "./ui/Badge";
 import type { LegalProfile, LegalIssue, IssueStatus } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
+import { api } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 
 /** Maps issue status values to Badge variant styles for visual differentiation. */
 const statusVariant: Record<IssueStatus, "default" | "success" | "warning" | "error"> = {
@@ -38,6 +41,29 @@ interface LegalProfileSidebarProps {
 export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProps) {
   const [liveProfile, setLiveProfile] = useState<LegalProfile>(profile);
   const [memoryPulse, setMemoryPulse] = useState(false);
+  const { t, setLocale } = useTranslation();
+
+  /**
+   * Toggles the user's language preference between English and Spanish
+   * and persists the change via the profile PATCH endpoint.
+   * Also updates the global i18n locale so the entire app switches language.
+   */
+  const toggleLanguage = useCallback(async () => {
+    const newLang: Locale = liveProfile.language_preference === "es" ? "en" : "es";
+    setLiveProfile((prev) => ({ ...prev, language_preference: newLang }));
+    setLocale(newLang);
+    try {
+      await api.updateProfile({ language_preference: newLang });
+    } catch {
+      // Revert on failure
+      const reverted: Locale = newLang === "es" ? "en" : "es";
+      setLiveProfile((prev) => ({
+        ...prev,
+        language_preference: reverted,
+      }));
+      setLocale(reverted);
+    }
+  }, [liveProfile.language_preference, setLocale]);
 
   // Sync prop changes
   useEffect(() => {
@@ -79,7 +105,7 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
           <div className="flex items-center gap-2 mb-1">
             <span className={`w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)] ${memoryPulse ? "animate-ping" : ""}`} />
             <span className={`text-xs font-medium ${memoryPulse ? "text-green-300" : "text-green-400"}`}>
-              {memoryPulse ? "Memory Updated" : "Memory Active"}
+              {memoryPulse ? t("memoryUpdated") : t("memoryActive")}
             </span>
           </div>
           <h2 className="text-lg font-semibold text-white">
@@ -88,24 +114,49 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
           <span className="jurisdiction-badge">
             {liveProfile.state}
           </span>
+          {/* Language toggle */}
+          <div className="flex items-center gap-1 mt-2">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className={`px-2 py-0.5 text-xs rounded-l-md border transition-colors ${
+                liveProfile.language_preference === "en"
+                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                  : "bg-white/[0.03] border-white/10 text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className={`px-2 py-0.5 text-xs rounded-r-md border transition-colors ${
+                liveProfile.language_preference === "es"
+                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                  : "bg-white/[0.03] border-white/10 text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              ES
+            </button>
+          </div>
         </div>
 
         {/* Your Situation */}
         <section>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Your Situation
+            {t("yourSituation")}
           </h3>
           <dl className="space-y-2 text-sm">
             <div>
-              <dt className="text-gray-500">Housing</dt>
+              <dt className="text-gray-500">{t("housing")}</dt>
               <dd className="text-gray-300">{liveProfile.housing_situation}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Employment</dt>
+              <dt className="text-gray-500">{t("employment")}</dt>
               <dd className="text-gray-300">{liveProfile.employment_type}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Family</dt>
+              <dt className="text-gray-500">{t("family")}</dt>
               <dd className="text-gray-300">{liveProfile.family_status}</dd>
             </div>
           </dl>
@@ -114,10 +165,10 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
         {/* Active Issues */}
         <section>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Active Issues
+            {t("activeIssues")}
           </h3>
           {liveProfile.active_issues.length === 0 ? (
-            <p className="text-sm text-gray-500">No active issues</p>
+            <p className="text-sm text-gray-500">{t("noActiveIssues")}</p>
           ) : (
             <ul className="space-y-2">
               {liveProfile.active_issues.map((issue: LegalIssue, i: number) => (
@@ -145,11 +196,11 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
         {/* Known Facts */}
         <section>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Known Facts
+            {t("knownFacts")}
           </h3>
           {liveProfile.legal_facts.length === 0 ? (
             <p className="text-sm text-gray-500">
-              Facts will appear as you chat
+              {t("factsWillAppear")}
             </p>
           ) : (
             <ul className="space-y-1">
@@ -166,10 +217,10 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
         {/* Documents */}
         <section>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Documents
+            {t("documents")}
           </h3>
           {liveProfile.documents.length === 0 ? (
-            <p className="text-sm text-gray-500">No documents uploaded</p>
+            <p className="text-sm text-gray-500">{t("noDocumentsUploaded")}</p>
           ) : (
             <ul className="space-y-1">
               {liveProfile.documents.map((doc: string, i: number) => (

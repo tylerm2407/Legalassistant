@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import LanguageWrapper from "@/components/LanguageWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-[#050505] text-white`}>
         <ErrorBoundary>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <LanguageWrapper>{children}</LanguageWrapper>
+          </AuthProvider>
         </ErrorBoundary>
       </body>
     </html>

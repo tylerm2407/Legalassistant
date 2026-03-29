@@ -5,6 +5,8 @@ import Card from "./ui/Card";
 import Button from "./ui/Button";
 import Badge from "./ui/Badge";
 import { api } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
+import translations from "@/lib/i18n/translations";
 
 /**
  * Local representation of a legal deadline for the dashboard UI.
@@ -40,6 +42,7 @@ export default function DeadlineDashboard() {
   const [newTitle, setNewTitle] = useState("");
   const [newDate, setNewDate] = useState("");
   const [newNotes, setNewNotes] = useState("");
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     loadDeadlines();
@@ -117,7 +120,7 @@ export default function DeadlineDashboard() {
       {/* Add button */}
       <div className="flex justify-end">
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          {showForm ? "Cancel" : "+ Add Deadline"}
+          {showForm ? t("cancel") : t("addDeadline")}
         </Button>
       </div>
 
@@ -128,7 +131,7 @@ export default function DeadlineDashboard() {
             <div className="space-y-3">
               <input
                 type="text"
-                placeholder="Deadline title..."
+                placeholder={t("deadlineTitlePlaceholder")}
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder:text-gray-600"
@@ -140,14 +143,14 @@ export default function DeadlineDashboard() {
                 className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 [color-scheme:dark]"
               />
               <textarea
-                placeholder="Notes (optional)..."
+                placeholder={t("notesOptional")}
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 rows={2}
                 className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder:text-gray-600"
               />
               <Button size="sm" onClick={addDeadline} disabled={!newTitle || !newDate}>
-                Save Deadline
+                {t("saveDeadline")}
               </Button>
             </div>
           </Card.Body>
@@ -157,8 +160,8 @@ export default function DeadlineDashboard() {
       {/* Active deadlines */}
       {activeDeadlines.length === 0 && !showForm ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 mb-2">No active deadlines</p>
-          <p className="text-xs text-gray-600">Deadlines will appear here as CaseMate detects them in your conversations</p>
+          <p className="text-gray-500 mb-2">{t("noActiveDeadlines")}</p>
+          <p className="text-xs text-gray-600">{t("deadlinesAutoDetect")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -175,10 +178,10 @@ export default function DeadlineDashboard() {
                   <div className="flex items-center gap-3 mt-1">
                     <span className={`text-xs font-medium ${urgencyColor}`}>
                       {days < 0
-                        ? `${Math.abs(days)} days overdue`
+                        ? (translations.daysOverdue[locale] as (n: number) => string)(Math.abs(days))
                         : days === 0
-                        ? "Due today"
-                        : `${days} days remaining`}
+                        ? t("dueToday")
+                        : (translations.daysRemaining[locale] as (n: number) => string)(days)}
                     </span>
                     <span className="text-xs text-gray-500">
                       {new Date(d.date).toLocaleDateString()}
@@ -195,7 +198,7 @@ export default function DeadlineDashboard() {
                   <button
                     onClick={() => completeDeadline(d.id)}
                     className="p-1.5 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors"
-                    title="Mark complete"
+                    title={t("markComplete")}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -204,7 +207,7 @@ export default function DeadlineDashboard() {
                   <button
                     onClick={() => dismissDeadline(d.id)}
                     className="p-1.5 text-gray-500 hover:bg-white/5 rounded-lg transition-colors"
-                    title="Dismiss"
+                    title={t("dismiss")}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -220,7 +223,7 @@ export default function DeadlineDashboard() {
       {/* Past deadlines */}
       {pastDeadlines.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Past Deadlines</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{t("pastDeadlines")}</h3>
           <div className="space-y-2 opacity-60">
             {pastDeadlines.map((d: Deadline) => (
               <div key={d.id} className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.05] flex items-center justify-between">

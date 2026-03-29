@@ -21,19 +21,23 @@ _supabase_client: Client | None = None
 def _get_supabase() -> Client:
     """Get or create the Supabase client singleton.
 
+    Uses the service role key to bypass RLS, since the backend performs
+    its own authorization checks (JWT verification + user_id matching)
+    before any database access.
+
     Returns:
-        An initialized Supabase client.
+        An initialized Supabase client with service role privileges.
 
     Raises:
-        ValueError: If SUPABASE_URL or SUPABASE_KEY environment variables
-                    are not set.
+        ValueError: If SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment
+                    variables are not set.
     """
     global _supabase_client  # noqa: PLW0603
     if _supabase_client is None:
         url = os.environ.get("SUPABASE_URL")
-        key = os.environ.get("SUPABASE_KEY")
+        key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_KEY")
         if not url or not key:
-            raise ValueError("SUPABASE_URL and SUPABASE_KEY environment variables must be set")
+            raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables must be set")
         _supabase_client = create_client(url, key)
     return _supabase_client
 

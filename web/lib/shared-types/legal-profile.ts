@@ -34,6 +34,7 @@ export interface LegalIssue {
  * @property housing_situation - Housing arrangement (renter, homeowner, etc.)
  * @property employment_type - Employment classification affecting legal rights
  * @property family_status - Marital/family status for family law context
+ * @property language_preference - ISO language code for response language ("en" or "es")
  * @property active_issues - Ongoing legal disputes being tracked
  * @property legal_facts - Specific facts extracted from conversations over time
  * @property documents - References to uploaded legal documents in Supabase Storage
@@ -47,6 +48,7 @@ export interface LegalProfile {
   housing_situation: string;
   employment_type: string;
   family_status: string;
+  language_preference: "en" | "es";
   active_issues: LegalIssue[];
   legal_facts: string[];
   documents: string[];

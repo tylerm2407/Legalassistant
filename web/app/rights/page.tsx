@@ -1,94 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth";
-import { api } from "@/lib/api";
+import React, { useState } from "react";
 import RightsGuide from "@/components/RightsGuide";
 import { useTranslation } from "@/lib/i18n";
-
-interface Domain {
-  domain: string;
-  label: string;
-  guide_count: number;
-}
-
-interface Guide {
-  id: string;
-  domain: string;
-  title: string;
-  description: string;
-  explanation: string;
-  your_rights: string[];
-  action_steps: string[];
-  deadlines: string[];
-  common_mistakes: string[];
-  when_to_get_a_lawyer: string;
-}
-
-/** Fallback domain list so the page renders even if the API is unavailable. */
-const FALLBACK_DOMAINS: Domain[] = [
-  { domain: "landlord_tenant", label: "Housing & Tenant Rights", guide_count: 5 },
-  { domain: "employment_rights", label: "Employment & Workplace", guide_count: 5 },
-  { domain: "consumer_protection", label: "Consumer Protection", guide_count: 2 },
-  { domain: "debt_collection", label: "Debt & Collections", guide_count: 2 },
-  { domain: "small_claims", label: "Small Claims Court", guide_count: 1 },
-  { domain: "family_law", label: "Family Law", guide_count: 1 },
-  { domain: "traffic_violations", label: "Traffic & Driving", guide_count: 1 },
-  { domain: "criminal_records", label: "Criminal Records", guide_count: 1 },
-  { domain: "immigration", label: "Immigration", guide_count: 1 },
-];
+import { RIGHTS_DOMAINS, RIGHTS_GUIDES } from "@/lib/rights-data";
+import type { RightsGuide as GuideType, RightsDomain } from "@/lib/rights-data";
 
 /**
  * "Know Your Rights" library page with domain browsing and guide detail views.
  *
+ * Uses static data embedded in the frontend — no backend required.
  * Two-level navigation: first shows legal domain categories (e.g., Housing,
  * Employment), then guides within the selected domain. Selecting a guide
  * renders the full RightsGuide component with rights, action steps, deadlines,
  * and common mistakes.
  */
 export default function RightsPage() {
-  const { user, loading: authLoading } = useAuth();
   const { t } = useTranslation();
-  const [domains, setDomains] = useState<Domain[]>(FALLBACK_DOMAINS);
-  const [guides, setGuides] = useState<Guide[]>([]);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
-  const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [selectedGuide, setSelectedGuide] = useState<GuideType | null>(null);
 
-  useEffect(() => {
-    if (authLoading || !user) return;
-    async function loadDomains() {
-      try {
-        const data = await api.getRightsDomains();
-        if (data.length > 0) setDomains(data);
-      } catch {
-        // Fallback domains already loaded — silently continue
-      }
-    }
-    loadDomains();
-  }, [user, authLoading]);
+  const domains: RightsDomain[] = RIGHTS_DOMAINS;
+  const guides: GuideType[] = selectedDomain
+    ? RIGHTS_GUIDES.filter((g) => g.domain === selectedDomain)
+    : [];
 
-  async function handleDomainSelect(domain: string) {
+  function handleDomainSelect(domain: string) {
     setSelectedDomain(domain);
     setSelectedGuide(null);
-    setLoading(true);
-    try {
-      const data = await api.getRightsGuides(domain);
-      setGuides(data);
-    } catch {
-      setError("Unable to load guides right now. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (authLoading || (loading && !selectedDomain)) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
   }
 
   if (selectedGuide) {
@@ -117,7 +56,7 @@ export default function RightsPage() {
         <div className="mb-8">
           {selectedDomain && (
             <button
-              onClick={() => { setSelectedDomain(null); setGuides([]); }}
+              onClick={() => { setSelectedDomain(null); }}
               className="text-sm text-gray-400 hover:text-white mb-4 flex items-center gap-1.5 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -125,9 +64,6 @@ export default function RightsPage() {
               </svg>
               {t("allCategories")}
             </button>
-          )}
-          {error && (
-            <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2 mb-4">{error}</p>
           )}
           <h1 className="text-2xl font-bold text-white mb-2">{t("knowYourRights")}</h1>
           <p className="text-gray-400">
@@ -140,7 +76,7 @@ export default function RightsPage() {
         {/* Domain grid or Guide list */}
         {!selectedDomain ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {domains.map((d: Domain) => (
+            {domains.map((d: RightsDomain) => (
               <button
                 key={d.domain}
                 onClick={() => handleDomainSelect(d.domain)}
@@ -155,13 +91,9 @@ export default function RightsPage() {
               </button>
             ))}
           </div>
-        ) : loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          </div>
         ) : (
           <div className="space-y-3">
-            {guides.map((guide: Guide) => (
+            {guides.map((guide: GuideType) => (
               <button
                 key={guide.id}
                 onClick={() => setSelectedGuide(guide)}

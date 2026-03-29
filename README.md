@@ -63,19 +63,21 @@ flowchart TD
 | **Document Analysis** | Upload leases, contracts, court notices. PDF/image text extraction with AI-powered fact and red flag identification. | Complete |
 | **Action Generator** | Generate demand letters, rights summaries, and next-steps checklists -- pre-filled with your profile data and statute citations. | Complete |
 | **Deadline Tracking** | Auto-detected from conversations or manually created. Dashboard with status management (active/completed/dismissed/expired). | Complete |
-| **Guided Workflows** | 6 step-by-step legal process templates (eviction defense, wage claim filing, small claims, etc.). | Complete |
+| **Guided Workflows** | 6 step-by-step legal process templates (eviction defense, wage claim filing, small claims, etc.) with localStorage persistence. | Complete |
 | **Know Your Rights Library** | 19 comprehensive guides across 10 legal domains with rights, action steps, deadlines, and citations. | Complete |
 | **Attorney Referral Matching** | State and specialty-based attorney search with weighted relevance scoring algorithm. | Complete |
-| **PDF Export and Email** | Generate branded PDFs of letters, summaries, and checklists. Send directly via email. | Complete |
-| **SSE Streaming Chat** | Real-time chat via Server-Sent Events with two-phase send strategy. GET `/api/chat/{id}/stream` endpoint. | Complete |
+| **PDF Export** | Generate branded PDFs of letters, summaries, and checklists. | Complete |
+| **Email Export** | Send generated documents via email. | Requires SMTP config |
+| **SSE Streaming Chat** | Real-time chat via Server-Sent Events. Next.js API route streams from OpenAI GPT-4o. | Complete |
 | **Hybrid Classifier** | Keyword-first classification with LLM fallback for ambiguous queries. ~0ms fast path, ~1s fallback. | Complete |
-| **Multi-Provider LLM Router** | Dual-model architecture with automatic failover: OpenAI GPT-4o (primary) + Anthropic Claude (fallback). Independent circuit breakers per provider, per-provider metrics, and transparent failover for zero-downtime AI. | Complete |
+| **Multi-Provider LLM Router** | OpenAI GPT-4o (primary) + Anthropic Claude (fallback) with independent circuit breakers and per-provider metrics. | Complete |
 | **Prompt Caching** | Anthropic prompt caching with static/dynamic content split via `cache_control` for reduced latency and cost. | Complete |
-| **Stripe Subscription Lifecycle** | Webhook handling (checkout, invoice, cancellation), subscription gate middleware, and free tier. Pro tier checkout integrated. | Complete |
-| **Real OCR Pipeline** | Document text extraction via pytesseract + Pillow for image-based legal documents. | Complete |
+| **Stripe Checkout** | Webhook handling (checkout, invoice, cancellation) and Pro tier checkout integrated. | Complete |
+| **Subscription Tracking** | Persistent subscription status in Supabase with free tier gating. | In Progress |
+| **Real OCR Pipeline** | Document text extraction via pytesseract + Pillow for image-based legal documents. Requires Tesseract installed. | Complete |
 | **Security Headers** | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy on all responses. | Complete |
-| **Realtime Sidebar** | Supabase realtime subscriptions for live profile updates in the legal profile sidebar. | Complete |
-| **Cross-Platform** | Web (Next.js 14) + iOS/Android (Expo React Native). | Complete |
+| **Spanish i18n** | Full Spanish translation of all UI text with language toggle. | Complete |
+| **Cross-Platform** | Web (Next.js) + iOS/Android (Expo React Native). | Complete |
 
 ---
 
@@ -101,7 +103,7 @@ graph TB
     end
 
     subgraph "External Services"
-        CLAUDE["OpenAI GPT-4o (chat)\nAnthropic Claude (classification)"]
+        CLAUDE["Anthropic Claude\nchat + classification"]
         SUPA["Supabase\nPostgres + Auth + Storage"]
         STRIPE["Stripe\nSubscription billing"]
         MC["Mailchimp\nWaitlist management"]
@@ -138,7 +140,7 @@ For the full technical deep dive -- data flow diagrams, database schema, memory 
 | Frontend | Next.js 14, TypeScript, Tailwind CSS | SSR, App Router, type-safe UI |
 | Mobile | Expo, React Native, Expo Router | Cross-platform iOS/Android from shared TypeScript |
 | Backend | FastAPI, Python 3.12 | Async API, background tasks, SSE streaming |
-| AI | OpenAI GPT-4o (chat) + Anthropic Claude (classification) | Dual-model architecture: GPT-4o for legal reasoning, Claude for domain classification |
+| AI | Anthropic Claude (claude-sonnet-4-20250514) | Chat, legal reasoning, domain classification, fact extraction |
 | Database | Supabase (PostgreSQL) | Structured profiles, conversations, documents, RLS |
 | Auth | Supabase Auth (JWT) | User authentication with Row Level Security |
 | File Storage | Supabase Storage | Document uploads tied to user auth |
@@ -369,14 +371,14 @@ Verify key README claims directly from the codebase:
 | Zero lint errors | `make lint` → All checks passed |
 | Zero type errors | `mypy backend/` → Success: no issues found |
 | Memory injection | Run demo, ask landlord question as MA renter → response cites M.G.L. |
-| Chat model | `grep "gpt-4o" backend/main.py` → gpt-4o (OpenAI) |
+| Chat model | `grep "claude-sonnet" backend/utils/llm_router.py` → claude-sonnet-4-20250514 (Anthropic) |
 | Classifier model | `grep "claude-sonnet" backend/legal/classifier.py` → claude-sonnet-4-20250514 (Anthropic) |
 
 ---
 
 ## Completeness Evidence
 
-Every feature listed is implemented, tested, and deployable.
+Features marked "Complete" above are implemented, tested, and deployable. Features marked "In Progress" or with config requirements are noted in the table.
 
 | Dimension | Evidence | Verification |
 |-----------|----------|-------------|
@@ -490,7 +492,7 @@ All architectural decisions are documented with context, options considered, and
 | [022](docs/decisions/022-sse-streaming-over-websocket-for-chat.md) | SSE streaming over WebSocket | Unidirectional SSE fits chat. Works through CDNs and proxies. |
 | [023](docs/decisions/023-supabase-unified-platform.md) | Supabase as unified platform | Auth + DB + Storage + Realtime. One SDK, one security model. |
 | [024](docs/decisions/024-prompt-injection-defense-structured-context.md) | Prompt injection defense | Structured context isolation. Zero-latency, deterministic, auditable. |
-| [025](docs/decisions/025-multi-provider-llm-router.md) | Multi-provider LLM router | Dual-model failover: OpenAI GPT-4o primary, Anthropic Claude fallback, independent circuit breakers. |
+| [025](docs/decisions/025-multi-provider-llm-router.md) | LLM router | Anthropic Claude with circuit-breaker protection and observability metrics. |
 
 ---
 

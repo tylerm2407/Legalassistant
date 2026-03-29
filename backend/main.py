@@ -17,7 +17,6 @@ from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import TypedDict, cast
 
 import anthropic
-import openai
 from anthropic.types import TextBlock
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -94,7 +93,6 @@ from backend.utils.auth import verify_supabase_jwt
 from backend.utils.circuit_breaker import CircuitBreakerOpenError, anthropic_breaker
 from backend.utils.client import get_anthropic_client
 from backend.utils.llm_router import get_llm_router
-from backend.utils.openai_client import get_openai_client
 from backend.utils.lifecycle import get_lifecycle_manager, lifecycle_middleware
 from backend.utils.logger import configure_logging, get_logger
 from backend.utils.rate_limiter import rate_limit
@@ -798,20 +796,11 @@ async def chat_stream(
             router = get_llm_router()
             provider_name, stream_obj = await router.stream(system_prompt, api_messages)
 
-            if provider_name == "openai":
-                async for chunk in stream_obj:
-                    delta = chunk.choices[0].delta if chunk.choices else None
-                    if delta and delta.content:
-                        full_response_parts.append(delta.content)
-                        event_data = json.dumps({"type": "token", "content": delta.content})
-                        yield f"data: {event_data}\n\n"
-            else:
-                # Anthropic fallback streaming
-                async with stream_obj as anthropic_stream:
-                    async for text in anthropic_stream.text_stream:
-                        full_response_parts.append(text)
-                        event_data = json.dumps({"type": "token", "content": text})
-                        yield f"data: {event_data}\n\n"
+            async with stream_obj as anthropic_stream:
+                async for text in anthropic_stream.text_stream:
+                    full_response_parts.append(text)
+                    event_data = json.dumps({"type": "token", "content": text})
+                    yield f"data: {event_data}\n\n"
 
             assistant_response = "".join(full_response_parts)
             stream_latency = time.monotonic() - stream_start

@@ -13,6 +13,7 @@ from datetime import datetime
 import stripe
 from pydantic import BaseModel
 
+from backend.memory.profile import _get_supabase
 from backend.utils.logger import get_logger
 
 _logger = get_logger(__name__)
@@ -110,8 +111,8 @@ async def create_checkout_session(
 async def get_subscription_status(user_id: str) -> SubscriptionStatus:
     """Get the current subscription status for a user.
 
-    Queries Supabase for the user's Stripe customer/subscription mapping,
-    then fetches the live status from Stripe.
+    Queries the subscriptions table in Supabase for the user's record,
+    then returns the current subscription state.
 
     Args:
         user_id: The authenticated CaseMate user ID.
@@ -121,31 +122,62 @@ async def get_subscription_status(user_id: str) -> SubscriptionStatus:
     """
     _logger.info("get_subscription_status", user_id=user_id)
 
-    # Returns inactive until subscriptions table is connected
-    _logger.warning(
-        "subscription_lookup_not_connected",
-        user_id=user_id,
-        detail="Supabase subscriptions table not yet connected",
-    )
+    try:
+        client = _get_supabase()
+        result = (
+            client.table("subscriptions")
+            .select("*")
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
 
-    return SubscriptionStatus(
-        user_id=user_id,
-        is_active=False,
-        status="none",
-    )
+        data = getattr(result, "data", None)
+        if data is None:
+            return SubscriptionStatus(
+                user_id=user_id,
+                is_active=False,
+                status="none",
+            )
+
+        status = data.get("status", "none")
+        period_end_raw = data.get("current_period_end")
+        period_end = datetime.fromisoformat(period_end_raw) if period_end_raw else None
+
+        return SubscriptionStatus(
+            user_id=user_id,
+            is_active=status == "active",
+            stripe_subscription_id=data.get("stripe_subscription_id"),
+            status=status,
+            current_period_end=period_end,
+        )
+
+    except Exception as exc:
+        _logger.error(
+            "subscription_status_error",
+            user_id=user_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
+        return SubscriptionStatus(
+            user_id=user_id,
+            is_active=False,
+            status="error",
+        )
 
 
 async def cancel_subscription(user_id: str) -> SubscriptionStatus:
-    """Cancel the user's active subscription.
+    """Cancel the user's active subscription at period end.
 
-    Cancels the subscription at period end (the user retains access until
-    the current billing period expires). Does not issue a refund.
+    Sets cancel_at_period_end on the Stripe subscription so the user
+    retains access until the current billing period expires. Updates
+    the local Supabase record to reflect the pending cancellation.
 
     Args:
         user_id: The authenticated CaseMate user ID.
 
     Returns:
-        SubscriptionStatus reflecting the updated (canceled) state.
+        SubscriptionStatus reflecting the updated state.
 
     Raises:
         ValueError: If the user has no active subscription to cancel.
@@ -153,7 +185,32 @@ async def cancel_subscription(user_id: str) -> SubscriptionStatus:
     """
     _logger.info("cancel_subscription", user_id=user_id)
 
-    raise NotImplementedError(
-        "Subscription cancellation not yet connected. "
-        "Requires subscriptions table with user-to-stripe mapping."
+    current = await get_subscription_status(user_id)
+    if not current.is_active or not current.stripe_subscription_id:
+        raise ValueError(f"No active subscription found for user {user_id}")
+
+    stripe.Subscription.modify(
+        current.stripe_subscription_id,
+        cancel_at_period_end=True,
     )
+
+    try:
+        client = _get_supabase()
+        client.table("subscriptions").update({"cancel_at_period_end": True}).eq(
+            "user_id", user_id
+        ).execute()
+    except Exception as exc:
+        _logger.error(
+            "subscription_cancel_db_error",
+            user_id=user_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
+
+    _logger.info(
+        "subscription_cancel_scheduled",
+        user_id=user_id,
+        subscription_id=current.stripe_subscription_id,
+    )
+
+    return await get_subscription_status(user_id)

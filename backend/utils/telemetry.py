@@ -180,12 +180,8 @@ class MetricsCollector:
         """
         return {
             "counters": dict(self._counters),
-            "histograms": {
-                name: hist.to_dict() for name, hist in self._histograms.items()
-            },
-            "labeled_counters": {
-                name: dict(labels) for name, labels in self._labels.items()
-            },
+            "histograms": {name: hist.to_dict() for name, hist in self._histograms.items()},
+            "labeled_counters": {name: dict(labels) for name, labels in self._labels.items()},
         }
 
 

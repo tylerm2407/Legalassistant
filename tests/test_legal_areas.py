@@ -94,7 +94,11 @@ class TestEmployment:
 
     def test_mentions_termination(self) -> None:
         guidance_lower = employment.DOMAIN_GUIDANCE.lower()
-        assert "termination" in guidance_lower or "fired" in guidance_lower or "employment" in guidance_lower
+        assert (
+            "termination" in guidance_lower
+            or "fired" in guidance_lower
+            or "employment" in guidance_lower
+        )
 
 
 class TestDebtCollections:
@@ -125,7 +129,11 @@ class TestTraffic:
 
     def test_mentions_ticket_or_violation(self) -> None:
         guidance_lower = traffic.DOMAIN_GUIDANCE.lower()
-        assert "ticket" in guidance_lower or "violation" in guidance_lower or "traffic" in guidance_lower
+        assert (
+            "ticket" in guidance_lower
+            or "violation" in guidance_lower
+            or "traffic" in guidance_lower
+        )
 
 
 class TestFamilyLaw:
@@ -133,7 +141,9 @@ class TestFamilyLaw:
 
     def test_mentions_custody_or_divorce(self) -> None:
         guidance_lower = family_law.DOMAIN_GUIDANCE.lower()
-        assert "custody" in guidance_lower or "divorce" in guidance_lower or "family" in guidance_lower
+        assert (
+            "custody" in guidance_lower or "divorce" in guidance_lower or "family" in guidance_lower
+        )
 
 
 class TestCriminalRecords:

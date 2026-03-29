@@ -121,3 +121,62 @@ async def update_profile(profile: LegalProfile) -> LegalProfile:
         raise RuntimeError(
             f"Failed to update profile for user_id={profile.user_id}: {exc}"
         ) from exc
+
+
+async def get_free_message_count(user_id: str) -> int:
+    """Get the number of free messages used by a user this month.
+
+    Args:
+        user_id: The Supabase auth user ID.
+
+    Returns:
+        The count of free messages used, or 0 if no profile exists.
+    """
+    try:
+        client = _get_supabase()
+        result = (
+            client.table("user_profiles")
+            .select("free_messages_used")
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        data = getattr(result, "data", None)
+        if data is None:
+            return 0
+        return int(data.get("free_messages_used", 0))
+    except Exception as exc:
+        _logger.error(
+            "free_message_count_error",
+            user_id=user_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
+        return 0
+
+
+async def increment_free_message_count(user_id: str) -> None:
+    """Increment the free message counter for a user.
+
+    Args:
+        user_id: The Supabase auth user ID.
+    """
+    try:
+        client = _get_supabase()
+        current = await get_free_message_count(user_id)
+        client.table("user_profiles").update({"free_messages_used": current + 1}).eq(
+            "user_id", user_id
+        ).execute()
+
+        _logger.info(
+            "free_message_incremented",
+            user_id=user_id,
+            new_count=current + 1,
+        )
+    except Exception as exc:
+        _logger.error(
+            "free_message_increment_error",
+            user_id=user_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )

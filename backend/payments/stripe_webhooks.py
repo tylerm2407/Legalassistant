@@ -12,6 +12,7 @@ import os
 import stripe
 from pydantic import BaseModel
 
+from backend.memory.profile import _get_supabase
 from backend.utils.logger import get_logger
 
 _logger = get_logger(__name__)
@@ -96,31 +97,62 @@ async def _handle_checkout_completed(session: dict[str, str]) -> None:
     """Process a completed checkout session.
 
     Activates the user's subscription in Supabase after successful payment.
-    The customer and subscription IDs are extracted from the session object.
+    Extracts user_id from session metadata (set during checkout creation),
+    then upserts the subscription record linking Stripe IDs to the CaseMate user.
 
     Args:
         session: The Stripe checkout session object from the webhook payload.
     """
     customer_id = session.get("customer", "")
     subscription_id = session.get("subscription", "")
+    raw_metadata: object = session.get("metadata", {})
+    metadata: dict[str, object] = raw_metadata if isinstance(raw_metadata, dict) else {}
+    user_id = metadata.get("user_id", "") if isinstance(metadata, dict) else ""
 
     _logger.info(
         "checkout_completed",
         customer_id=customer_id,
         subscription_id=subscription_id,
+        user_id=user_id,
     )
 
-    raise NotImplementedError(
-        "Supabase subscription activation not yet connected. "
-        "Requires subscriptions table and user-customer mapping."
-    )
+    if not user_id:
+        _logger.error("checkout_missing_user_id", customer_id=customer_id)
+        return
+
+    try:
+        client = _get_supabase()
+        upsert_data: dict[str, str | bool] = {
+            "user_id": str(user_id),
+            "stripe_customer_id": str(customer_id),
+            "stripe_subscription_id": str(subscription_id),
+            "status": "active",
+            "cancel_at_period_end": False,
+        }
+        client.table("subscriptions").upsert(
+            upsert_data,
+            on_conflict="user_id",
+        ).execute()
+
+        _logger.info(
+            "subscription_activated",
+            user_id=user_id,
+            subscription_id=subscription_id,
+        )
+    except Exception as exc:
+        _logger.error(
+            "subscription_activation_error",
+            user_id=user_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
 
 
 async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
     """Process a subscription update event.
 
-    Syncs the subscription status (active, past_due, etc.) to Supabase
-    whenever Stripe reports a change.
+    Syncs the subscription status, current_period_end, and cancel_at_period_end
+    fields to Supabase whenever Stripe reports a change.
 
     Args:
         subscription: The Stripe subscription object from the webhook payload.
@@ -128,6 +160,8 @@ async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
     subscription_id = subscription.get("id", "")
     status = subscription.get("status", "")
     customer_id = subscription.get("customer", "")
+    current_period_end = subscription.get("current_period_end", "")
+    cancel_at_period_end = subscription.get("cancel_at_period_end", False)
 
     _logger.info(
         "subscription_updated",
@@ -136,10 +170,31 @@ async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
         customer_id=customer_id,
     )
 
-    raise NotImplementedError(
-        "Supabase subscription sync not yet connected. "
-        "Requires subscriptions table and user-customer mapping."
-    )
+    try:
+        client = _get_supabase()
+        update_data: dict[str, object] = {
+            "status": status,
+            "cancel_at_period_end": bool(cancel_at_period_end),
+        }
+        if current_period_end:
+            update_data["current_period_end"] = current_period_end
+
+        client.table("subscriptions").update(update_data).eq(  # type: ignore[arg-type]
+            "stripe_subscription_id", subscription_id
+        ).execute()
+
+        _logger.info(
+            "subscription_synced",
+            subscription_id=subscription_id,
+            status=status,
+        )
+    except Exception as exc:
+        _logger.error(
+            "subscription_sync_error",
+            subscription_id=subscription_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
 
 
 async def _handle_subscription_deleted(subscription: dict[str, str]) -> None:
@@ -160,7 +215,20 @@ async def _handle_subscription_deleted(subscription: dict[str, str]) -> None:
         customer_id=customer_id,
     )
 
-    raise NotImplementedError(
-        "Supabase subscription cancellation not yet connected. "
-        "Requires subscriptions table and user-customer mapping."
-    )
+    try:
+        client = _get_supabase()
+        client.table("subscriptions").update({"status": "canceled"}).eq(
+            "stripe_subscription_id", subscription_id
+        ).execute()
+
+        _logger.info(
+            "subscription_canceled",
+            subscription_id=subscription_id,
+        )
+    except Exception as exc:
+        _logger.error(
+            "subscription_cancel_error",
+            subscription_id=subscription_id,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )

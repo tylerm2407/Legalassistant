@@ -47,7 +47,7 @@ from backend.knowledge.rights_library import (
     get_guide_by_id,
     get_guides_by_domain,
 )
-from backend.legal.classifier import classify_with_confidence
+from backend.legal.classifier import classify_with_llm_fallback
 from backend.memory.conversation_store import (
     create_conversation,
     delete_conversation,
@@ -55,8 +55,13 @@ from backend.memory.conversation_store import (
     list_conversations,
     save_conversation,
 )
-from backend.memory.injector import build_system_prompt
-from backend.memory.profile import get_profile, update_profile
+from backend.memory.injector import build_system_prompt, build_system_prompt_parts
+from backend.memory.profile import (
+    get_free_message_count,
+    get_profile,
+    increment_free_message_count,
+    update_profile,
+)
 from backend.memory.updater import update_profile_from_conversation
 from backend.models.legal_profile import LegalProfile
 from backend.models.responses import HealthResponse
@@ -233,6 +238,43 @@ _chat_rate_limit = rate_limit(max_requests=10, window_seconds=60)
 _actions_rate_limit = rate_limit(max_requests=5, window_seconds=60)
 _documents_rate_limit = rate_limit(max_requests=3, window_seconds=60)
 
+# ---------- Subscription gate ----------
+
+FREE_TIER_MESSAGE_LIMIT = 5
+
+
+async def require_subscription_or_free_tier(
+    user_id: str = Depends(verify_supabase_jwt),
+) -> str:
+    """Verify the user has an active subscription or free messages remaining.
+
+    Free tier users get 5 messages per month. Paid subscribers have unlimited access.
+
+    Args:
+        user_id: Authenticated user ID from JWT.
+
+    Returns:
+        The verified user_id.
+
+    Raises:
+        HTTPException: 402 if the user has exhausted free messages and has no subscription.
+    """
+    sub_status = await get_subscription_status(user_id)
+    if sub_status.is_active:
+        return user_id
+
+    free_count = await get_free_message_count(user_id)
+    if free_count >= FREE_TIER_MESSAGE_LIMIT:
+        raise HTTPException(
+            status_code=402,
+            detail=(
+                f"Free tier limit reached ({FREE_TIER_MESSAGE_LIMIT} messages/month). "
+                "Subscribe for unlimited access."
+            ),
+        )
+    return user_id
+
+
 # ---------- Max upload size ----------
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
@@ -265,7 +307,7 @@ async def metrics_endpoint() -> Response:
 async def chat(
     request: ChatRequest,
     background_tasks: BackgroundTasks,
-    user_id: str = Depends(verify_supabase_jwt),
+    user_id: str = Depends(require_subscription_or_free_tier),
     _rate: None = Depends(_chat_rate_limit),
 ) -> ChatResponse:
     """Process a user message and return CaseMate's response.
@@ -298,12 +340,14 @@ async def chat(
         raise HTTPException(status_code=404, detail="Profile not found. Complete onboarding first.")
 
     # Classify with confidence scoring for observability
-    classification = classify_with_confidence(request.message)
+    client = get_anthropic_client()
+    classification = await classify_with_llm_fallback(request.message, client=client)
     legal_area = classification.domain
     metrics.increment_label("legal_area_classified", legal_area)
     metrics.increment_label("classifier_confidence_bucket", f"{classification.confidence:.1f}")
 
     system_prompt = build_system_prompt(profile, request.message)
+    static_prefix, dynamic_suffix = build_system_prompt_parts(profile, request.message)
 
     # Load or create conversation
     conversation = None
@@ -332,7 +376,6 @@ async def chat(
         )
 
     try:
-        client = get_anthropic_client()
 
         @anthropic_breaker
         @retry_anthropic
@@ -341,7 +384,10 @@ async def chat(
             response = await client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
-                system=system_prompt,
+                system=[
+                    {"type": "text", "text": static_prefix, "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": dynamic_suffix},
+                ],
                 messages=api_messages,  # type: ignore[arg-type]
             )
             first_block = response.content[0] if response.content else None
@@ -408,9 +454,13 @@ async def chat(
         conversation_id=conversation.id,
         response_length=len(assistant_response),
         classifier_confidence=classification.confidence,
+        classifier_method=classification.method,
         token_budget_truncated=budget_result.was_truncated,
         chat_latency_ms=round(chat_latency * 1000, 2),
     )
+
+    # Track free tier usage for non-subscribers
+    background_tasks.add_task(increment_free_message_count, user_id)
 
     return ChatResponse(
         conversation_id=conversation.id,
@@ -457,9 +507,11 @@ async def chat_stream(
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found.")
 
-    classification = classify_with_confidence(message)
+    sse_client = get_anthropic_client()
+    classification = await classify_with_llm_fallback(message, client=sse_client)
     legal_area = classification.domain
     system_prompt = build_system_prompt(profile, message)
+    static_prefix, dynamic_suffix = build_system_prompt_parts(profile, message)
 
     conversation.add_message("user", message, legal_area=legal_area)
 
@@ -478,11 +530,13 @@ async def chat_stream(
         full_response_parts: list[str] = []
 
         try:
-            client = get_anthropic_client()
-            async with client.messages.stream(
+            async with sse_client.messages.stream(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
-                system=system_prompt,
+                system=[
+                    {"type": "text", "text": static_prefix, "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": dynamic_suffix},
+                ],
                 messages=api_messages,  # type: ignore[arg-type]
             ) as stream:
                 async for text in stream.text_stream:
@@ -512,29 +566,35 @@ async def chat_stream(
                 detect_and_save_deadlines, user_id, conversation_messages, conversation.id
             )
 
-            done_data = json.dumps({
-                "type": "done",
-                "conversation_id": conversation_id,
-                "legal_area": legal_area,
-                "response_length": len(assistant_response),
-                "latency_ms": round(stream_latency * 1000, 2),
-            })
+            done_data = json.dumps(
+                {
+                    "type": "done",
+                    "conversation_id": conversation_id,
+                    "legal_area": legal_area,
+                    "response_length": len(assistant_response),
+                    "latency_ms": round(stream_latency * 1000, 2),
+                }
+            )
             yield f"data: {done_data}\n\n"
 
         except CircuitBreakerOpenError as exc:
-            error_data = json.dumps({
-                "type": "error",
-                "message": "AI service temporarily unavailable.",
-                "retry_after": int(exc.retry_after),
-            })
+            error_data = json.dumps(
+                {
+                    "type": "error",
+                    "message": "AI service temporarily unavailable.",
+                    "retry_after": int(exc.retry_after),
+                }
+            )
             yield f"data: {error_data}\n\n"
 
         except anthropic.APIError as exc:
             _logger.error("stream_api_error", user_id=user_id, error=str(exc))
-            error_data = json.dumps({
-                "type": "error",
-                "message": "AI service error. Please try again.",
-            })
+            error_data = json.dumps(
+                {
+                    "type": "error",
+                    "message": "AI service error. Please try again.",
+                }
+            )
             yield f"data: {error_data}\n\n"
 
     return StreamingResponse(

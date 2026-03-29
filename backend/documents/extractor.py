@@ -2,7 +2,7 @@
 
 Supports PDF, plain text, and image files. PDF extraction uses pdfplumber
 for accurate text recovery from scanned and digital PDFs. Image OCR
-support is noted as a future enhancement.
+uses pytesseract with Pillow for text extraction from uploaded images.
 """
 
 from __future__ import annotations
@@ -18,8 +18,7 @@ def extract_text(file_bytes: bytes, content_type: str) -> str:
     """Extract text content from uploaded file bytes.
 
     Supports PDF files via pdfplumber, plain text files via UTF-8 decoding,
-    and returns a placeholder message for image files indicating OCR is
-    not yet implemented.
+    and image files via pytesseract OCR.
 
     Args:
         file_bytes: Raw bytes of the uploaded file.
@@ -38,7 +37,7 @@ def extract_text(file_bytes: bytes, content_type: str) -> str:
     elif content_type.startswith("text/"):
         return _extract_text(file_bytes)
     elif content_type.startswith("image/"):
-        return _extract_image_placeholder(content_type)
+        return _extract_image(file_bytes, content_type)
     else:
         raise ValueError(
             f"Unsupported content type: {content_type}. "
@@ -105,22 +104,78 @@ def _extract_text(file_bytes: bytes) -> str:
         raise ValueError(f"Failed to decode text file as UTF-8: {exc}") from exc
 
 
-def _extract_image_placeholder(content_type: str) -> str:
-    """Return a placeholder message for image files.
+def _extract_image(file_bytes: bytes, content_type: str) -> str:
+    """Extract text from image bytes using Tesseract OCR.
 
-    Image OCR support is planned but not yet implemented. This returns
-    a descriptive message so the caller can handle it gracefully.
+    Uses pytesseract (a Python wrapper for Google's Tesseract OCR engine)
+    and Pillow for image loading. Both are lazy-imported to match the
+    existing pdfplumber pattern and avoid hard failures at import time.
+
+    Falls back to a descriptive error message if the tesseract binary
+    is not installed on the host system.
 
     Args:
-        content_type: The MIME type of the image file.
+        file_bytes: Raw bytes of the image file.
+        content_type: The MIME type of the image (e.g. 'image/png').
 
     Returns:
-        A placeholder string indicating OCR is not yet available.
+        Extracted text from the image via OCR.
+
+    Raises:
+        RuntimeError: If pytesseract or Pillow are not installed, or if
+            the tesseract binary is not available on the system PATH.
     """
-    _logger.info("image_ocr_placeholder", content_type=content_type)
-    return (
-        f"[Image file received ({content_type}). "
-        "OCR text extraction is not yet implemented. "
-        "Please upload the document as a PDF or text file for full analysis, "
-        "or describe the contents of the image in your message.]"
-    )
+    try:
+        import pytesseract  # type: ignore[import-untyped]
+        from PIL import Image
+    except ImportError as exc:
+        raise RuntimeError(
+            "pytesseract and Pillow are required for image OCR. "
+            "Install them with: pip install pytesseract Pillow"
+        ) from exc
+
+    try:
+        image = Image.open(io.BytesIO(file_bytes))
+        text = pytesseract.image_to_string(image)
+        result = text.strip()
+
+        _logger.info(
+            "image_ocr_extracted",
+            content_type=content_type,
+            char_count=len(result),
+            image_size=f"{image.width}x{image.height}",
+        )
+
+        if not result:
+            _logger.warning(
+                "image_ocr_empty",
+                content_type=content_type,
+                detail="OCR produced no text — image may be blank or non-textual",
+            )
+            return (
+                "[OCR extracted no readable text from this image. "
+                "The image may not contain text, or the text may be "
+                "too small or unclear for OCR.]"
+            )
+
+        return str(result)
+
+    except Exception as exc:
+        if "tesseract" in str(exc).lower() or "not installed" in str(exc).lower():
+            _logger.error(
+                "tesseract_not_installed",
+                error=str(exc),
+            )
+            raise RuntimeError(
+                "Tesseract OCR engine is not installed. "
+                "Install it with: sudo apt-get install tesseract-ocr (Linux) "
+                "or brew install tesseract (macOS)"
+            ) from exc
+
+        _logger.error(
+            "image_ocr_error",
+            content_type=content_type,
+            error_type=type(exc).__name__,
+            error_message=str(exc),
+        )
+        raise RuntimeError(f"Failed to extract text from image: {exc}") from exc

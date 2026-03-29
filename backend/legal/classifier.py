@@ -33,19 +33,21 @@ PHRASE_BOOST: int = 3
 CONFIDENCE_THRESHOLD: float = 0.4
 
 # All valid legal domain labels for validation
-VALID_DOMAINS: frozenset[str] = frozenset({
-    "landlord_tenant",
-    "employment_rights",
-    "consumer_protection",
-    "debt_collections",
-    "small_claims",
-    "contract_disputes",
-    "traffic_violations",
-    "family_law",
-    "criminal_records",
-    "immigration",
-    "general",
-})
+VALID_DOMAINS: frozenset[str] = frozenset(
+    {
+        "landlord_tenant",
+        "employment_rights",
+        "consumer_protection",
+        "debt_collections",
+        "small_claims",
+        "contract_disputes",
+        "traffic_violations",
+        "family_law",
+        "criminal_records",
+        "immigration",
+        "general",
+    }
+)
 
 DOMAIN_KEYWORDS: dict[str, list[str]] = {
     "landlord_tenant": [

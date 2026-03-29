@@ -55,9 +55,15 @@ class TestConversationSummarizer:
     def test_summarizes_user_and_assistant(self) -> None:
         messages = [
             {"role": "user", "content": "My landlord kept my deposit. What can I do?"},
-            {"role": "assistant", "content": "Under MA law, landlords must return deposits within 30 days."},
+            {
+                "role": "assistant",
+                "content": "Under MA law, landlords must return deposits within 30 days.",
+            },
             {"role": "user", "content": "He didn't do a move-in inspection either."},
-            {"role": "assistant", "content": "Without a move-in inspection, the landlord cannot claim damages."},
+            {
+                "role": "assistant",
+                "content": "Without a move-in inspection, the landlord cannot claim damages.",
+            },
         ]
         summary = ConversationSummarizer().summarize(messages)
         assert "CONVERSATION SUMMARY" in summary
@@ -90,10 +96,7 @@ class TestTokenBudgetManager:
     def test_long_conversation_gets_truncated(self) -> None:
         manager = TokenBudgetManager(conversation_budget=100)
         # Create messages that exceed 100 tokens
-        messages = [
-            {"role": "user", "content": "This is a long message. " * 20}
-            for _ in range(20)
-        ]
+        messages = [{"role": "user", "content": "This is a long message. " * 20} for _ in range(20)]
         result = manager.apply(messages)
         assert result.was_truncated
         assert result.final_count < result.original_count
@@ -104,7 +107,10 @@ class TestTokenBudgetManager:
             min_recent_messages=2,
         )
         messages = [
-            {"role": "user", "content": "This is message number " + str(i) + " with some padding text." * 5}
+            {
+                "role": "user",
+                "content": "This is message number " + str(i) + " with some padding text." * 5,
+            }
             for i in range(20)
         ]
         result = manager.apply(messages)
@@ -116,20 +122,14 @@ class TestTokenBudgetManager:
             conversation_budget=100,
             min_recent_messages=4,
         )
-        messages = [
-            {"role": "user", "content": f"Message {i} " * 10}
-            for i in range(20)
-        ]
+        messages = [{"role": "user", "content": f"Message {i} " * 10} for i in range(20)]
         result = manager.apply(messages)
         # The last messages should always be the most recent ones
         assert result.final_count >= 1  # At least some messages kept
 
     def test_system_prompt_tokens_subtracted(self) -> None:
         manager = TokenBudgetManager(conversation_budget=200)
-        messages = [
-            {"role": "user", "content": "Short message " * 10}
-            for _ in range(10)
-        ]
+        messages = [{"role": "user", "content": "Short message " * 10} for _ in range(10)]
         # With high system prompt overhead, should truncate more aggressively
         result_no_system = manager.apply(messages, system_prompt_tokens=0)
         result_with_system = manager.apply(messages, system_prompt_tokens=150)

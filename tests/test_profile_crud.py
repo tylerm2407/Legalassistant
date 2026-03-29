@@ -47,10 +47,7 @@ async def test_get_profile_found(mock_supabase: MagicMock, sample_profile_data: 
     select_chain = MagicMock()
     select_chain.execute.return_value = MagicMock(data=sample_profile_data)
     (
-        mock_supabase.table.return_value
-        .select.return_value
-        .eq.return_value
-        .maybe_single.return_value
+        mock_supabase.table.return_value.select.return_value.eq.return_value.maybe_single.return_value
     ) = select_chain
 
     result = await get_profile("user_test_001")
@@ -65,10 +62,7 @@ async def test_get_profile_not_found(mock_supabase: MagicMock) -> None:
     select_chain = MagicMock()
     select_chain.execute.return_value = MagicMock(data=None)
     (
-        mock_supabase.table.return_value
-        .select.return_value
-        .eq.return_value
-        .maybe_single.return_value
+        mock_supabase.table.return_value.select.return_value.eq.return_value.maybe_single.return_value
     ) = select_chain
 
     result = await get_profile("nonexistent_user")

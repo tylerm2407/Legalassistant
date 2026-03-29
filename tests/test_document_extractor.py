@@ -28,16 +28,45 @@ class TestExtractText:
         result = extract_text(html.encode("utf-8"), "text/html")
         assert result == html
 
-    def test_image_returns_placeholder(self) -> None:
-        """Image files return an OCR placeholder message."""
-        result = extract_text(b"\x89PNG", "image/png")
-        assert "OCR text extraction is not yet implemented" in result
-        assert "image/png" in result
+    def test_image_ocr_extracts_text(self) -> None:
+        """Image files are processed via OCR when pytesseract is available."""
+        mock_image = MagicMock()
+        mock_image.width = 100
+        mock_image.height = 50
 
-    def test_image_jpeg_returns_placeholder(self) -> None:
-        """JPEG images also return placeholder."""
-        result = extract_text(b"\xff\xd8\xff", "image/jpeg")
-        assert "image/jpeg" in result
+        mock_pil = MagicMock()
+        mock_pil.Image.open.return_value = mock_image
+        mock_tess = MagicMock()
+        mock_tess.image_to_string.return_value = "Extracted legal text"
+
+        with patch.dict(
+            "sys.modules", {"pytesseract": mock_tess, "PIL": mock_pil, "PIL.Image": mock_pil.Image}
+        ):
+            mock_pil.Image.open.return_value = mock_image
+            result = extract_text(b"\x89PNG", "image/png")
+            assert result == "Extracted legal text"
+
+    def test_image_ocr_empty_returns_message(self) -> None:
+        """Empty OCR result returns a descriptive message."""
+        mock_image = MagicMock()
+        mock_image.width = 100
+        mock_image.height = 50
+
+        mock_pil = MagicMock()
+        mock_pil.Image.open.return_value = mock_image
+        mock_tess = MagicMock()
+        mock_tess.image_to_string.return_value = ""
+
+        with patch.dict(
+            "sys.modules", {"pytesseract": mock_tess, "PIL": mock_pil, "PIL.Image": mock_pil.Image}
+        ):
+            result = extract_text(b"\x89PNG", "image/png")
+            assert "no readable text" in result
+
+    def test_image_ocr_invalid_image_raises(self) -> None:
+        """Invalid image data raises RuntimeError."""
+        with pytest.raises(RuntimeError, match="Failed to extract text from image"):
+            extract_text(b"\x89PNG", "image/png")
 
     def test_unsupported_type_raises(self) -> None:
         """Unsupported content types raise ValueError."""

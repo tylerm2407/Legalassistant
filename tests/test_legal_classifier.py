@@ -172,7 +172,9 @@ class TestConfidenceScoring:
         assert 0.0 <= result.confidence <= 1.0
 
     def test_high_confidence_for_clear_signal(self) -> None:
-        result = classify_with_confidence("my landlord kept my security deposit and won't return it")
+        result = classify_with_confidence(
+            "my landlord kept my security deposit and won't return it"
+        )
         assert result.confidence > CONFIDENCE_THRESHOLD
 
     def test_zero_confidence_for_general(self) -> None:

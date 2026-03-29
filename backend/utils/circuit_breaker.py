@@ -51,8 +51,7 @@ class CircuitBreakerOpenError(Exception):
         self.service_name = service_name
         self.retry_after = retry_after
         super().__init__(
-            f"Circuit breaker OPEN for {service_name}. "
-            f"Retry after {retry_after:.1f}s."
+            f"Circuit breaker OPEN for {service_name}. Retry after {retry_after:.1f}s."
         )
 
 
@@ -177,9 +176,7 @@ class CircuitBreaker:
             return
 
         if current == CircuitState.OPEN:
-            retry_after = self.recovery_timeout - (
-                time.monotonic() - self._last_failure_time
-            )
+            retry_after = self.recovery_timeout - (time.monotonic() - self._last_failure_time)
             self._total_rejected += 1
             raise CircuitBreakerOpenError(self.service_name, max(0.0, retry_after))
 
@@ -192,9 +189,7 @@ class CircuitBreaker:
             if self._state != CircuitState.HALF_OPEN:
                 await self._transition_to(CircuitState.HALF_OPEN)
 
-    def __call__(
-        self, func: Callable[P, Awaitable[T]]
-    ) -> Callable[P, Awaitable[T]]:
+    def __call__(self, func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]:
         """Decorate an async function with circuit breaker protection.
 
         Args:

@@ -53,6 +53,7 @@ export default function ConversationHistory({
 }: ConversationHistoryProps) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -63,8 +64,8 @@ export default function ConversationHistory({
     try {
       const data = await api.getConversations();
       setConversations(data);
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("failedToLoadConversations"));
     } finally {
       setLoading(false);
     }
@@ -75,8 +76,8 @@ export default function ConversationHistory({
     try {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c.id !== id));
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("failedToDelete"));
     }
   }
 
@@ -95,6 +96,9 @@ export default function ConversationHistory({
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
+        {error && (
+          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2 mx-2 mt-2">{error}</p>
+        )}
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />

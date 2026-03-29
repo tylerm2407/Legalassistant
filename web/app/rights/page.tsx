@@ -41,6 +41,7 @@ export default function RightsPage() {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -48,8 +49,8 @@ export default function RightsPage() {
       try {
         const data = await api.getRightsDomains();
         setDomains(data);
-      } catch {
-        // silent
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load rights categories");
       } finally {
         setLoading(false);
       }
@@ -64,8 +65,8 @@ export default function RightsPage() {
     try {
       const data = await api.getRightsGuides(domain);
       setGuides(data);
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load guides");
     } finally {
       setLoading(false);
     }
@@ -113,6 +114,9 @@ export default function RightsPage() {
               </svg>
               {t("allCategories")}
             </button>
+          )}
+          {error && (
+            <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2 mb-4">{error}</p>
           )}
           <h1 className="text-2xl font-bold text-white mb-2">{t("knowYourRights")}</h1>
           <p className="text-gray-400">

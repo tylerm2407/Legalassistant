@@ -38,6 +38,7 @@ interface Deadline {
 export default function DeadlineDashboard() {
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDate, setNewDate] = useState("");
@@ -52,8 +53,8 @@ export default function DeadlineDashboard() {
     try {
       const data = await api.getDeadlines();
       setDeadlines(data);
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("failedToLoadDeadlines"));
     } finally {
       setLoading(false);
     }
@@ -68,8 +69,8 @@ export default function DeadlineDashboard() {
       setNewNotes("");
       setShowForm(false);
       loadDeadlines();
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("failedToSaveDeadline"));
     }
   }
 
@@ -77,8 +78,8 @@ export default function DeadlineDashboard() {
     try {
       await api.updateDeadline(id, { status: "dismissed" });
       loadDeadlines();
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("failedToUpdateDeadline"));
     }
   }
 
@@ -86,8 +87,8 @@ export default function DeadlineDashboard() {
     try {
       await api.updateDeadline(id, { status: "completed" });
       loadDeadlines();
-    } catch {
-      // silent
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("failedToUpdateDeadline"));
     }
   }
 
@@ -117,6 +118,9 @@ export default function DeadlineDashboard() {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2">{error}</p>
+      )}
       {/* Add button */}
       <div className="flex justify-end">
         <Button size="sm" onClick={() => setShowForm(!showForm)}>

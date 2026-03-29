@@ -346,7 +346,10 @@ At 1% penetration of Americans who cannot afford a lawyer: **$360M ARR**.
 - **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), LinkedIn (600)
 - **300+ waitlist signups** in Supabase — real users waiting for launch
 - **40+ content pieces** published across 5 platforms
-- **LinkedIn pricing poll:** 100% of respondents willing to pay — 50% validated our $20/mo price point
+- **LinkedIn pricing poll (312 respondents):** 100% willing to pay — 50% validated our $20/mo price point
+- **16,852 total poll respondents** across 5 market validation polls — see [`USER_RESEARCH.md`](USER_RESEARCH.md)
+- **78% of 8,400 TikTok respondents** have needed a lawyer but couldn't afford one
+- **90% of Instagram respondents** open to AI-powered legal guidance
 
 ---
 

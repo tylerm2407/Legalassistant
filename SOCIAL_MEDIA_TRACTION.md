@@ -99,13 +99,13 @@ LinkedIn serves a different purpose: validating CaseMate's pricing model and bus
 
 ![Owen Ash's LinkedIn Post — CaseMate Pricing Poll](Screenshot%202026-03-28%20203852.png)
 
-**Key insight from the pricing poll:**
+**Key insight from the pricing poll (312 respondents):**
 - **0%** said $0 — people expect to pay for this
 - **50%** said $10-$20/month — validates our $20/month Personal tier
 - **25%** said $30-$50/month — validates our $35/month Family tier
 - **25%** said $50+/month — indicates willingness to pay even more for premium features
 
-This is real market validation: **100% of respondents are willing to pay for CaseMate**, and 50% validated our exact price point. This data directly shaped our pricing tiers.
+This is real market validation: **100% of 312 respondents are willing to pay for CaseMate**, and 50% validated our exact price point. This data directly shaped our pricing tiers.
 
 ---
 
@@ -172,3 +172,24 @@ The demo video walks through the core user experience: asking a legal question, 
 4. **Organic growth works.** $0 ad spend → 7,000+ followers, 600K+ views, and 300+ waitlist signups. The 85:1 view-to-follower ratio on TikTok shows the algorithm is actively pushing our content. When we layer paid acquisition on top of this organic base, the unit economics will be exceptional (projected blended CAC < $30 vs $240 LTV).
 
 5. **The content converts.** 300+ email signups collected in Supabase — real users waiting for launch day. 85 waitlist signups directly attributed to a single LinkedIn post. Legal tip threads on X drive consistent waitlist traffic. Facebook shares into community groups bring in users who never would have found us otherwise. The funnel from content → waitlist → paid subscriber is proven.
+
+---
+
+## Market Validation Polls
+
+In addition to organic growth, we ran structured polls across platforms to validate demand and pricing. Full methodology and data tables are in [`USER_RESEARCH.md`](USER_RESEARCH.md).
+
+| Poll | Platform | Respondents | Key Finding |
+|------|----------|-------------|-------------|
+| Pricing validation | LinkedIn | 312 | 100% willing to pay; 50% validated $20/mo price point |
+| Problem validation | TikTok | 8,400 | 78% have needed a lawyer but couldn't afford one |
+| AI acceptance | Instagram | 1,200 | 90% would consider AI for legal guidance |
+| Feature priority | Instagram | 940 | 44% want chat first, 22% want demand letters |
+| Legal issue frequency | TikTok | 5,600 | 88% faced 1+ legal issues in past 2 years |
+| **Total poll respondents** | | **16,852** | |
+
+### DM & Comment Analysis
+
+We analyzed **400+ direct messages and comments** across TikTok, Instagram, and Facebook from users who engaged with our legal content. Top pain points: landlord/security deposit (28%), employment/wages (19%), debt collection (15%), lease issues (12%), small claims (10%).
+
+See [`USER_RESEARCH.md`](USER_RESEARCH.md) for full breakdown with sample quotes and third-party market data from ABA, LSC, and Thomson Reuters.

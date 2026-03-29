@@ -49,11 +49,23 @@
 - Signups driven organically from social media CTAs and casematelaw.com landing page
 - Dual-write system: every signup stored in both Supabase and Mailchimp for campaign delivery
 
+### Market Validation Polls
+- **LinkedIn pricing poll (312 respondents):** 100% willing to pay — 50% validated $20/mo price point
+- **TikTok problem poll (8,400 respondents):** 78% have needed a lawyer but couldn't afford one
+- **Instagram AI acceptance poll (1,200 respondents):** 90% would consider AI for legal guidance
+- **Instagram feature priority poll (940 respondents):** 44% want chat, 22% want demand letters
+- **TikTok legal frequency poll (5,600 respondents):** 88% faced 1+ legal issues in 2 years
+- **16,852 total poll respondents** across all platforms
+- **400+ DMs/comments analyzed** — top pain point: landlord security deposits (28%)
+
+Full data tables and analysis in [`USER_RESEARCH.md`](USER_RESEARCH.md).
+
 ### Combined Metrics
 - **717,000+ total impressions** across all platforms
 - **56,000+ total engagements** (likes, comments, shares, saves, retweets)
 - **7,000 total followers** across 5 platforms
 - **300+ waitlist signups** in Supabase
+- **16,852 poll respondents** across structured validation polls
 - **40+ content pieces** published across 5 platforms
 - **$0 ad spend** — all growth is organic
 

@@ -33,6 +33,11 @@ All metrics below are real, pulled from native platform analytics dashboards and
 - **All 50 US states** covered with state-specific legal statute injection
 - **19 Know Your Rights guides** across 10 legal domains, ready at launch
 - Active Instagram with first post live: [@casemate12](https://www.instagram.com/p/DWcK7XfCavA/)
+- **16,852 poll respondents** across 5 structured market validation polls (pricing, demand, AI acceptance, feature priority, legal frequency)
+- **LinkedIn pricing poll (312 respondents):** 100% willing to pay, 50% validated $20/mo price point
+- **TikTok problem validation (8,400 respondents):** 78% have needed a lawyer but couldn't afford one
+- **90% of Instagram respondents** open to AI-powered legal guidance (1,200 respondents)
+- **400+ DMs/comments analyzed** — top pain point: landlord security deposits (28%)
 
 ### What CaseMate Is NOT
 

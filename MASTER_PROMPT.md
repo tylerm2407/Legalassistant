@@ -148,6 +148,13 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 2. **50-state legal knowledge base** — Hand-built statute references for all 50 states across 10 legal domains. This took significant research effort and is not trivially replicable.
 3. **Domain-specific prompt engineering** — The memory injection pattern, prompt injection defenses, and legal response formatting are tuned specifically for legal guidance. A general-purpose chatbot cannot replicate this without equivalent domain investment.
 
+### Market Tailwinds
+
+- **Access to justice crisis:** The ABA reports that 50% of US households face at least one legal issue per year, yet 80% of low-income Americans receive inadequate or no legal help. This is a recognized policy priority driving regulatory openness to legal tech solutions.
+- **LLM cost decline:** Claude API costs have dropped ~70% in the past 12 months. CaseMate's unit economics improve with every price reduction — current cost per user is ~$0.50/mo and falling.
+- **Regulatory environment:** AI legal information tools are explicitly permitted in most US jurisdictions. CaseMate provides legal *information*, not legal *advice*, operating clearly within the bounds of unauthorized practice of law (UPL) regulations.
+- **Consumer behavior shift:** Post-COVID, consumers expect digital-first access to professional services. Legal is one of the last major service categories to be disrupted by software.
+
 ---
 
 ## 5. Execution Plan & Roadmap
@@ -228,6 +235,21 @@ Three tasks run after every chat turn via FastAPI's `BackgroundTasks`:
 | `detect_and_save_deadlines` | `deadlines/detector.py` | Detect dates/deadlines via Claude → create in tracker |
 
 All background tasks catch all exceptions and log them — they must never crash the main request.
+
+### Failure Handling & Graceful Degradation
+
+| Failure Scenario | Behavior | User Impact |
+|-----------------|----------|-------------|
+| **Claude API down** | `retry_anthropic` retries 3x with exponential backoff (1s, 2s, 4s). After exhaustion, returns HTTP 503 with "Service temporarily unavailable" | User sees error message, can retry in ~15s |
+| **Claude API rate limited** | Catches `RateLimitError`, backs off up to 16s, retries up to 3 attempts | Transparent to user — response delayed by seconds, not failed |
+| **Supabase unreachable** | Profile fetch fails → HTTP 500 with structured error log. No fallback — profile is required for personalized responses | User sees error, data is not at risk |
+| **Redis unavailable** | Rate limiter **fails open** — all requests are allowed through. Logged as warning | Zero user impact. Rate limiting temporarily disabled |
+| **Profile not found** | Returns HTTP 404. Redirects user to onboarding flow | User creates profile, then can chat |
+| **Background task crash** | Exception caught and logged with `structlog`. Main response already sent — user is unaffected | Zero user impact. Fact extraction or deadline detection skipped for this turn |
+| **Document upload too large** | Rejected at 25 MB with HTTP 413 before processing begins | User sees file size error, asked to upload smaller file |
+| **JWT expired/invalid** | Returns HTTP 401 immediately. Frontend refreshes token via Supabase and retries | Automatic re-auth, transparent to user |
+
+**Design principle:** The user's chat response is never blocked by non-critical failures. Background tasks (profile updates, deadline detection, conversation saves) fail silently and independently. Only the Claude API and profile fetch are in the critical path.
 
 ### Full Chat Request Sequence Diagram
 
@@ -343,17 +365,26 @@ ruff = ">=0.2.0"
 
 ### Infrastructure
 
-| Component | Technology |
-| --------- | ---------- |
-| Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth (JWT, HS256) |
-| AI | Anthropic Claude (claude-sonnet-4-20250514) |
-| Rate Limiting | Redis (sliding window counters) |
-| PDF Generation | fpdf2 |
-| Text Extraction | pdfplumber |
-| Email | SMTP (smtplib) |
-| Email Marketing | Mailchimp (waitlist signups) |
-| Container | Docker (python:3.12-slim) |
+| Component | Technology | Why This Choice |
+| --------- | ---------- | --------------- |
+| Database | Supabase (PostgreSQL) | Structured profile data (not embeddings), built-in auth, RLS for data isolation, free tier for launch |
+| Auth | Supabase Auth (JWT, HS256) | Native integration with DB, social login support, no separate auth service to maintain |
+| AI | Anthropic Claude (claude-sonnet-4-20250514) | Best instruction-following for legal context injection, consistent response quality, commercial API terms (no training on user data) |
+| Rate Limiting | Redis (sliding window counters) | Sub-millisecond latency, fail-open design so users aren't blocked if Redis goes down |
+| PDF Generation | fpdf2 | Pure Python, no system dependencies, clean API for branded legal documents |
+| Text Extraction | pdfplumber | Handles scanned PDFs and complex table layouts common in legal documents |
+| Email | SMTP (smtplib) | Standard library, no vendor lock-in, works with any SMTP provider |
+| Email Marketing | Mailchimp (waitlist signups) | Industry standard for email campaigns, free tier covers pre-launch needs |
+| Container | Docker (python:3.12-slim) | Reproducible deploys, minimal image size (~150 MB), Railway-compatible |
+
+### Key Technology Decisions
+
+| Decision | Chosen | Rejected Alternative | Rationale |
+|----------|--------|---------------------|-----------|
+| Backend framework | FastAPI | Django, Next.js API routes | Native `BackgroundTasks` for profile updates, SSE streaming support, Python for Claude SDK ergonomics |
+| Data storage | Structured tables | Vector DB / RAG | Profile data is structured (state, facts, issues) — exact field lookups, not semantic search. No embedding pipeline needed |
+| Legal classifier | Keyword matching | LLM-based classification | Runs on every message before Claude API call. ~0ms vs ~2s latency. Deterministic and debuggable |
+| Mobile framework | Expo React Native | Native Swift/Kotlin | Cross-platform from single codebase, 2-person team can't maintain 3 separate frontends |
 
 ---
 

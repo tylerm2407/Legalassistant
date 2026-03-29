@@ -248,6 +248,29 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     }
   }, []);
 
+  /**
+   * Handles transcript auto-send: closes the recorder, sets the input,
+   * and triggers handleSend on next render via a ref flag.
+   */
+  const pendingSendRef = useRef(false);
+
+  const handleTranscriptSend = useCallback((text: string) => {
+    setShowRecorder(false);
+    const trimmed = text.trim();
+    if (trimmed) {
+      setInput(trimmed);
+      pendingSendRef.current = true;
+    }
+  }, []);
+
+  // Auto-send when input is set from transcript and pendingSend is flagged
+  useEffect(() => {
+    if (pendingSendRef.current && input.trim() && !isLoading && !isStreaming) {
+      pendingSendRef.current = false;
+      handleSend();
+    }
+  }, [input]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function handleStopStream() {
     if (abortStreamRef.current) {
       abortStreamRef.current();
@@ -379,6 +402,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             <div className="max-w-4xl mx-auto mb-3">
               <AudioRecorder
                 onTranscript={handleTranscript}
+                onTranscriptSend={handleTranscriptSend}
                 onClose={() => setShowRecorder(false)}
               />
             </div>

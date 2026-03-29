@@ -127,7 +127,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // Stream response from local Next.js API route → OpenAI GPT-4o
+    // Stream response from local Next.js API route → Anthropic Claude
     setIsStreaming(true);
     setStreamingContent("");
 

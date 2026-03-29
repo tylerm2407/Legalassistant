@@ -54,7 +54,7 @@ export default function DeadlineDashboard() {
       const data = await api.getDeadlines();
       setDeadlines(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToLoadDeadlines"));
+      setError(err instanceof Error ? err.message : t("failedToLoad"));
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export default function DeadlineDashboard() {
       setShowForm(false);
       loadDeadlines();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToSaveDeadline"));
+      setError(err instanceof Error ? err.message : t("failedToSave"));
     }
   }
 
@@ -79,7 +79,7 @@ export default function DeadlineDashboard() {
       await api.updateDeadline(id, { status: "dismissed" });
       loadDeadlines();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToUpdateDeadline"));
+      setError(err instanceof Error ? err.message : t("failedToSave"));
     }
   }
 
@@ -88,7 +88,7 @@ export default function DeadlineDashboard() {
       await api.updateDeadline(id, { status: "completed" });
       loadDeadlines();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToUpdateDeadline"));
+      setError(err instanceof Error ? err.message : t("failedToSave"));
     }
   }
 

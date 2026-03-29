@@ -1,16 +1,16 @@
 /**
- * Next.js API route for CaseMate chat powered by OpenAI GPT-4o.
+ * Next.js API route for CaseMate chat powered by Anthropic Claude.
  *
  * Builds a personalized system prompt from the user's legal profile
  * (state, housing, employment, active issues, known facts) and streams
- * GPT-4o's response back to the client via Server-Sent Events.
+ * Claude's response back to the client via Server-Sent Events.
  *
  * This is the memory injection pattern — the core differentiator of CaseMate.
  * Every response is personalized to the user's actual legal situation.
  */
 
 import { NextRequest } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
 /** Legal area classification keywords. */
 const LEGAL_AREA_KEYWORDS: Record<string, string[]> = {
@@ -103,7 +103,7 @@ interface UserProfile {
  *
  * @param profile - The user's legal profile
  * @param legalArea - The classified legal area for this question
- * @returns Complete system prompt string for GPT-4o
+ * @returns Complete system prompt string for Claude
  */
 function buildSystemPrompt(profile: UserProfile, legalArea: string): string {
   const parts: string[] = [];
@@ -189,22 +189,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: "OpenAI API key not configured" }),
+        JSON.stringify({ error: "Anthropic API key not configured" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const openai = new OpenAI({ apiKey });
+    const anthropic = new Anthropic({ apiKey });
     const legalArea = classifyLegalArea(message);
     const systemPrompt = buildSystemPrompt(profile, legalArea);
 
     // Build messages array with conversation history
-    const messages: OpenAI.ChatCompletionMessageParam[] = [
-      { role: "system", content: systemPrompt },
-    ];
+    const messages: Anthropic.MessageParam[] = [];
 
     if (history && history.length > 0) {
       for (const msg of history) {
@@ -217,11 +215,11 @@ export async function POST(req: NextRequest) {
     messages.push({ role: "user", content: message });
 
     // Stream the response
-    const stream = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages,
+    const stream = anthropic.messages.stream({
+      model: "claude-sonnet-4-20250514",
       max_tokens: 2048,
-      stream: true,
+      system: systemPrompt,
+      messages,
     });
 
     // Create SSE response
@@ -229,11 +227,13 @@ export async function POST(req: NextRequest) {
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of stream) {
-            const delta = chunk.choices[0]?.delta;
-            if (delta?.content) {
-              const event = JSON.stringify({ type: "token", content: delta.content });
-              controller.enqueue(encoder.encode(`data: ${event}\n\n`));
+          for await (const event of stream) {
+            if (
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
+            ) {
+              const sseData = JSON.stringify({ type: "token", content: event.delta.text });
+              controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
             }
           }
 

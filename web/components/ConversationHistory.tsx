@@ -65,7 +65,7 @@ export default function ConversationHistory({
       const data = await api.getConversations();
       setConversations(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToLoadConversations"));
+      setError(err instanceof Error ? err.message : t("failedToLoad"));
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function ConversationHistory({
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToDelete"));
+      setError(err instanceof Error ? err.message : t("failedToLoad"));
     }
   }
 

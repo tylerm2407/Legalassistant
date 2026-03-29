@@ -8,16 +8,18 @@ from __future__ import annotations
 
 import pytest
 
-from backend.legal.areas import consumer
-from backend.legal.areas import contracts
-from backend.legal.areas import criminal_records
-from backend.legal.areas import debt_collections
-from backend.legal.areas import employment
-from backend.legal.areas import family_law
-from backend.legal.areas import immigration
-from backend.legal.areas import landlord_tenant
-from backend.legal.areas import small_claims
-from backend.legal.areas import traffic
+from backend.legal.areas import (
+    consumer,
+    contracts,
+    criminal_records,
+    debt_collections,
+    employment,
+    family_law,
+    immigration,
+    landlord_tenant,
+    small_claims,
+    traffic,
+)
 
 # Collect all modules for parametrized tests
 ALL_AREA_MODULES = [

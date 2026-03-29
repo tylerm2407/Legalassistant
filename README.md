@@ -8,7 +8,7 @@ The average US lawyer charges $349/hour. The average American earns $52,000/year
 CaseMate closes that gap with AI that remembers your situation, knows your state's laws, and gives specific, actionable legal guidance for $20/month.
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/tylerm2407/Legalassistant/ci.yml?branch=main&label=CI)](https://github.com/tylerm2407/Legalassistant/actions)
-[![Backend Tests](https://img.shields.io/badge/backend_tests-509-blue)](tests/)
+[![Backend Tests](https://img.shields.io/badge/backend_tests-535-blue)](tests/)
 [![Frontend Tests](https://img.shields.io/badge/frontend_tests-143-blue)](web/__tests__/)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-6B57FF?logo=claude)](https://claude.ai/code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -58,7 +58,7 @@ flowchart TD
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Persistent Legal Memory** | Legal profile auto-updates from every conversation. Facts, issues, and documents compound over time. | Complete |
+| **Persistent Legal Memory** | Legal profile auto-updates from every conversation. Facts, issues, and documents compound over time. LLM-powered conversation summarizer preserves legal facts, statutes, and action items across long histories. | Complete |
 | **State-Specific Legal Context** | 50 US states, 10 legal domains, 500+ statute entries organized by region. Real citations, not vague references. | Complete |
 | **Document Analysis** | Upload leases, contracts, court notices. PDF/image text extraction with AI-powered fact and red flag identification. | Complete |
 | **Action Generator** | Generate demand letters, rights summaries, and next-steps checklists -- pre-filled with your profile data and statute citations. | Complete |
@@ -252,7 +252,7 @@ casemate/
 │   └── components/                # ChatInterface, ProfileSidebar, ActionGenerator, etc.
 ├── mobile/                        # Expo React Native app (Expo Router)
 ├── shared/                        # Shared TypeScript types
-├── tests/                         # Backend test suite (509 tests across 37 files)
+├── tests/                         # Backend test suite (535 tests across 38 files)
 ├── web/__tests__/                 # Frontend test suite (143 tests across 21 files)
 ├── supabase/                      # Database schema + RLS policies
 ├── docs/decisions/                # 25 Architecture Decision Records
@@ -312,7 +312,7 @@ pytest tests/ -v --cov=backend --cov-report=term-missing  # Verbose with line-by
 pytest tests/test_memory_injector.py -v           # Run a specific file
 ```
 
-**509 tests** across 37 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery, 13 end-to-end integration tests covering full API pipelines, and a live deployment smoke test suite.
+**535 tests** across 38 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery, 13 end-to-end integration tests covering full API pipelines, and a live deployment smoke test suite.
 
 ### Frontend (Jest)
 
@@ -365,7 +365,7 @@ Verify key README claims directly from the codebase:
 | Claim | Verification Command |
 |-------|---------------------|
 | 50-state coverage | `python -c "from backend.legal.state_laws import STATE_LAWS; print(len(STATE_LAWS))"` → 51 (50 states + federal) |
-| Backend test count | `pytest tests/ --co -q \| tail -1` → 509 tests collected |
+| Backend test count | `pytest tests/ --co -q \| tail -1` → 535 tests collected |
 | Zero lint errors | `make lint` → All checks passed |
 | Zero type errors | `mypy backend/` → Success: no issues found |
 | Memory injection | Run demo, ask landlord question as MA renter → response cites M.G.L. |
@@ -380,7 +380,7 @@ Every feature listed is implemented, tested, and deployable.
 
 | Dimension | Evidence | Verification |
 |-----------|----------|-------------|
-| **Backend Tests** | 509 pytest tests | `make test` |
+| **Backend Tests** | 535 pytest tests | `make test` |
 | **Frontend Tests** | 143 Jest tests across 21 files | `cd web && npm test` |
 | **Integration Tests** | 13 end-to-end pipeline tests | `pytest tests/test_integration.py -v` |
 | **Smoke Tests** | 7 live deployment checks | `python scripts/smoke_test.py <url>` |
@@ -597,7 +597,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
 
 ## Acknowledgments
 
-- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (652 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
+- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (678 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
 - [Anthropic Claude](https://anthropic.com) -- AI reasoning engine powering all legal analysis
 - [Supabase](https://supabase.com) -- Database, auth, and storage infrastructure
 - [Next.js](https://nextjs.org) -- Frontend framework

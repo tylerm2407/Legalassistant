@@ -26,11 +26,13 @@ Every Claude API call injects the user's complete legal profile as structured co
 - **Not a fintech/trading app.** The only domain knowledge is legal.
 - Every substantive legal response includes a disclaimer recommending a licensed attorney for complex matters.
 
-### Technical Innovation
+### Technical Architecture
 
-CaseMate introduces a **structured memory injection architecture** that is distinct from both conversation-history chatbots and RAG-based retrieval systems. Rather than embedding documents and retrieving by similarity, CaseMate maintains a structured Pydantic model (`LegalProfile`) that is auto-updated after every conversation turn via a secondary Claude call (`backend/memory/updater.py`). This creates a compounding knowledge effect: each conversation makes the next one more personalized. The profile is then combined with deterministic state-specific legal context (all 50 states, 10 domains) to produce a system prompt that grounds every response in the user's actual legal situation. This three-layer assembly (profile + state law + domain guidance) is a novel pattern for legal AI that produces measurably more specific responses than conversation-history-only approaches.
+CaseMate uses a **structured memory injection architecture** that is distinct from both conversation-history chatbots and RAG-based retrieval systems. Rather than embedding documents and retrieving by similarity, CaseMate maintains a structured Pydantic model (`LegalProfile`) that is auto-updated after every conversation turn via a secondary Claude call (`backend/memory/updater.py`). This creates a compounding knowledge effect: each conversation makes the next one more personalized. The profile is then combined with deterministic state-specific legal context (all 50 states, 10 domains) to produce a system prompt that grounds every response in the user's actual legal situation. This three-layer assembly (profile + state law + domain guidance) is an established pattern in vertical AI applications, applied here specifically to legal guidance with measurably more specific responses than conversation-history-only approaches.
 
-### Memory Injection: Demonstrable Impact
+### Memory Injection: Demonstrable Impact — The Pitch Centerpiece
+
+**This table is the single most important artifact in the entire pitch.** It demonstrates the concrete, measurable difference between a generic chatbot and CaseMate's memory-injected responses. Lead with this in every presentation.
 
 The same question — "My landlord is saying I owe $800 for the bathroom tiles" — produces fundamentally different responses depending on profile depth:
 
@@ -44,9 +46,9 @@ The same question — "My landlord is saying I owe $800 for the bathroom tiles" 
 
 This is the actual demo output, not a hypothetical. The profile injection transforms a $0-value generic chatbot response into a $349-value legal consultation.
 
-**Architectural novelty vs. existing legal AI patterns:** RAG-based systems (Harvey, Casetext) retrieve document chunks by semantic similarity — latency-heavy (~500ms retrieval), unable to compound structured user context across sessions, and prone to retrieving irrelevant chunks. Conversation-history systems (ChatGPT, Gemini) carry raw message history until the context window fills, then forget everything. CaseMate's three-layer assembly is O(1) regardless of conversation count: structured profile (not raw history) + deterministic statute lookup (not embedding search) + keyword classification at ~0ms (not LLM classification at ~2s). The result is faster, cheaper, and compounds indefinitely.
+**Architecture vs. existing legal AI patterns:** RAG-based systems (Harvey, Casetext) retrieve document chunks by semantic similarity — latency-heavy (~500ms retrieval), unable to compound structured user context across sessions, and prone to retrieving irrelevant chunks. Conversation-history systems (ChatGPT, Gemini) carry raw message history until the context window fills, then forget everything. CaseMate's three-layer assembly is O(1) regardless of conversation count: structured profile (not raw history) + deterministic statute lookup (not embedding search) + keyword classification at ~0ms (not LLM classification at ~2s). The result is faster, cheaper, and compounds indefinitely.
 
-**Why the combination is the innovation:** No individual component — FastAPI, Supabase, Claude API, keyword classification — is novel in isolation. The innovation is the specific architecture that wires them together: a secondary LLM call that *writes structured data back* to the user's profile after every turn (not just reads from it), a deterministic statute resolver that eliminates retrieval latency entirely, and a keyword classifier that avoids the cost and latency of LLM-based routing. This creates a feedback loop that no existing legal AI system implements: conversation → fact extraction → profile enrichment → better next response. Each component is simple; the compounding interaction between them is what produces the 5x response quality gap shown in the table above. The closest analogue in computer science is not RAG or chat history — it is a **write-ahead log with materialized views**, where raw conversation data is continuously materialized into a structured query-optimized profile.
+**Why the combination matters:** No individual component — FastAPI, Supabase, Claude API, keyword classification — is novel in isolation. These are industry-standard tools. The differentiation is the specific architecture that wires them together for legal guidance: a secondary LLM call that *writes structured data back* to the user's profile after every turn (not just reads from it), a deterministic statute resolver that eliminates retrieval latency entirely, and a keyword classifier that avoids the cost and latency of LLM-based routing. This creates a feedback loop: conversation → fact extraction → profile enrichment → better next response. Each component is simple; the compounding interaction between them is what produces the response quality gap shown in the table above. The architecture pattern — continuous structured extraction from unstructured conversation — is analogous to a **write-ahead log with materialized views**, applied to the legal domain.
 
 ### Why Now
 
@@ -203,6 +205,21 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 
 ## 5. Execution Plan & Roadmap
 
+### Scope Definition: v1 Demo vs. Full Build
+
+CaseMate has two clearly defined scopes — what ships at the hackathon and what the full product becomes:
+
+| | **v1 Demo (Hackathon Deliverable)** | **Full Build (Post-Hackathon)** |
+|---|------|------|
+| **Screens** | 3 core screens: Chat + Profile Sidebar + Demand Letter Generator | 12 screens across web, mobile, and waitlist |
+| **Backend** | Memory injection, profile CRUD, chat, action generation (~10 endpoints) | 30 endpoints covering deadlines, workflows, referrals, export, payments |
+| **Platforms** | Web (Next.js) | Web + iOS + Android (Expo) + standalone waitlist |
+| **Tests** | Core memory layer coverage (~100 tests) | 462 tests across 33 files, 91%+ coverage |
+| **State laws** | All 50 states (research completed in parallel by Owen) | All 50 states + federal defaults + ongoing statute updates |
+| **Demo** | Sarah Chen profile → personalized chat → demand letter generation | Full user lifecycle: onboarding → chat → documents → actions → deadlines → export |
+
+**The v1 demo proves the thesis.** Three screens are sufficient to demonstrate the before/after quality gap between a generic chatbot and memory-injected legal guidance. Everything beyond v1 is product depth, not proof of concept.
+
 ### Hackathon Build Phases (24-Hour Plan)
 
 | Phase | Time | Tyler (Dev) | Owen (Product/GTM) | Deliverable | Verification Gate |
@@ -215,12 +232,14 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 | 6. UI Polish | Hour 12–18 | Profile sidebar, chat UI, mobile responsive | Content strategy, waitlist setup | All surfaces polished | Mobile responsive test at 375px width |
 | 7. Hardening | Hour 18–24 | Full test suite, CI pipeline, demo seed data | MASTER_PROMPT, pitch prep, demo script | `make verify` passes | 0 failures in lint + test |
 
+**Phases 1–5 deliver v1.** Phases 6–7 extend toward the full build. If time runs short at Hour 12, the 3-screen v1 demo is already complete and demo-ready.
+
 ### Why This Is Feasible in 24 Hours
 
 Three force multipliers make this scope achievable for a 2-person team:
 
 1. **Clear dev/GTM split** — Owen compiles the 50-state legal knowledge base (Hours 1–8) while Tyler codes. Neither person blocks the other. The knowledge base is pure research, not code — it can be produced in parallel.
-2. **AI-assisted development** — Claude Code generates boilerplate, test scaffolding, and repetitive patterns (state law file structure, 10 area modules) at ~5x manual speed. The 303 backend tests are auto-generated alongside each module, not a separate QA phase.
+2. **AI-assisted development** — Claude Code generates boilerplate, test scaffolding, and repetitive patterns (state law file structure, 10 area modules) at ~5x manual speed. Tests are auto-generated alongside each module, not a separate QA phase.
 3. **Shared codebase architecture** — The Expo mobile app uses shared TypeScript types and API client from the web app. It is a thin native shell over the same backend, not a separate codebase. Three platforms (web, iOS, Android) from one set of types and one API.
 
 ### Post-Hackathon Roadmap
@@ -318,7 +337,7 @@ All background tasks catch all exceptions and log them — they must never crash
 
 **Core deps (31):** FastAPI >=0.109, uvicorn, anthropic >=0.42, supabase >=2.3, pydantic >=2.5, pydantic-settings >=2.1, structlog >=24.1, tenacity >=8.2, pdfplumber >=0.11, fpdf2 >=2.7, PyJWT >=2.8, redis >=5.0, httpx, python-dotenv, python-multipart >=0.0.6, PyPDF2, pytesseract, Pillow, python-docx, stripe
 **Dev deps (8):** pytest >=8.0, pytest-asyncio >=0.23, pytest-cov >=4.1, pytest-httpx, httpx >=0.27, ruff >=0.2, mypy
-**Build:** setuptools >=68.0 + wheel | **Linter:** Ruff (Python 3.12, line length 100, rules: E,F,I,N,W,UP,B,SIM,ANN) | **Type checker:** mypy strict mode | **Test runner:** pytest with asyncio_mode="auto", 80% coverage threshold
+**Build:** setuptools >=68.0 + wheel | **Linter:** Ruff (Python 3.12, line length 100, rules: E,F,I,N,W,UP,B,SIM,ANN) | **Type checker:** mypy strict mode | **Test runner:** pytest with asyncio_mode="auto", 90% coverage threshold
 
 ### Web Frontend (Next.js)
 
@@ -566,7 +585,8 @@ casemate/
 │       ├── client.py                 ← Singleton AsyncAnthropic client
 │       ├── logger.py                 ← structlog JSON logging
 │       ├── rate_limiter.py           ← Redis sliding-window rate limiter
-│       └── retry.py                  ← Tenacity retry decorator for Anthropic API
+│       ├── retry.py                  ← Tenacity retry decorator for Anthropic API
+│       └── type_helpers.py           ← Typed helper functions for Supabase/Anthropic returns
 │
 ├── web/                              ← Next.js 14 frontend (dark theme)
 │   ├── next.config.mjs               ← API proxy rewrites to backend
@@ -663,7 +683,7 @@ casemate/
 │   ├── 001_user_profiles_rls.sql
 │   └── 002_conversations_deadlines_workflows_attorneys.sql
 │
-├── docs/                             ← 13 docs + 20 Architecture Decision Records
+├── docs/                             ← 23 docs + 20 Architecture Decision Records
 │   ├── API.md                        ← Full API route documentation
 │   ├── DATABASE.md                   ← Database schema and design
 │   ├── MEMORY_SYSTEM.md              ← Memory injection pattern
@@ -676,6 +696,16 @@ casemate/
 │   ├── SECURITY.md                   ← Security practices and RLS
 │   ├── DEPLOYMENT.md                 ← Deployment procedures
 │   ├── CI_CD.md                      ← CI/CD pipeline
+│   ├── PAYMENTS.md                   ← Stripe integration guide
+│   ├── ACTIONS.md                    ← Action generator system
+│   ├── DEADLINES.md                  ← Deadline detection & tracking
+│   ├── REFERRALS.md                  ← Attorney matching system
+│   ├── EXPORT.md                     ← PDF & email export
+│   ├── UTILS.md                      ← Backend utilities reference
+│   ├── FRONTEND.md                   ← Web app architecture
+│   ├── LEGAL_KNOWLEDGE_BASE.md       ← 50-state law database & classifier
+│   ├── RIGHTS_LIBRARY.md             ← Know Your Rights guides
+│   ├── EXTENDING.md                  ← How to extend CaseMate
 │   ├── email-campaigns.md            ← Mailchimp email campaign templates
 │   └── decisions/                    ← 20 Architecture Decision Records
 │       ├── 001-memory-as-differentiator.md
@@ -702,7 +732,7 @@ casemate/
 ├── scripts/
 │   └── seed_demo.py                  ← Seed Sarah Chen demo profile
 │
-└── tests/                            ← 24 backend test files (303 tests)
+└── tests/                            ← 33 backend test files (462 tests)
     ├── conftest.py                   ← Shared fixtures (mock_profile, mock_anthropic, mock_supabase)
     ├── test_memory_injector.py       ← Core memory injection tests
     ├── test_profile_crud.py          ← Profile CRUD operations
@@ -725,7 +755,14 @@ casemate/
     ├── test_email_sender.py          ← Email delivery
     ├── test_referral_matcher.py      ← Attorney matching + scoring
     ├── test_rights_library.py        ← Rights guide content
-    └── test_payments.py              ← Stripe integration tests
+    ├── test_payments.py              ← Stripe integration tests
+    ├── test_retry.py                 ← Retry logic and backoff
+    ├── test_models.py                ← Pydantic model validation
+    ├── test_concurrency.py           ← Concurrency utilities
+    ├── test_idempotency.py           ← Idempotency key handling
+    ├── test_lifecycle.py             ← App startup/shutdown hooks
+    ├── test_content_store.py         ← Content storage
+    └── test_audit_log.py             ← Audit logging
 ```
 
 ---
@@ -1160,8 +1197,8 @@ Hidden screens (accessible via navigation, not tabs): `rights`, `rights-guide`, 
 
 - **Framework:** pytest with `pytest-asyncio` (auto mode)
 - **Coverage:** `pytest-cov` with term-missing report
-- **24 backend test files** + **21 frontend test files** covering all modules
-- **303 backend tests**, 100% pass rate
+- **33 backend test files** + **21 frontend test files** covering all modules
+- **462 backend tests**, 100% pass rate, **91%+ line coverage**
 - All tests run without real API calls or database connections
 - **Coverage target:** 90%+ line coverage on core modules (memory/, legal/, actions/)
 - **CI integration:** `make verify` runs `ruff check` + `ruff format --check` + full test suite before every commit
@@ -1175,7 +1212,7 @@ Four shared fixtures: `mock_profile` (Sarah Chen power-user profile with 8 facts
 
 All tests run without real API calls or database connections. Anthropic is patched at the client level; Supabase is patched at the singleton getter. No external dependencies required to run the full test suite.
 
-### Backend Test Files (24 files, 303 tests)
+### Backend Test Files (33 files, 462 tests)
 
 | File | Tests |
 | ---- | ----- |
@@ -1201,6 +1238,13 @@ All tests run without real API calls or database connections. Anthropic is patch
 | `test_referral_matcher.py` | Attorney search and scoring |
 | `test_rights_library.py` | Rights guide retrieval and filtering |
 | `test_payments.py` | Stripe integration, checkout, webhooks, subscription management |
+| `test_retry.py` | Exponential backoff retry logic, APIError/RateLimitError handling |
+| `test_models.py` | Pydantic model validation, serialization, property-based tests |
+| `test_concurrency.py` | Concurrency utilities and thread safety |
+| `test_idempotency.py` | Idempotency key handling for API operations |
+| `test_lifecycle.py` | Application lifecycle (startup/shutdown) hooks |
+| `test_content_store.py` | Content storage and retrieval |
+| `test_audit_log.py` | Audit logging for sensitive operations |
 
 ### Frontend Test Files (19 files in `web/__tests__/`)
 
@@ -1226,7 +1270,7 @@ Backend: `pip install -e ".[dev]"` → `make dev` (uvicorn on :8000). Web: `cd w
 | `make backend` | Start FastAPI backend only |
 | `make frontend` | Start Next.js frontend only on port 3000 |
 | `make install` | Install Python + Node dependencies |
-| `make test` | Run pytest with coverage (80% threshold) |
+| `make test` | Run pytest with coverage (90% threshold) |
 | `make lint` | Run ruff checks + format validation |
 | `make format` | Auto-fix ruff + format code |
 | `make typecheck` | Run mypy strict mode |
@@ -1510,7 +1554,7 @@ CaseMate makes up to three Claude API calls per chat turn (response + profile up
 | **Mobile app won't build** | Expo build errors | Deprioritize mobile. Web app is the primary demo surface. Mobile is bonus credit, not the core deliverable. |
 | **Memory injection produces generic responses** | Demo response doesn't cite state law | Debug injector.py first (most important file). If state law dict is incomplete, hard-code MA laws for demo and expand post-hackathon. |
 | **Tests fail and block commit** | `make verify` fails | Fix critical test failures only. Disable non-blocking tests temporarily. Never ship with zero tests — minimum 50 covering memory layer. |
-| **Time crunch: behind schedule at Hour 12** | Less than 5 phases complete | Cut UI polish scope: skip mobile responsive, skip chat history, focus on chat + profile sidebar + demand letter. These 3 screens are the demo. |
+| **Time crunch: behind schedule at Hour 12** | Less than 5 phases complete | Cut to v1 scope: chat + profile sidebar + demand letter. These 3 screens prove the thesis and are the complete v1 demo. |
 
 ---
 

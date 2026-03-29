@@ -1,4 +1,4 @@
-.PHONY: dev backend frontend install test lint format typecheck verify seed clean docker-build docker-up docker-down deploy-staging
+.PHONY: dev backend frontend install test lint format typecheck verify seed clean docker-build docker-up docker-down deploy-staging verify-deploy e2e
 
 ## ─── Start ────────────────────────────────────────────────────────────────
 
@@ -88,6 +88,14 @@ deploy-mobile:
 # Full deployment (backend + frontend)
 deploy: deploy-backend deploy-frontend
 	@echo "Deployment complete."
+
+# Verify live deployment health
+verify-deploy:
+	@bash scripts/verify_deployment.sh
+
+# Run Playwright E2E tests
+e2e:
+	cd web && npx playwright test
 
 ## ─── Utilities ────────────────────────────────────────────────────────────
 

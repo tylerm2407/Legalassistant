@@ -123,7 +123,9 @@ async def test_profile_context_included_in_prompt(test_profile):
     with patch("backend.documents.analyzer.get_anthropic_client", return_value=mock_client):
         await analyze_document(text="Lease text.", profile=test_profile)
         call_args = mock_client.messages.create.call_args
-        messages = call_args.kwargs.get("messages", [])
-        user_message = messages[0]["content"]
-        assert "CA" in user_message
-        assert "USER PROFILE" in user_message
+        system = call_args.kwargs.get("system", [])
+        system_text = " ".join(
+            block["text"] if isinstance(block, dict) else str(block) for block in system
+        )
+        assert "CA" in system_text
+        assert "USER PROFILE" in system_text

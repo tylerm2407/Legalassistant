@@ -115,11 +115,13 @@ class TestGenerateDemandLetter:
 
             await generate_demand_letter(mock_profile, "Return my deposit")
 
-        # Inspect the messages argument passed to create()
+        # Inspect the system argument passed to create() — profile context is in system, not messages
         call_args = mock_client.messages.create.call_args
-        messages = call_args.kwargs.get("messages") or call_args[1].get("messages")
-        user_content = messages[0]["content"]
-        assert "MA" in user_content
+        system = call_args.kwargs.get("system") or call_args[1].get("system", [])
+        system_text = " ".join(
+            block["text"] if isinstance(block, dict) else str(block) for block in system
+        )
+        assert "MA" in system_text
 
 
 class TestGenerateRightsSummary:
@@ -165,10 +167,12 @@ class TestGenerateRightsSummary:
             await generate_rights_summary(mock_profile, "security deposit rights")
 
         call_args = mock_client.messages.create.call_args
-        messages = call_args.kwargs.get("messages") or call_args[1].get("messages")
-        user_content = messages[0]["content"]
-        # The prompt should contain landlord_tenant law text from STATE_LAWS
-        assert "landlord_tenant" in user_content or "186" in user_content
+        system = call_args.kwargs.get("system") or call_args[1].get("system", [])
+        system_text = " ".join(
+            block["text"] if isinstance(block, dict) else str(block) for block in system
+        )
+        # The system prompt should contain landlord_tenant law text from STATE_LAWS
+        assert "landlord_tenant" in system_text or "186" in system_text
 
 
 class TestGenerateChecklist:

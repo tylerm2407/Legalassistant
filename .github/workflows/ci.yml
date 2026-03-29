@@ -250,6 +250,9 @@ jobs:
           sleep 30
           curl -f https://api.casematelaw.com/health || echo "Health check pending — Railway may still be deploying"
 
+      - name: Run deployment verification
+        run: bash scripts/verify_deployment.sh https://api.casematelaw.com https://casematelaw.com || true
+
   # ---------------------------------------------------------------------------
   # Deploy: production (manual trigger)
   # ---------------------------------------------------------------------------
@@ -292,3 +295,6 @@ jobs:
           sleep 30
           curl -f https://api.casematelaw.com/health || echo "Health check pending"
           curl -f https://casematelaw.com || echo "Frontend health check pending"
+
+      - name: Run deployment verification
+        run: bash scripts/verify_deployment.sh https://api.casematelaw.com https://casematelaw.com

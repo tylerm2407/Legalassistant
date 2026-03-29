@@ -83,10 +83,39 @@ Runs after the frontend build job succeeds, against the staging environment.
 
 Test artifacts (screenshots, traces) are uploaded as GitHub Actions artifacts when tests fail, making debugging straightforward from the CI logs.
 
+### 4. Deploy: `deploy-staging` + `deploy-production`
+
+**Runner:** `ubuntu-latest`
+
+Staging deploys automatically on every push to `main`. Production requires manual approval via GitHub Environments.
+
+| Step | Command | What It Does |
+|------|---------|--------------|
+| Deploy backend | `railway up --service casemate-backend --detach` | Deploys backend to Railway |
+| Deploy frontend | `vercel pull && vercel build && vercel deploy --prebuilt` | Deploys frontend to Vercel |
+| Health check | `curl -f https://api.casematelaw.com/health` | Verifies backend is responding |
+| Deployment verification | `bash scripts/verify_deployment.sh` | Validates health, API endpoints, security headers |
+
+The deployment verification script (`scripts/verify_deployment.sh`) runs 10 checks: health status, version match, public API endpoints, frontend availability, and security header presence. Production deploy additionally checks both backend and frontend URLs.
+
+### 5. Deployment Verification
+
+Run locally to verify production deployment:
+
+```bash
+make verify-deploy   # Runs scripts/verify_deployment.sh against production
+```
+
+The script validates:
+- `GET /health` returns 200 with `{"status": "ok", "version": "0.4.0"}`
+- Public API endpoints respond (rights, workflows)
+- Frontend serves with 200
+- Security headers present (X-Content-Type-Options, X-Frame-Options)
+
 ## What Is Not in CI (Yet)
 
 - **Mobile build** -- The Expo React Native app (`mobile/`) has no CI job. Builds are done locally via `npx expo start`.
-- **Caching** -- No pip or npm cache configured. Each run installs from scratch.
+- **Caching** -- Pip cache is configured via `actions/setup-python` `cache: "pip"`. npm cache is configured via `actions/setup-node` `cache: "npm"`.
 
 ## Adding New CI Steps
 

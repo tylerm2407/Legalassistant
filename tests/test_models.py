@@ -198,9 +198,9 @@ class TestResponseModels:
 
     def test_health_response(self) -> None:
         """HealthResponse serializes correctly."""
-        resp = HealthResponse(status="ok", version="0.1.0")
+        resp = HealthResponse(status="ok", version="0.4.0")
         data = resp.model_dump()
-        assert data == {"status": "ok", "version": "0.1.0"}
+        assert data == {"status": "ok", "version": "0.4.0"}
 
     def test_delete_response(self) -> None:
         """DeleteResponse serializes correctly."""

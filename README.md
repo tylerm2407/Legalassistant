@@ -8,8 +8,8 @@ The average US lawyer charges $349/hour. The average American earns $52,000/year
 CaseMate closes that gap with AI that remembers your situation, knows your state's laws, and gives specific, actionable legal guidance for $20/month.
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/tylerm2407/Legalassistant/ci.yml?branch=main&label=CI)](https://github.com/tylerm2407/Legalassistant/actions)
-[![Test Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen)](tests/)
-[![Backend Tests](https://img.shields.io/badge/backend_tests-303-blue)](tests/)
+[![Test Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](tests/)
+[![Backend Tests](https://img.shields.io/badge/backend_tests-462-blue)](tests/)
 [![Frontend Tests](https://img.shields.io/badge/frontend_tests-143-blue)](web/__tests__/)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-6B57FF?logo=claude)](https://claude.ai/code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -222,6 +222,9 @@ curl http://localhost:8000/health
 | `make verify` | Lint + test (run before every commit) |
 | `make seed` | Seed demo profile (Sarah Chen) |
 | `make install` | Install all dependencies |
+| `make deploy` | Deploy backend + frontend to production |
+| `make verify-deploy` | Verify live deployment health + security headers |
+| `make e2e` | Run Playwright E2E tests |
 
 ---
 
@@ -249,7 +252,7 @@ casemate/
 │   └── components/                # ChatInterface, ProfileSidebar, ActionGenerator, etc.
 ├── mobile/                        # Expo React Native app (Expo Router)
 ├── shared/                        # Shared TypeScript types
-├── tests/                         # Backend test suite (303 tests across 24 files)
+├── tests/                         # Backend test suite (462 tests across 29 files)
 ├── web/__tests__/                 # Frontend test suite (143 tests across 21 files)
 ├── supabase/                      # Database schema + RLS policies
 ├── docs/decisions/                # 20 Architecture Decision Records
@@ -308,7 +311,7 @@ pytest tests/ -v --cov=backend --cov-report=term-missing  # Verbose with line-by
 pytest tests/test_memory_injector.py -v           # Run a specific file
 ```
 
-**303 tests** across 24 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery.
+**462 tests** across 29 files. Priority coverage on the memory injection layer (31 tests in `test_memory_injector.py` alone). Includes property-based tests via [Hypothesis](https://hypothesis.readthedocs.io/) for edge case discovery.
 
 ### Frontend (Jest)
 
@@ -344,7 +347,7 @@ Verify key README claims directly from the codebase:
 | Claim | Verification Command |
 |-------|---------------------|
 | 50-state coverage | `python -c "from backend.legal.state_laws import STATE_LAWS; print(len(STATE_LAWS))"` → 51 (50 states + federal) |
-| Backend test count | `pytest tests/ --co -q \| tail -1` → 303 tests collected |
+| Backend test count | `pytest tests/ --co -q \| tail -1` → 462 tests collected |
 | Test coverage | `make test` → shows coverage % |
 | Zero lint errors | `make lint` → All checks passed |
 | Zero type errors | `mypy backend/` → Success: no issues found |
@@ -355,7 +358,23 @@ Verify key README claims directly from the codebase:
 
 ## Deployment
 
-CaseMate ships with a complete CI/CD pipeline and multi-platform deployment infrastructure.
+CaseMate ships with a complete CI/CD pipeline, multi-platform deployment infrastructure, and automated deployment verification.
+
+### Live Deployment
+
+| Service | URL | Verification |
+|---------|-----|--------------|
+| Backend API | `https://api.casematelaw.com` | `curl https://api.casematelaw.com/health` → `{"status": "ok", "version": "0.4.0"}` |
+| Frontend | `https://casematelaw.com` | HTTP 200 with CaseMate branding |
+| Health Check | `https://api.casematelaw.com/health` | Returns status, version, lifecycle state, and uptime |
+| Metrics | `https://api.casematelaw.com/metrics` | Prometheus-compatible request metrics |
+
+```bash
+# Verify deployment end-to-end
+make verify-deploy                       # Runs scripts/verify_deployment.sh against production
+```
+
+The deployment verification script checks: health endpoint status, API version, public endpoints (rights, workflows), frontend availability, and security headers (X-Content-Type-Options, X-Frame-Options).
 
 | Component | Platform | Configuration | CI/CD |
 |-----------|----------|---------------|-------|
@@ -383,6 +402,7 @@ make deploy              # Deploy backend + frontend to production
 make deploy-backend      # Deploy backend to Railway
 make deploy-frontend     # Deploy frontend to Vercel
 make deploy-mobile       # Build + submit mobile via EAS
+make verify-deploy       # Verify live deployment (health, API, security headers)
 make docker-up           # Start all services via Docker Compose
 ```
 
@@ -425,7 +445,7 @@ All architectural decisions are documented with context, options considered, and
 | [017](docs/decisions/017-mobile-architecture-expo.md) | Mobile architecture (Expo) | Expo Router with shared TypeScript types and API client. |
 | [018](docs/decisions/018-deployment-architecture.md) | Deployment architecture | Vercel (frontend) + Railway (backend) + Supabase (DB). |
 | [019](docs/decisions/019-comprehensive-documentation-standards.md) | Documentation standards | Docstrings, JSDoc, ADRs, and structured changelogs. |
-| [020](docs/decisions/020-backend-test-coverage-threshold.md) | Backend test coverage threshold | 87% coverage minimum, 90%+ target on core modules. |
+| [020](docs/decisions/020-backend-test-coverage-threshold.md) | Backend test coverage threshold | 91% coverage, 90% CI-enforced threshold. |
 
 ---
 
@@ -534,7 +554,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
 
 ## Acknowledgments
 
-- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (446 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
+- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (605 tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
 - [Anthropic Claude](https://anthropic.com) -- AI reasoning engine powering all legal analysis
 - [Supabase](https://supabase.com) -- Database, auth, and storage infrastructure
 - [Next.js](https://nextjs.org) -- Frontend framework

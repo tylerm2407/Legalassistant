@@ -907,7 +907,7 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 
 | Method | Path | Auth | Rate Limit | Description |
 | ------ | ---- | ---- | ---------- | ----------- |
-| GET | `/health` | None | None | Returns `{"status": "ok", "version": "0.1.0"}` |
+| GET | `/health` | None | None | Returns `{"status": "ok", "version": "0.4.0"}` |
 
 ### Chat
 

@@ -22,7 +22,7 @@ make dev        # uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 make frontend   # cd web && npm run dev (port 3000)
 ```
 
-5. Verify health: `GET http://localhost:8000/health` should return `{"status": "ok", "version": "0.3.0"}`.
+5. Verify health: `GET http://localhost:8000/health` should return `{"status": "ok", "version": "0.4.0"}`.
 
 ## Dev Workflow
 
@@ -120,7 +120,7 @@ CaseMate is developed with [Claude Code](https://claude.ai/code), Anthropic's AI
 
 1. Architecture decisions documented in ADRs (`docs/decisions/`)
 2. Implementation with Claude Code (memory injection, legal modules, tests)
-3. `make verify` before every commit (lint + 446 tests: 303 backend + 143 frontend)
+3. `make verify` before every commit (lint + 605 tests: 462 backend + 143 frontend)
 4. `cd web && npx playwright test` for E2E tests
 4. CI/CD validates on push, deploys on merge to main
 

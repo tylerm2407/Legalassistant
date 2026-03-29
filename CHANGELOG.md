@@ -68,7 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CI/CD now validates Docker image builds before deployment
 - Deployment docs rewritten with full multi-platform guide (Railway, Vercel, EAS, Docker)
 - Makefile expanded from 8 to 15 targets (added Docker, deploy, and test-web commands)
-- README badges updated to match actual test counts (303 backend, 143 frontend)
+- README badges updated to match actual test counts (462 backend, 143 frontend)
 - Model version references corrected to `claude-sonnet-4-20250514` throughout
 - Backend version bumped from 0.1.0 to 0.3.0 to match CHANGELOG
 - Market validation section now includes methodology disclaimer
@@ -86,7 +86,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.3.0] - 2026-03-29
 
 ### Added
-- Backend test coverage increased from 40% to 87% (303 tests)
+- Backend test coverage increased from 40% to 91% (462 tests)
   - Legal area module tests (40 parametrized tests for all 10 domains)
   - Profile CRUD tests (8 tests for get/update operations)
   - Document extractor tests (9 tests for PDF/text/HTML)

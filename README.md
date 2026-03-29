@@ -68,9 +68,9 @@ flowchart TD
 | **Attorney Referral Matching** | State and specialty-based attorney search with weighted relevance scoring algorithm. | Complete |
 | **PDF Export** | Generate branded PDFs of letters, summaries, and checklists. | Complete |
 | **Email Export** | Send generated documents via email. | Requires SMTP config |
-| **SSE Streaming Chat** | Real-time chat via Server-Sent Events. Next.js API route streams from OpenAI GPT-4o. | Complete |
+| **SSE Streaming Chat** | Real-time chat via Server-Sent Events. Backend streams from Anthropic Claude. | Complete |
 | **Hybrid Classifier** | Keyword-first classification with LLM fallback for ambiguous queries. ~0ms fast path, ~1s fallback. | Complete |
-| **Multi-Provider LLM Router** | OpenAI GPT-4o (primary) + Anthropic Claude (fallback) with independent circuit breakers and per-provider metrics. | Complete |
+| **LLM Router** | Anthropic Claude (claude-sonnet-4-20250514) with circuit-breaker protection and per-provider metrics. | Complete |
 | **Prompt Caching** | Anthropic prompt caching with static/dynamic content split via `cache_control` for reduced latency and cost. | Complete |
 | **Stripe Checkout** | Webhook handling (checkout, invoice, cancellation) and Pro tier checkout integrated. | Complete |
 | **Subscription Tracking** | Persistent subscription status in Supabase with free tier gating. | In Progress |
@@ -574,8 +574,8 @@ All data below is from social media polls (non-random, self-selected samples) an
 
 - **App Store and Google Play launch** -- Submit all builds for review
 - **Mobile parity** -- Feature parity between web and Expo React Native app
+- **Subscription persistence** -- Complete subscriptions table migration for Stripe lifecycle tracking
 - **Premium tier** -- Attorney consultation credits, court filing assistance
-- **Multi-language support** -- Spanish as first additional language
 - **Real-time statute updates** -- Automated pipeline for legislative changes
 
 ---

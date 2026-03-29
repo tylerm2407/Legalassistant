@@ -103,7 +103,7 @@ export default function ActionGenerator({ userId }: ActionGeneratorProps) {
                     Legal Citations
                   </p>
                   <ul className="space-y-1">
-                    {letter.legal_citations.map((cite, i) => (
+                    {letter.legal_citations.map((cite: string, i: number) => (
                       <li key={i} className="citation">
                         {cite}
                       </li>
@@ -143,7 +143,7 @@ export default function ActionGenerator({ userId }: ActionGeneratorProps) {
                     Key Rights
                   </p>
                   <ul className="space-y-1.5">
-                    {rights.key_rights.map((right, i) => (
+                    {rights.key_rights.map((right: string, i: number) => (
                       <li
                         key={i}
                         className="text-sm text-gray-300 flex gap-2"
@@ -179,7 +179,7 @@ export default function ActionGenerator({ userId }: ActionGeneratorProps) {
             </Card.Header>
             <Card.Body>
               <ul className="space-y-2">
-                {checklist.items.map((item, i) => (
+                {checklist.items.map((item: string, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-sm">
                     <input
                       type="checkbox"

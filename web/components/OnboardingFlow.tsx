@@ -151,7 +151,7 @@ export default function OnboardingFlow() {
                 className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
               >
                 <option value="">Select your state</option>
-                {US_STATES.map((s) => (
+                {US_STATES.map((s: string) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -172,7 +172,7 @@ export default function OnboardingFlow() {
               you.
             </p>
             <div className="space-y-2">
-              {["Renter", "Homeowner", "Other"].map((opt) => (
+              {["Renter", "Homeowner", "Other"].map((opt: string) => (
                 <label
                   key={opt}
                   className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
@@ -213,7 +213,7 @@ export default function OnboardingFlow() {
             </p>
             <div className="space-y-2">
               {["W-2 Employee", "1099 Contractor", "Unemployed", "Student", "Retired"].map(
-                (opt) => (
+                (opt: string) => (
                   <label
                     key={opt}
                     className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
@@ -257,7 +257,7 @@ export default function OnboardingFlow() {
             </p>
             <div className="space-y-2">
               {["Single", "Married", "Divorced", "Widowed", "Domestic Partnership"].map(
-                (opt) => (
+                (opt: string) => (
                   <label
                     key={opt}
                     className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Badge from "./ui/Badge";
-import type { LegalProfile, IssueStatus } from "@/lib/types";
+import type { LegalProfile, LegalIssue, IssueStatus } from "@/lib/types";
 
 const statusVariant: Record<IssueStatus, "default" | "success" | "warning" | "error"> = {
   open: "default",
@@ -65,7 +65,7 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
             <p className="text-sm text-gray-500">No active issues</p>
           ) : (
             <ul className="space-y-2">
-              {profile.active_issues.map((issue, i) => (
+              {profile.active_issues.map((issue: LegalIssue, i: number) => (
                 <li
                   key={i}
                   className="p-2 bg-white/[0.03] rounded-lg border border-white/[0.06] hover:border-white/15 transition-colors"
@@ -98,7 +98,7 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
             </p>
           ) : (
             <ul className="space-y-1">
-              {profile.legal_facts.map((fact, i) => (
+              {profile.legal_facts.map((fact: string, i: number) => (
                 <li key={i} className="text-xs text-gray-400 flex gap-1.5">
                   <span className="text-gray-500 shrink-0">&#8226;</span>
                   {fact}
@@ -117,7 +117,7 @@ export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProp
             <p className="text-sm text-gray-500">No documents uploaded</p>
           ) : (
             <ul className="space-y-1">
-              {profile.documents.map((doc, i) => (
+              {profile.documents.map((doc: string, i: number) => (
                 <li
                   key={i}
                   className="text-xs text-gray-400 flex items-center gap-1.5"

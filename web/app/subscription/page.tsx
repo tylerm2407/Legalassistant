@@ -50,7 +50,7 @@ function SubscriptionContent() {
               <span className="text-sm text-gray-400">/month</span>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
-              {freeFeatures.map((feature) => (
+              {freeFeatures.map((feature: string) => (
                 <li key={feature} className="flex items-center gap-2 text-sm text-gray-300">
                   <span className="text-blue-400">&#10003;</span>
                   {feature}
@@ -75,7 +75,7 @@ function SubscriptionContent() {
               <span className="text-sm text-gray-400">/month</span>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
-              {proFeatures.map((feature) => (
+              {proFeatures.map((feature: string) => (
                 <li key={feature} className="flex items-center gap-2 text-sm text-gray-300">
                   <span className="text-violet-400">&#10003;</span>
                   {feature}

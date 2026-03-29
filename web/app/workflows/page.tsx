@@ -138,7 +138,7 @@ export default function WorkflowsPage() {
           <div className="mb-10">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Active Workflows</h2>
             <div className="space-y-3">
-              {activeWorkflows.map((w) => (
+              {activeWorkflows.map((w: ActiveWorkflow) => (
                 <button
                   key={w.id}
                   onClick={() => handleLoadWorkflow(w.id)}
@@ -165,7 +165,7 @@ export default function WorkflowsPage() {
         {/* Available Templates */}
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Available Workflows</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {templates.map((t) => (
+          {templates.map((t: WorkflowTemplate) => (
             <div
               key={t.id}
               className="p-5 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 hover:border-blue-500/30 transition-all"

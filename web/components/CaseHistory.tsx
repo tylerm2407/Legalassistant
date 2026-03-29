@@ -37,7 +37,7 @@ export default function CaseHistory({ issues }: CaseHistoryProps) {
       <div className="absolute left-3 top-0 bottom-0 w-px bg-white/10" />
 
       <ul className="space-y-4">
-        {issues.map((issue, i) => (
+        {issues.map((issue: LegalIssue, i: number) => (
           <li key={i} className="relative pl-8">
             {/* Timeline dot */}
             <div
@@ -73,7 +73,7 @@ export default function CaseHistory({ issues }: CaseHistoryProps) {
                     Notes
                   </p>
                   <ul className="space-y-1">
-                    {issue.notes.map((note, j) => (
+                    {issue.notes.map((note: string, j: number) => (
                       <li key={j} className="text-xs text-gray-400">
                         {note}
                       </li>

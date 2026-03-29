@@ -41,7 +41,7 @@ export default function AttorneyCard({ attorney, matchReason, relevanceScore }: 
               <p className="text-sm text-gray-400 mb-3">{attorney.bio}</p>
             )}
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {attorney.specializations.map((spec) => (
+              {attorney.specializations.map((spec: string) => (
                 <Badge key={spec} variant="default" size="sm">
                   {spec.replace(/_/g, " ")}
                 </Badge>

@@ -12,7 +12,7 @@ function SkeletonLine({ width = "100%", height = "16px" }: { width?: string; hei
 function SkeletonBlock({ lines = 3, className = "" }: { lines?: number; className?: string }) {
   return (
     <div className={`space-y-3 ${className}`}>
-      {Array.from({ length: lines }).map((_, i) => (
+      {Array.from({ length: lines }).map((_: unknown, i: number) => (
         <SkeletonLine key={i} width={i === lines - 1 ? "70%" : "100%"} />
       ))}
     </div>
@@ -60,7 +60,7 @@ function SkeletonChat() {
 function SkeletonList({ items = 4, className = "" }: { items?: number; className?: string }) {
   return (
     <div className={`space-y-3 ${className}`}>
-      {Array.from({ length: items }).map((_, i) => (
+      {Array.from({ length: items }).map((_: unknown, i: number) => (
         <SkeletonCard key={i} />
       ))}
     </div>

@@ -85,7 +85,7 @@ export default function AttorneysPage() {
             onChange={(e) => setSearchArea(e.target.value)}
             className="flex-1 px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 [color-scheme:dark]"
           >
-            {legalAreas.map((area) => (
+            {legalAreas.map((area: { value: string; label: string }) => (
               <option key={area.value} value={area.value} className="bg-[#1a1a1a]">
                 {area.label}
               </option>
@@ -107,7 +107,7 @@ export default function AttorneysPage() {
           </div>
         ) : suggestions.length > 0 ? (
           <div className="space-y-4">
-            {suggestions.map((s) => (
+            {suggestions.map((s: ReferralSuggestion) => (
               <AttorneyCard
                 key={s.attorney.id}
                 attorney={s.attorney}

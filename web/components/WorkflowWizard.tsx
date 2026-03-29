@@ -24,7 +24,7 @@ interface WorkflowWizardProps {
 
 export default function WorkflowWizard({ workflowId, title, steps, initialStep }: WorkflowWizardProps) {
   const [currentStep, setCurrentStep] = useState(initialStep);
-  const [stepStatuses, setStepStatuses] = useState<string[]>(steps.map((s) => s.status));
+  const [stepStatuses, setStepStatuses] = useState<string[]>(steps.map((s: WorkflowStep) => s.status));
   const [updating, setUpdating] = useState(false);
 
   const step = steps[currentStep];
@@ -55,7 +55,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
 
       {/* Step progress */}
       <div className="flex items-center gap-1">
-        {steps.map((s, i) => (
+        {steps.map((s: WorkflowStep, i: number) => (
           <button
             key={s.id}
             onClick={() => setCurrentStep(i)}
@@ -93,7 +93,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
               <div>
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Required Documents</h3>
                 <ul className="space-y-1">
-                  {step.required_documents.map((doc, i) => (
+                  {step.required_documents.map((doc: string, i: number) => (
                     <li key={i} className="text-sm text-gray-300 flex gap-2">
                       <svg className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -109,7 +109,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
               <div>
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tips</h3>
                 <ul className="space-y-1">
-                  {step.tips.map((tip, i) => (
+                  {step.tips.map((tip: string, i: number) => (
                     <li key={i} className="text-sm text-blue-300 flex gap-2">
                       <span className="text-blue-400 shrink-0">&#x2022;</span>
                       {tip}
@@ -123,7 +123,7 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep }
               <div>
                 <h3 className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-2">Deadlines</h3>
                 <ul className="space-y-1">
-                  {step.deadlines.map((deadline, i) => (
+                  {step.deadlines.map((deadline: string, i: number) => (
                     <li key={i} className="text-sm text-yellow-400 flex gap-2">
                       <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />

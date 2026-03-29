@@ -183,7 +183,7 @@ function ProfilePageInner() {
                   className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
                 >
                   <option value="">Select state</option>
-                  {US_STATES.map((s) => (
+                  {US_STATES.map((s: string) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
@@ -246,7 +246,7 @@ function ProfilePageInner() {
           <Card.Body>
             {profile.documents.length > 0 && (
               <ul className="space-y-2 mb-6">
-                {profile.documents.map((doc, i) => (
+                {profile.documents.map((doc: string, i: number) => (
                   <li
                     key={i}
                     className="flex items-center gap-2 text-sm text-gray-300 p-2 bg-white/[0.03] rounded-lg border border-white/[0.06]"
@@ -283,7 +283,7 @@ function ProfilePageInner() {
             </Card.Header>
             <Card.Body>
               <ul className="space-y-1.5">
-                {profile.legal_facts.map((fact, i) => (
+                {profile.legal_facts.map((fact: string, i: number) => (
                   <li key={i} className="text-sm text-gray-300 flex gap-2">
                     <span className="text-blue-400 shrink-0">&#8226;</span>
                     {fact}

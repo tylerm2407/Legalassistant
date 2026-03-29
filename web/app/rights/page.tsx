@@ -115,7 +115,7 @@ export default function RightsPage() {
         {/* Domain grid or Guide list */}
         {!selectedDomain ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {domains.map((d) => (
+            {domains.map((d: Domain) => (
               <button
                 key={d.domain}
                 onClick={() => handleDomainSelect(d.domain)}
@@ -136,7 +136,7 @@ export default function RightsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {guides.map((guide) => (
+            {guides.map((guide: Guide) => (
               <button
                 key={guide.id}
                 onClick={() => setSelectedGuide(guide)}

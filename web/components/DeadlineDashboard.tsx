@@ -144,7 +144,7 @@ export default function DeadlineDashboard() {
         </div>
       ) : (
         <div className="space-y-3">
-          {activeDeadlines.map((d) => {
+          {activeDeadlines.map((d: Deadline) => {
             const days = getDaysUntil(d.date);
             const urgencyColor = getUrgencyColor(days);
             return (
@@ -204,7 +204,7 @@ export default function DeadlineDashboard() {
         <div>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Past Deadlines</h3>
           <div className="space-y-2 opacity-60">
-            {pastDeadlines.map((d) => (
+            {pastDeadlines.map((d: Deadline) => (
               <div key={d.id} className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.05] flex items-center justify-between">
                 <div>
                   <span className="text-sm text-gray-400 line-through">{d.title}</span>

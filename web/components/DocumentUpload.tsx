@@ -204,7 +204,7 @@ export default function DocumentUpload({
                     Key Facts
                   </p>
                   <ul className="space-y-1">
-                    {result.key_facts.map((fact, i) => (
+                    {result.key_facts.map((fact: string, i: number) => (
                       <li
                         key={i}
                         className="text-sm text-gray-300 flex gap-2"
@@ -224,7 +224,7 @@ export default function DocumentUpload({
                     Red Flags
                   </p>
                   <ul className="space-y-1">
-                    {result.red_flags.map((flag, i) => (
+                    {result.red_flags.map((flag: string, i: number) => (
                       <li
                         key={i}
                         className="text-sm text-red-400 flex gap-2"

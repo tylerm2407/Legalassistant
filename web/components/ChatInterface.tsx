@@ -141,7 +141,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
       const conv = await api.getConversation(id);
       setConversationId(conv.id);
       setMessages(
-        conv.messages.map((m) => ({
+        conv.messages.map((m: { role: string; content: string; timestamp: string; legal_area?: string | null }) => ({
           role: m.role as "user" | "assistant" | "error",
           content: m.content,
           timestamp: new Date(m.timestamp),
@@ -206,7 +206,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
-          {messages.map((msg, i) => (
+          {messages.map((msg: Message, i: number) => (
             <MessageBubble key={i} message={msg} />
           ))}
           {isLoading && <TypingIndicator />}

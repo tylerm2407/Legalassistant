@@ -73,7 +73,7 @@ export default function ConversationHistory({
           <p className="text-xs text-gray-500 text-center py-8 px-4">No previous conversations</p>
         ) : (
           <div className="p-2 space-y-1">
-            {conversations.map((c) => (
+            {conversations.map((c: ConversationSummary) => (
               <button
                 key={c.id}
                 onClick={() => onSelectConversation(c.id)}

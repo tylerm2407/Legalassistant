@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import os
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from fastapi import HTTPException, Request, status
 
@@ -16,10 +17,10 @@ from backend.utils.logger import get_logger
 
 _logger = get_logger(__name__)
 
-_redis_client = None
+_redis_client: Any = None
 
 
-def _get_redis() -> object | None:
+def _get_redis() -> Any:
     """Get or create the Redis client singleton.
 
     Returns:
@@ -43,7 +44,7 @@ def _get_redis() -> object | None:
     return _redis_client
 
 
-def rate_limit(max_requests: int, window_seconds: int = 60) -> Callable:
+def rate_limit(max_requests: int, window_seconds: int = 60) -> Callable[..., Awaitable[None]]:
     """Create a rate limiting dependency for FastAPI endpoints.
 
     Uses a sliding window counter in Redis keyed by user_id.

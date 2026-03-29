@@ -10,6 +10,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -217,8 +218,9 @@ async def list_workflows(user_id: str) -> list[dict[str, object]]:
             .execute()
         )
         summaries: list[dict[str, object]] = []
-        for row in result.data or []:
-            steps = row.get("steps") or []
+        for raw_row in result.data or []:
+            row: dict[str, Any] = dict(raw_row)  # type: ignore[arg-type]
+            steps: list[dict[str, Any]] = row.get("steps") or []
             completed = sum(1 for s in steps if s.get("status") == "completed")
             summaries.append(
                 {

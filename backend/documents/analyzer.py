@@ -103,7 +103,7 @@ async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object
                 else:
                     result[key] = []
 
-        return result
+        return dict(result)
 
     except json.JSONDecodeError as exc:
         _logger.error(

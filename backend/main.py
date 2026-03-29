@@ -7,8 +7,8 @@ and action generation (demand letters, rights summaries, checklists).
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
-from typing import TypedDict, cast
+from collections.abc import Awaitable, Callable
+from typing import Any, TypedDict, cast
 
 import anthropic
 from anthropic.types import TextBlock
@@ -113,7 +113,7 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def attach_user_id_to_state(request: Request, call_next: Callable) -> Response:
+async def attach_user_id_to_state(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """Extract user_id from JWT and attach to request.state for rate limiter.
 
     Parses the Authorization header to extract the user_id from the JWT
@@ -137,7 +137,7 @@ async def attach_user_id_to_state(request: Request, call_next: Callable) -> Resp
             request.state.user_id = "anonymous"
     else:
         request.state.user_id = "anonymous"
-    response = await call_next(request)
+    response: Response = await call_next(request)
     return response
 
 
@@ -296,7 +296,7 @@ async def chat(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
                 system=system_prompt,
-                messages=api_messages,
+                messages=api_messages,  # type: ignore[arg-type]
             )
             first_block = response.content[0] if response.content else None
             return first_block.text if isinstance(first_block, TextBlock) else ""
@@ -1039,7 +1039,7 @@ async def export_document(
     elif request.type == "checklist":
         doc_bytes = generate_checklist_document(
             items=cast(_ChecklistContent, content).get("items", []),
-            deadlines=cast(_ChecklistContent, content).get("deadlines", []),
+            deadlines=cast(list[str | None], cast(_ChecklistContent, content).get("deadlines", [])),
             user_name=user_name,
         )
         filename = "casemate_checklist.pdf"

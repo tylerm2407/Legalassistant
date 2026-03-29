@@ -72,4 +72,4 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
         A BoundLogger instance that supports structured key-value logging
         and context binding via .bind(user_id=...).
     """
-    return structlog.get_logger(name)
+    return structlog.get_logger(name)  # type: ignore[no-any-return]

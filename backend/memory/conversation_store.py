@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from backend.memory.profile import _get_supabase
 from backend.models.conversation import Conversation, Message
@@ -40,7 +41,7 @@ async def create_conversation(
     )
     try:
         client = _get_supabase()
-        data = {
+        data: dict[str, Any] = {
             "id": conversation.id,
             "user_id": user_id,
             "messages": [],
@@ -127,9 +128,10 @@ async def list_conversations(user_id: str, limit: int = 50) -> list[dict[str, ob
             .execute()
         )
         summaries: list[dict[str, object]] = []
-        for row in result.data or []:
-            messages = row.get("messages") or []
-            first_user_msg = next(
+        for raw_row in result.data or []:
+            row: dict[str, Any] = dict(raw_row)  # type: ignore[arg-type]
+            messages: list[dict[str, Any]] = row.get("messages") or []
+            first_user_msg: str = next(
                 (m["content"] for m in messages if m.get("role") == "user"),
                 "New conversation",
             )

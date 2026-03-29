@@ -54,7 +54,7 @@ async def handle_webhook(payload: bytes, sig_header: str) -> dict[str, str]:
         stripe.error.SignatureVerificationError: If the signature is invalid.
     """
     try:
-        event = stripe.Webhook.construct_event(
+        event = stripe.Webhook.construct_event(  # type: ignore[no-untyped-call]
             payload,
             sig_header,
             STRIPE_WEBHOOK_SECRET,

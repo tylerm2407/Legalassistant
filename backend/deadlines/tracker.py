@@ -151,7 +151,7 @@ async def list_deadlines(user_id: str, status: DeadlineStatus | None = None) -> 
         if status:
             query = query.eq("status", status.value)
         result = query.order("date", desc=False).execute()
-        return [Deadline(**row) for row in (result.data or [])]
+        return [Deadline(**dict(row)) for row in (result.data or [])]  # type: ignore[arg-type]
     except Exception as exc:
         _logger.error(
             "deadline_list_error",
@@ -195,7 +195,7 @@ async def update_deadline(
         if not result.data:
             return None
         _logger.info("deadline_updated", deadline_id=deadline_id, user_id=user_id)
-        return Deadline(**result.data[0])
+        return Deadline(**dict(result.data[0]))  # type: ignore[arg-type]
     except Exception as exc:
         _logger.error(
             "deadline_update_error",

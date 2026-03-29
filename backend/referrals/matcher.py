@@ -80,7 +80,7 @@ async def find_attorneys(
         if legal_area:
             query = query.contains("specializations", [legal_area])
         result = query.order("rating", desc=True).limit(limit).execute()
-        return [Attorney(**row) for row in (result.data or [])]
+        return [Attorney(**dict(row)) for row in (result.data or [])]  # type: ignore[arg-type]
     except Exception as exc:
         _logger.error(
             "attorney_search_error",

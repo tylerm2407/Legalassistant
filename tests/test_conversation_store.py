@@ -6,7 +6,7 @@ with all Supabase calls mocked.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -58,7 +58,7 @@ class TestGetConversation:
     """Verify get_conversation fetches and parses a conversation."""
 
     async def test_returns_conversation(self, mock_supabase_conversations: MagicMock) -> None:
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(UTC).isoformat()
         mock_result = MagicMock()
         mock_result.data = {
             "id": "c1",
@@ -98,7 +98,7 @@ class TestListConversations:
     """Verify list_conversations returns summary dicts."""
 
     async def test_returns_summaries(self, mock_supabase_conversations: MagicMock) -> None:
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(UTC).isoformat()
         mock_supabase_conversations.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value = MagicMock(
             data=[
                 {

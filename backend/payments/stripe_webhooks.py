@@ -110,8 +110,6 @@ async def _handle_checkout_completed(session: dict[str, str]) -> None:
         subscription_id=subscription_id,
     )
 
-    # TODO: Update user's subscription status in Supabase
-    # This will be connected when the subscriptions table is created
     raise NotImplementedError(
         "Supabase subscription activation not yet connected. "
         "Requires subscriptions table and user-customer mapping."
@@ -138,7 +136,6 @@ async def _handle_subscription_updated(subscription: dict[str, str]) -> None:
         customer_id=customer_id,
     )
 
-    # TODO: Sync subscription status to Supabase
     raise NotImplementedError(
         "Supabase subscription sync not yet connected. "
         "Requires subscriptions table and user-customer mapping."
@@ -163,7 +160,6 @@ async def _handle_subscription_deleted(subscription: dict[str, str]) -> None:
         customer_id=customer_id,
     )
 
-    # TODO: Mark subscription as cancelled in Supabase
     raise NotImplementedError(
         "Supabase subscription cancellation not yet connected. "
         "Requires subscriptions table and user-customer mapping."

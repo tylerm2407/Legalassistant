@@ -6,6 +6,14 @@ import type { LegalProfile } from "@/lib/types";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
+/**
+ * Chat page that loads the user's legal profile and renders the main chat interface.
+ *
+ * Wraps ChatPageInner in Suspense for loading states. The inner component
+ * fetches the authenticated user's profile from the backend and passes it
+ * to ChatInterface, which handles the conversation UI, profile sidebar,
+ * and action generator.
+ */
 export default function ChatPage() {
   return (
     <Suspense
@@ -23,6 +31,13 @@ export default function ChatPage() {
   );
 }
 
+/**
+ * Inner chat page component that handles profile loading and error states.
+ *
+ * Fetches the authenticated user's legal profile on mount and renders either
+ * a loading spinner, an error state with onboarding redirect, or the full
+ * ChatInterface with the loaded profile.
+ */
 function ChatPageInner() {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<LegalProfile | null>(null);

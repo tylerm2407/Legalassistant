@@ -25,6 +25,13 @@ interface ReferralSuggestion {
   relevance_score: number;
 }
 
+/**
+ * Attorney search and referral page for finding legal representation.
+ *
+ * Allows users to search for attorneys by state and legal area, displaying
+ * AI-matched results with relevance scores, specializations, ratings, and
+ * contact information via AttorneyCard components.
+ */
 export default function AttorneysPage() {
   const { user, loading: authLoading } = useAuth();
   const [suggestions, setSuggestions] = useState<ReferralSuggestion[]>([]);

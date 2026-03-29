@@ -24,6 +24,14 @@ interface Guide {
   when_to_get_a_lawyer: string;
 }
 
+/**
+ * "Know Your Rights" library page with domain browsing and guide detail views.
+ *
+ * Two-level navigation: first shows legal domain categories (e.g., Housing,
+ * Employment), then guides within the selected domain. Selecting a guide
+ * renders the full RightsGuide component with rights, action steps, deadlines,
+ * and common mistakes.
+ */
 export default function RightsPage() {
   const { user, loading: authLoading } = useAuth();
   const [domains, setDomains] = useState<Domain[]>([]);

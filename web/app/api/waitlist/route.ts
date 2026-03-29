@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+/** Simple email validation regex for waitlist signup. */
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Handles waitlist signup requests from the CaseMate landing page.
+ *
+ * Validates the email, syncs to Mailchimp (if configured), and writes to
+ * Supabase as a backup. Handles duplicate emails gracefully via upsert.
+ * Returns 200 on success, 400 for invalid email, or 500 on server error.
+ *
+ * @param request - The incoming POST request with { email, source? } body
+ * @returns JSON response with { success: true } or { error: string }
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

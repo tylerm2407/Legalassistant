@@ -121,8 +121,7 @@ async def get_subscription_status(user_id: str) -> SubscriptionStatus:
     """
     _logger.info("get_subscription_status", user_id=user_id)
 
-    # TODO: Query Supabase for user's stripe_subscription_id
-    # For now, return inactive status until the subscriptions table is connected
+    # Returns inactive until subscriptions table is connected
     _logger.warning(
         "subscription_lookup_not_connected",
         user_id=user_id,
@@ -154,8 +153,6 @@ async def cancel_subscription(user_id: str) -> SubscriptionStatus:
     """
     _logger.info("cancel_subscription", user_id=user_id)
 
-    # TODO: Query Supabase for user's stripe_subscription_id
-    # For now, raise an error until the subscriptions table is connected
     raise NotImplementedError(
         "Subscription cancellation not yet connected. "
         "Requires subscriptions table with user-to-stripe mapping."

@@ -9,18 +9,21 @@ from __future__ import annotations
 import os
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
+
+if TYPE_CHECKING:
+    from redis import Redis
 
 from backend.utils.logger import get_logger
 
 _logger = get_logger(__name__)
 
-_redis_client: Any = None
+_redis_client: Redis | None = None
 
 
-def _get_redis() -> Any:
+def _get_redis() -> Redis | None:
     """Get or create the Redis client singleton.
 
     Returns:

@@ -302,9 +302,7 @@ def classify_legal_area(question: str) -> str:
 
     scores: dict[str, int] = {}
     for domain, keywords in DOMAIN_KEYWORDS.items():
-        score = sum(
-            _keyword_weight(kw) for kw in keywords if kw in question_lower
-        )
+        score = sum(_keyword_weight(kw) for kw in keywords if kw in question_lower)
         if score > 0:
             scores[domain] = score
 

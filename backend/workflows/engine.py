@@ -8,9 +8,8 @@ User progress is tracked per workflow instance.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -95,8 +94,8 @@ class WorkflowInstance(BaseModel):
     steps: list[WorkflowStep]
     current_step: int = 0
     status: StepStatus = StepStatus.IN_PROGRESS
-    started_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class WorkflowStepUpdateRequest(BaseModel):
@@ -219,9 +218,12 @@ async def list_workflows(user_id: str) -> list[dict[str, object]]:
         )
         summaries: list[dict[str, object]] = []
         for raw_row in result.data or []:
-            row: dict[str, Any] = dict(raw_row)  # type: ignore[arg-type]
-            steps: list[dict[str, Any]] = row.get("steps") or []
-            completed = sum(1 for s in steps if s.get("status") == "completed")
+            row: dict[str, object] = dict(raw_row)  # type: ignore[arg-type]
+            raw_steps = row.get("steps") or []
+            steps: list[dict[str, object]] = list(raw_steps)  # type: ignore[call-overload]
+            completed = sum(
+                1 for s in steps if isinstance(s, dict) and s.get("status") == "completed"
+            )
             summaries.append(
                 {
                     "id": row["id"],
@@ -273,7 +275,7 @@ async def update_workflow_step(
         raise RuntimeError(f"Invalid step index: {update.step_index}")
 
     instance.steps[update.step_index].status = update.status
-    instance.updated_at = datetime.utcnow()
+    instance.updated_at = datetime.now(UTC)
 
     # Auto-advance current_step if completed
     if update.status == StepStatus.COMPLETED:

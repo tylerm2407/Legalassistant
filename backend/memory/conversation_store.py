@@ -8,8 +8,7 @@ an ordered list of messages.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
 
 from backend.memory.profile import _get_supabase
 from backend.models.conversation import Conversation, Message
@@ -41,7 +40,7 @@ async def create_conversation(
     )
     try:
         client = _get_supabase()
-        data: dict[str, Any] = {
+        data: dict[str, object] = {
             "id": conversation.id,
             "user_id": user_id,
             "messages": [],
@@ -49,7 +48,7 @@ async def create_conversation(
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
         }
-        result = client.table("conversations").insert(data).execute()
+        result = client.table("conversations").insert(data).execute()  # type: ignore[arg-type]
         if not result.data:
             raise RuntimeError(f"Failed to create conversation for user_id={user_id}")
         _logger.info("conversation_created", user_id=user_id, conversation_id=conversation.id)
@@ -93,8 +92,8 @@ async def get_conversation(conversation_id: str, user_id: str) -> Conversation |
             user_id=data["user_id"],
             messages=messages,
             legal_area=data.get("legal_area"),
-            created_at=data.get("created_at", datetime.utcnow()),
-            updated_at=data.get("updated_at", datetime.utcnow()),
+            created_at=data.get("created_at", datetime.now(UTC)),
+            updated_at=data.get("updated_at", datetime.now(UTC)),
         )
     except Exception as exc:
         _logger.error(
@@ -129,10 +128,15 @@ async def list_conversations(user_id: str, limit: int = 50) -> list[dict[str, ob
         )
         summaries: list[dict[str, object]] = []
         for raw_row in result.data or []:
-            row: dict[str, Any] = dict(raw_row)  # type: ignore[arg-type]
-            messages: list[dict[str, Any]] = row.get("messages") or []
+            row: dict[str, object] = dict(raw_row)  # type: ignore[arg-type]
+            raw_messages = row.get("messages") or []
+            messages: list[dict[str, object]] = list(raw_messages)  # type: ignore[call-overload]
             first_user_msg: str = next(
-                (m["content"] for m in messages if m.get("role") == "user"),
+                (
+                    str(m["content"])
+                    for m in messages
+                    if isinstance(m, dict) and m.get("role") == "user"
+                ),
                 "New conversation",
             )
             preview = first_user_msg[:100] + ("..." if len(first_user_msg) > 100 else "")
@@ -172,7 +176,7 @@ async def save_conversation(conversation: Conversation) -> None:
             {
                 "messages": messages_data,
                 "legal_area": conversation.legal_area,
-                "updated_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ).eq("id", conversation.id).execute()
         _logger.info(

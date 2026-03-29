@@ -8,7 +8,7 @@ can filter conversations by topic.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -28,7 +28,7 @@ class Message(BaseModel):
 
     role: Literal["user", "assistant", "error"]
     content: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     legal_area: str | None = None
 
 
@@ -49,8 +49,8 @@ class Conversation(BaseModel):
     user_id: str
     messages: list[Message] = Field(default_factory=list)
     legal_area: str | None = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     def add_message(
         self,
@@ -70,7 +70,7 @@ class Conversation(BaseModel):
         """
         message = Message(role=role, content=content, legal_area=legal_area)
         self.messages.append(message)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
         return message
 
     def to_anthropic_messages(self) -> list[dict[str, str]]:

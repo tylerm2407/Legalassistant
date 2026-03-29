@@ -23,6 +23,13 @@ const US_STATES = [
   "Virginia","Washington","West Virginia","Wisconsin","Wyoming",
 ];
 
+/**
+ * Profile management page with editable fields, case history, and document upload.
+ *
+ * Displays the user's legal profile in editable form fields, shows active issues
+ * on a timeline, lists uploaded documents, and provides a document upload zone.
+ * Changes are persisted to Supabase via the backend API.
+ */
 export default function ProfilePage() {
   return (
     <Suspense
@@ -37,6 +44,13 @@ export default function ProfilePage() {
   );
 }
 
+/**
+ * Inner profile page component handling profile fetch, edit form, and save logic.
+ *
+ * Loads the user's profile on mount, populates editable form fields, and saves
+ * changes back to Supabase. Includes sections for active issues (CaseHistory),
+ * document upload (DocumentUpload), and extracted legal facts.
+ */
 function ProfilePageInner() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<LegalProfile | null>(null);

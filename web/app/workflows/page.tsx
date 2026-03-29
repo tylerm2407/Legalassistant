@@ -35,6 +35,13 @@ interface ActiveWorkflow {
   status: string;
 }
 
+/**
+ * Guided legal workflows page with template browsing and active workflow management.
+ *
+ * Displays available workflow templates (e.g., "Recover Security Deposit") and
+ * the user's active workflows with progress bars. Starting a workflow or clicking
+ * an active one opens the WorkflowWizard for step-by-step guidance.
+ */
 export default function WorkflowsPage() {
   const { user, loading: authLoading } = useAuth();
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);

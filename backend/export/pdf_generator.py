@@ -25,6 +25,12 @@ class CaseMatePDF(FPDF):
     """Branded PDF with CaseMate header and disclaimer footer."""
 
     def __init__(self, title: str = "", user_name: str = "") -> None:
+        """Initialize a branded CaseMate PDF document.
+
+        Args:
+            title: Document title displayed in the header.
+            user_name: Optional user name for the "Prepared for" line.
+        """
         super().__init__()
         self._doc_title = title
         self._user_name = user_name
@@ -32,6 +38,11 @@ class CaseMatePDF(FPDF):
         self.add_page()
 
     def header(self) -> None:
+        """Render the CaseMate branded header with generation date and user name.
+
+        Called automatically by fpdf2 at the start of each page. Draws the
+        brand name, timestamp, optional user name, and a blue separator line.
+        """
         self.set_font("Helvetica", "B", 16)
         self.set_text_color(30, 64, 175)  # blue-700
         self.cell(0, 10, "CASEMATE - AI Legal Assistant", new_x="LMARGIN", new_y="NEXT")
@@ -46,6 +57,11 @@ class CaseMatePDF(FPDF):
         self.ln(8)
 
     def footer(self) -> None:
+        """Render the disclaimer footer at the bottom of each page.
+
+        Called automatically by fpdf2. Draws a separator line and the
+        CaseMate legal disclaimer in italicized gray text.
+        """
         self.set_y(-22)
         self.set_draw_color(200, 200, 200)
         self.line(10, self.get_y(), 200, self.get_y())
@@ -55,18 +71,34 @@ class CaseMatePDF(FPDF):
         self.multi_cell(0, 3, CASEMATE_DISCLAIMER)
 
     def add_title(self, title: str) -> None:
+        """Add a bold, uppercase document title to the PDF body.
+
+        Args:
+            title: The title text to render.
+        """
         self.set_font("Helvetica", "B", 14)
         self.set_text_color(15, 23, 42)  # gray-900
         self.cell(0, 10, title.upper(), new_x="LMARGIN", new_y="NEXT")
         self.ln(2)
 
     def add_body(self, text: str) -> None:
+        """Add a block of body text in standard formatting.
+
+        Args:
+            text: The body text to render as a multi-line cell.
+        """
         self.set_font("Helvetica", "", 10)
         self.set_text_color(51, 65, 85)  # gray-700
         self.multi_cell(0, 5, text)
         self.ln(3)
 
     def add_section(self, heading: str, body: str) -> None:
+        """Add a titled section with a blue heading and body text.
+
+        Args:
+            heading: Section heading rendered in uppercase blue text.
+            body: Section body text rendered via add_body().
+        """
         self.set_font("Helvetica", "B", 11)
         self.set_text_color(30, 64, 175)
         self.cell(0, 8, heading.upper(), new_x="LMARGIN", new_y="NEXT")

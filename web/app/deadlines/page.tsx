@@ -4,6 +4,13 @@ import React from "react";
 import { useAuth } from "@/lib/auth";
 import DeadlineDashboard from "@/components/DeadlineDashboard";
 
+/**
+ * Deadlines page for tracking legal deadlines and statutes of limitations.
+ *
+ * Requires authentication. Renders the DeadlineDashboard component which
+ * displays active deadlines with urgency indicators and allows creating,
+ * completing, and dismissing deadlines.
+ */
 export default function DeadlinesPage() {
   const { user, loading: authLoading } = useAuth();
 

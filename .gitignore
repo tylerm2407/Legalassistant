@@ -38,3 +38,7 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Private content (kept locally, not pushed)
+SOCIAL_MEDIA.md
+USER_RESEARCH.md

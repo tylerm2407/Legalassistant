@@ -23,11 +23,15 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
         });
         if (signUpError) throw signUpError;
+        if (data.session) {
+          router.push("/onboarding");
+          return;
+        }
         setMessage(
           "Check your email for a confirmation link, then sign in."
         );

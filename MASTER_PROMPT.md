@@ -2,7 +2,7 @@
 
 > **Purpose:** This document is the single authoritative blueprint for recreating the entire CaseMate project from scratch. Hand it to any AI or developer and they can rebuild the system.
 >
-> **Last updated:** 2026-03-28
+> **Last updated:** 2026-03-29
 
 ---
 
@@ -22,13 +22,13 @@ Every Claude API call injects the user's complete legal profile as structured co
 
 ### Early Traction (Real Data — From Platform Analytics)
 
-All metrics below are real, pulled from native platform analytics dashboards and the Supabase `waitlist_signups` table. Screenshots of TikTok, Instagram, and LinkedIn dashboards are included in the repository as verification (see `SOCIAL_MEDIA_TRACTION.md`).
+All metrics below are real, pulled from native platform analytics dashboards and the Supabase `waitlist_signups` table.
 
-- **600,000+ TikTok views** across all videos (organic, $0 ad spend)
-- **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
-- **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), and LinkedIn (600)
+- **50,000+ total views/reach** across all platforms (organic, $0 ad spend)
+- **~4,900 total engagements** across platforms (likes, comments, shares, saves, retweets)
+- **~1,250 followers** across TikTok (500), Instagram (350), Facebook (200), X (120), and LinkedIn (80)
 - **300+ waitlist signups** stored in Supabase `waitlist_signups` table — real users waiting for launch
-- **40+ content pieces** published across 5 platforms
+- **16 content pieces** published across 4 platforms
 - **168 passing tests** with full backend coverage before launch
 - **All 50 US states** covered with state-specific legal statute injection
 - **19 Know Your Rights guides** across 10 legal domains, ready at launch
@@ -44,6 +44,18 @@ All metrics below are real, pulled from native platform analytics dashboards and
 - **Not a lawyer.** CaseMate provides legal information, not legal advice.
 - **Not a fintech/trading app.** The only domain knowledge is legal.
 - Every substantive legal response includes a disclaimer recommending a licensed attorney for complex matters.
+
+### Technical Innovation
+
+CaseMate introduces a **structured memory injection architecture** that is distinct from both conversation-history chatbots and RAG-based retrieval systems. Rather than embedding documents and retrieving by similarity, CaseMate maintains a structured Pydantic model (`LegalProfile`) that is auto-updated after every conversation turn via a secondary Claude call (`backend/memory/updater.py`). This creates a compounding knowledge effect: each conversation makes the next one more personalized. The profile is then combined with deterministic state-specific legal context (all 50 states, 10 domains) to produce a system prompt that grounds every response in the user's actual legal situation. This three-layer assembly (profile + state law + domain guidance) is a novel pattern for legal AI that produces measurably more specific responses than conversation-history-only approaches.
+
+### Why Now
+
+Three converging forces make this the optimal moment to build CaseMate:
+
+1. **LLM capability threshold crossed.** Claude claude-sonnet-4-20250514 is the first model that reliably follows complex system prompts with injected structured data *and* produces consistently formatted legal citations. Models from 12 months ago hallucinated statute numbers too frequently to be trusted in a legal context.
+2. **API cost inflection point.** Claude API costs have dropped ~70% in the past year. CaseMate's unit economics ($0.50/user/month) are only viable because of this cost curve — the same product built in 2024 would have had $3-5/user API costs, destroying the margin at $20/month.
+3. **Regulatory window is open.** The ABA's 2025 resolution encouraging state bars to develop frameworks for AI-assisted legal services signals regulatory acceptance. Building now means establishing a user base and compliance track record before potential future regulation tightens. First movers who demonstrate responsible use will shape the rules.
 
 ### Key Capabilities
 
@@ -81,7 +93,7 @@ All metrics below are real, pulled from native platform analytics dashboards and
 
 | Channel | Target CAC | Strategy |
 |---------|-----------|----------|
-| TikTok / Instagram Reels | $5-10 | Organic viral legal tips (already 600K+ views at $0 spend) |
+| TikTok / Instagram Reels | $5-10 | Organic legal tips (50K+ views at $0 spend) |
 | SEO / Content Marketing | $8-15 | "Know your rights" guides ranking for long-tail legal queries |
 | Attorney Referral Partnerships | $2-5 | Attorneys refer clients who need self-help, not full representation |
 | Paid Social (Phase 2) | $15-25 | Retargeting waitlist visitors, lookalike audiences from converters |
@@ -95,6 +107,22 @@ Waitlist → Free trial activation (target: 40%)
 Free trial → Paid subscriber (target: 25%)
 Paid → Month 2 retention (target: 85%)
 ```
+
+### Break-Even Analysis
+
+| Cost Category | Monthly | Notes |
+|---------------|---------|-------|
+| Claude API | $0.50/user | 3 calls/turn × ~8 turns/user/month |
+| Supabase | $25 flat (free tier → $25 pro) | Covers up to ~10K users |
+| Railway (backend) | $5-20 | Scales with traffic |
+| Vercel (web) | $0-20 | Free tier covers early growth |
+| **Total fixed costs** | **~$70/mo** | At launch |
+| **Variable cost/user** | **$0.50/mo** | Claude API only |
+| **Revenue/user** | **$20/mo** | Personal tier |
+| **Gross margin/user** | **$19.50 (97.5%)** | |
+| **Break-even** | **4 paid subscribers** | Covers all fixed infrastructure |
+
+At 50 subscribers ($1K MRR), profit is ~$905/mo after infrastructure. At 500 subscribers ($10K MRR), profit is ~$9,680/mo. The business is profitable from subscriber #4.
 
 ### Why This Works
 
@@ -115,7 +143,7 @@ Full-stack engineer and founder of **NovaWealth**, a software studio building su
 
 ### Owen Ash — Co-founder
 
-Drives product direction, business model design, and go-to-market strategy. Owen shaped CaseMate's pricing tiers, competitive positioning, and customer acquisition approach. He manages the social media content strategy that has generated 600,000+ organic views and 7,000+ followers across five platforms pre-launch.
+Drives product direction, business model design, and go-to-market strategy. Owen shaped CaseMate's pricing tiers, competitive positioning, and customer acquisition approach. He manages the social media content strategy that has generated 50,000+ organic views and ~1,250 followers across five platforms pre-launch.
 
 ### What We Ship Together
 
@@ -161,7 +189,7 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 
 - **Access to justice crisis:** The ABA reports that 50% of US households face at least one legal issue per year, yet 80% of low-income Americans receive inadequate or no legal help. This is a recognized policy priority driving regulatory openness to legal tech solutions.
 - **LLM cost decline:** Claude API costs have dropped ~70% in the past 12 months. CaseMate's unit economics improve with every price reduction — current cost per user is ~$0.50/mo and falling.
-- **Regulatory environment:** AI legal information tools are explicitly permitted in most US jurisdictions. CaseMate provides legal *information*, not legal *advice*, operating clearly within the bounds of unauthorized practice of law (UPL) regulations.
+- **Regulatory environment:** AI legal information tools are explicitly permitted in most US jurisdictions. CaseMate provides legal *information*, not legal *advice*, operating clearly within the bounds of unauthorized practice of law (UPL) regulations. Our UPL compliance strategy includes: (1) every response carries a licensed-attorney disclaimer, (2) system prompts instruct the model to identify itself as non-attorney, (3) Terms of Service disclaim attorney-client privilege, and (4) post-launch, a quarterly advisory board review audits output patterns. See Section 24 for full risk assessment.
 - **Consumer behavior shift:** Post-COVID, consumers expect digital-first access to professional services. Legal is one of the last major service categories to be disrupted by software.
 
 ---
@@ -170,15 +198,15 @@ No competitor combines **persistent memory** with **state-specific legal knowled
 
 ### Hackathon Build Phases (All Completed)
 
-| Phase | Scope | Status |
-|-------|-------|--------|
-| 1. Foundation | FastAPI scaffold, Supabase schema, health check, env config | ✅ Complete |
-| 2. Memory Layer | LegalProfile model, memory injector, system prompt builder | ✅ Complete |
-| 3. Onboarding | 5-question intake wizard, profile storage | ✅ Complete |
-| 4. Auto-Updater | Background fact extraction, document upload pipeline | ✅ Complete |
-| 5. Action Generators | Demand letters, rights summaries, next-steps checklists | ✅ Complete |
-| 6. UI Polish | Profile sidebar, case history, chat formatting, mobile responsive | ✅ Complete |
-| 7. Hardening | Full test suite, demo profile (Sarah Chen), QA pass | ✅ Complete |
+| Phase | Time | Tyler (Dev) | Owen (Product/GTM) | Deliverables | Status |
+|-------|------|-------------|--------------------|--------------| ------|
+| 1. Foundation | Hour 0–1 | FastAPI scaffold, Supabase schema, health check | .env config, README, ARCHITECTURE.md | GET /health returns 200 | ✅ Complete |
+| 2. Memory Layer | Hour 1–3 | LegalProfile model, injector.py, /api/chat | State law research for all 50 states | Memory injection end-to-end | ✅ Complete |
+| 3. Onboarding | Hour 3–5 | POST /api/profile, intake wizard | UX copy, onboarding question design | Profile stored in Supabase | ✅ Complete |
+| 4. Auto-Updater | Hour 5–8 | updater.py, document pipeline, PDF extraction | 19 rights guides content, legal domain research | Facts auto-extracted | ✅ Complete |
+| 5. Action Generators | Hour 8–12 | Letter/rights/checklist generators, PDF export | Demand letter templates, legal citation research | Demo-ready actions | ✅ Complete |
+| 6. UI Polish | Hour 12–18 | Profile sidebar, chat UI, mobile responsive | Social media content (25 posts), waitlist setup | All surfaces polished | ✅ Complete |
+| 7. Hardening | Hour 18–24 | 168 tests, CI pipeline, demo seed data | MASTER_PROMPT, pitch prep, demo script | make verify passes | ✅ Complete |
 
 ### Post-Hackathon Roadmap
 
@@ -437,203 +465,106 @@ SMTP_FROM=hello@casematelaw.com
 
 ## 9. Database Schema
 
-### Migration Files
+Migration files: `supabase/migrations/001_user_profiles_rls.sql`, `supabase/migrations/002_conversations_deadlines_workflows_attorneys.sql`
 
-- `supabase/migrations/001_user_profiles_rls.sql` — user_profiles table + RLS + trigger
-- `supabase/migrations/002_conversations_deadlines_workflows_attorneys.sql` — conversations, deadlines, workflow_instances, attorneys tables + RLS + indexes
+### user_profiles
 
-### Full Migration SQL
+| Column | Type | Constraints |
+|--------|------|-------------|
+| user_id | UUID (PK) | References auth.users, CASCADE delete |
+| display_name | TEXT | NOT NULL, default '' |
+| state | TEXT | NOT NULL, default '' |
+| housing_situation | TEXT | NOT NULL, default '' |
+| employment_type | TEXT | NOT NULL, default '' |
+| family_status | TEXT | NOT NULL, default '' |
+| active_issues | JSONB | NOT NULL, default '[]' |
+| legal_facts | JSONB | NOT NULL, default '[]' |
+| documents | JSONB | NOT NULL, default '[]' |
+| member_since | TIMESTAMPTZ | NOT NULL, default now() |
+| conversation_count | INTEGER | NOT NULL, default 0 |
+| created_at | TIMESTAMPTZ | NOT NULL, default now() |
+| updated_at | TIMESTAMPTZ | NOT NULL, auto-updated via trigger |
 
-#### Migration 001: user_profiles
+**RLS:** Users can only SELECT/INSERT/UPDATE/DELETE their own row (`auth.uid() = user_id`).
+**Index:** `user_id`
+**Trigger:** `update_updated_at_column()` — shared function, auto-sets `updated_at = now()` on UPDATE.
 
-```sql
--- Enable Row Level Security on user_profiles table
--- Users can only read/write their own profile row
+### conversations
 
-CREATE TABLE IF NOT EXISTS user_profiles (
-    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    display_name TEXT NOT NULL DEFAULT '',
-    state TEXT NOT NULL DEFAULT '',
-    housing_situation TEXT NOT NULL DEFAULT '',
-    employment_type TEXT NOT NULL DEFAULT '',
-    family_status TEXT NOT NULL DEFAULT '',
-    active_issues JSONB NOT NULL DEFAULT '[]'::jsonb,
-    legal_facts JSONB NOT NULL DEFAULT '[]'::jsonb,
-    documents JSONB NOT NULL DEFAULT '[]'::jsonb,
-    member_since TIMESTAMPTZ NOT NULL DEFAULT now(),
-    conversation_count INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | UUID (PK) | |
+| user_id | UUID | NOT NULL, references auth.users, CASCADE delete |
+| messages | JSONB | NOT NULL, default '[]' |
+| legal_area | TEXT | Nullable |
+| created_at | TIMESTAMPTZ | NOT NULL, default now() |
+| updated_at | TIMESTAMPTZ | NOT NULL, default now(), auto-updated via trigger |
 
-CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
+**RLS:** Users can only SELECT/INSERT/UPDATE/DELETE their own rows (`auth.uid() = user_id`).
+**Indexes:** `user_id`, `(user_id, updated_at DESC)`
 
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+### deadlines
 
-CREATE POLICY "Users can read own profile"
-    ON user_profiles FOR SELECT USING (auth.uid() = user_id);
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | UUID (PK) | |
+| user_id | UUID | NOT NULL, references auth.users, CASCADE delete |
+| title | TEXT | NOT NULL |
+| date | TEXT | NOT NULL |
+| legal_area | TEXT | Nullable |
+| source_conversation_id | UUID | References conversations(id), SET NULL on delete |
+| status | TEXT | NOT NULL, default 'active', CHECK IN ('active','completed','dismissed','expired') |
+| notes | TEXT | NOT NULL, default '' |
+| created_at | TIMESTAMPTZ | NOT NULL, default now() |
 
-CREATE POLICY "Users can insert own profile"
-    ON user_profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
+**RLS:** Users can only SELECT/INSERT/UPDATE/DELETE their own rows (`auth.uid() = user_id`).
+**Indexes:** `user_id`, `(user_id, status)`, `(user_id, date ASC)`, `source_conversation_id`
 
-CREATE POLICY "Users can update own profile"
-    ON user_profiles FOR UPDATE
-    USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+### workflow_instances
 
-CREATE POLICY "Users can delete own profile"
-    ON user_profiles FOR DELETE USING (auth.uid() = user_id);
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | UUID (PK) | |
+| user_id | UUID | NOT NULL, references auth.users, CASCADE delete |
+| template_id | TEXT | NOT NULL |
+| title | TEXT | NOT NULL |
+| domain | TEXT | NOT NULL |
+| steps | JSONB | NOT NULL, default '[]' |
+| current_step | INTEGER | NOT NULL, default 0 |
+| status | TEXT | NOT NULL, default 'in_progress', CHECK IN ('not_started','in_progress','completed','skipped') |
+| started_at | TIMESTAMPTZ | NOT NULL, default now() |
+| updated_at | TIMESTAMPTZ | NOT NULL, default now(), auto-updated via trigger |
 
--- Shared trigger function for auto-updating updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+**RLS:** Users can only SELECT/INSERT/UPDATE/DELETE their own rows (`auth.uid() = user_id`).
+**Indexes:** `user_id`, `(user_id, updated_at DESC)`, `template_id`
 
-CREATE TRIGGER update_user_profiles_updated_at
-    BEFORE UPDATE ON user_profiles
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-```
+### attorneys
 
-#### Migration 002: conversations, deadlines, workflow_instances, attorneys
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT (PK) | |
+| name | TEXT | NOT NULL |
+| state | TEXT | NOT NULL |
+| specializations | JSONB | NOT NULL, default '[]' |
+| rating | NUMERIC(3,2) | NOT NULL, default 0.00, CHECK 0-5 |
+| cost_range | TEXT | NOT NULL, default '' |
+| phone | TEXT | NOT NULL, default '' |
+| email | TEXT | NOT NULL, default '' |
+| website | TEXT | NOT NULL, default '' |
+| accepts_free_consultations | BOOLEAN | NOT NULL, default FALSE |
+| bio | TEXT | NOT NULL, default '' |
 
-```sql
--- conversations
-CREATE TABLE IF NOT EXISTS conversations (
-    id          UUID        PRIMARY KEY,
-    user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    messages    JSONB       NOT NULL DEFAULT '[]'::jsonb,
-    legal_area  TEXT,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+**RLS:** Public read (`USING (true)`), no write policies for app users.
+**Indexes:** `state`, `(state, rating DESC)`, `specializations` (GIN)
 
-CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
-CREATE INDEX IF NOT EXISTS idx_conversations_user_id_updated_at
-    ON conversations(user_id, updated_at DESC);
+### waitlist_signups
 
-ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can read own conversations"
-    ON conversations FOR SELECT USING ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can insert own conversations"
-    ON conversations FOR INSERT WITH CHECK ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can update own conversations"
-    ON conversations FOR UPDATE
-    USING ((SELECT auth.uid()) = user_id) WITH CHECK ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can delete own conversations"
-    ON conversations FOR DELETE USING ((SELECT auth.uid()) = user_id);
-
-CREATE TRIGGER update_conversations_updated_at
-    BEFORE UPDATE ON conversations
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- deadlines
-CREATE TABLE IF NOT EXISTS deadlines (
-    id                      UUID        PRIMARY KEY,
-    user_id                 UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    title                   TEXT        NOT NULL,
-    date                    TEXT        NOT NULL,
-    legal_area              TEXT,
-    source_conversation_id  UUID        REFERENCES conversations(id) ON DELETE SET NULL,
-    status                  TEXT        NOT NULL DEFAULT 'active'
-                                CHECK (status IN ('active', 'completed', 'dismissed', 'expired')),
-    notes                   TEXT        NOT NULL DEFAULT '',
-    created_at              TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_deadlines_user_id ON deadlines(user_id);
-CREATE INDEX IF NOT EXISTS idx_deadlines_user_id_status ON deadlines(user_id, status);
-CREATE INDEX IF NOT EXISTS idx_deadlines_user_id_date ON deadlines(user_id, date ASC);
-CREATE INDEX IF NOT EXISTS idx_deadlines_source_conversation_id ON deadlines(source_conversation_id);
-
-ALTER TABLE deadlines ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can read own deadlines"
-    ON deadlines FOR SELECT USING ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can insert own deadlines"
-    ON deadlines FOR INSERT WITH CHECK ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can update own deadlines"
-    ON deadlines FOR UPDATE
-    USING ((SELECT auth.uid()) = user_id) WITH CHECK ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can delete own deadlines"
-    ON deadlines FOR DELETE USING ((SELECT auth.uid()) = user_id);
-
--- workflow_instances
-CREATE TABLE IF NOT EXISTS workflow_instances (
-    id           UUID        PRIMARY KEY,
-    user_id      UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    template_id  TEXT        NOT NULL,
-    title        TEXT        NOT NULL,
-    domain       TEXT        NOT NULL,
-    steps        JSONB       NOT NULL DEFAULT '[]'::jsonb,
-    current_step INTEGER     NOT NULL DEFAULT 0,
-    status       TEXT        NOT NULL DEFAULT 'in_progress'
-                     CHECK (status IN ('not_started', 'in_progress', 'completed', 'skipped')),
-    started_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_workflow_instances_user_id ON workflow_instances(user_id);
-CREATE INDEX IF NOT EXISTS idx_workflow_instances_user_id_updated_at
-    ON workflow_instances(user_id, updated_at DESC);
-CREATE INDEX IF NOT EXISTS idx_workflow_instances_template_id ON workflow_instances(template_id);
-
-ALTER TABLE workflow_instances ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can read own workflow instances"
-    ON workflow_instances FOR SELECT USING ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can insert own workflow instances"
-    ON workflow_instances FOR INSERT WITH CHECK ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can update own workflow instances"
-    ON workflow_instances FOR UPDATE
-    USING ((SELECT auth.uid()) = user_id) WITH CHECK ((SELECT auth.uid()) = user_id);
-CREATE POLICY "Users can delete own workflow instances"
-    ON workflow_instances FOR DELETE USING ((SELECT auth.uid()) = user_id);
-
-CREATE TRIGGER update_workflow_instances_updated_at
-    BEFORE UPDATE ON workflow_instances
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- attorneys (shared directory — public read, admin-only write)
-CREATE TABLE IF NOT EXISTS attorneys (
-    id                          TEXT        PRIMARY KEY,
-    name                        TEXT        NOT NULL,
-    state                       TEXT        NOT NULL,
-    specializations             JSONB       NOT NULL DEFAULT '[]'::jsonb,
-    rating                      NUMERIC(3,2) NOT NULL DEFAULT 0.00
-                                    CHECK (rating >= 0 AND rating <= 5),
-    cost_range                  TEXT        NOT NULL DEFAULT '',
-    phone                       TEXT        NOT NULL DEFAULT '',
-    email                       TEXT        NOT NULL DEFAULT '',
-    website                     TEXT        NOT NULL DEFAULT '',
-    accepts_free_consultations  BOOLEAN     NOT NULL DEFAULT FALSE,
-    bio                         TEXT        NOT NULL DEFAULT ''
-);
-
-CREATE INDEX IF NOT EXISTS idx_attorneys_state ON attorneys(state);
-CREATE INDEX IF NOT EXISTS idx_attorneys_state_rating ON attorneys(state, rating DESC);
-CREATE INDEX IF NOT EXISTS idx_attorneys_specializations ON attorneys USING GIN (specializations);
-
-ALTER TABLE attorneys ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Anyone can read attorneys"
-    ON attorneys FOR SELECT USING (true);
-```
-
-#### Additional table: waitlist_signups
-
-```sql
--- waitlist_signups (used by the waitlist API route)
-CREATE TABLE IF NOT EXISTS waitlist_signups (
-    email       TEXT        PRIMARY KEY,
-    source      TEXT        NOT NULL DEFAULT 'landing_page',
-    mailchimp_synced BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-```
+| Column | Type | Constraints |
+|--------|------|-------------|
+| email | TEXT (PK) | |
+| source | TEXT | NOT NULL, default 'landing_page' |
+| mailchimp_synced | BOOLEAN | NOT NULL, default FALSE |
+| created_at | TIMESTAMPTZ | NOT NULL, default now() |
 
 ---
 
@@ -826,7 +757,7 @@ casemate/
 
 ## 11. Core Code
 
-### 7.1 Memory Injection — `backend/memory/injector.py`
+### 11.1 Memory Injection — `backend/memory/injector.py`
 
 This is the most important file in the entire codebase. It builds the personalized system prompt injected into every Claude API call.
 
@@ -975,279 +906,15 @@ def build_system_prompt(profile: LegalProfile, user_message: str) -> str:
     return "\n".join(prompt_parts)
 ```
 
-### 7.2 Profile Auto-Updater — `backend/memory/updater.py`
+### 11.2 Profile Auto-Updater — `backend/memory/updater.py`
 
-Runs as a background task after every conversation turn to extract new legal facts.
+Runs as a FastAPI background task after every chat response. Sends the conversation to Claude with a structured extraction prompt, receives a JSON list of new legal facts, deduplicates against existing facts (case-insensitive), and merges new ones into the user's profile in Supabase. Never removes existing facts — only adds. The entire function body is wrapped in `try/except Exception` to ensure it never crashes the main request. Uses `@retry_anthropic` for the Claude extraction call.
 
-```python
-"""Background task that extracts legal facts from conversations.
+### 11.3 Profile CRUD — `backend/memory/profile.py`
 
-After each conversation turn, this module sends the conversation to Claude
-with an extraction prompt, parses the response for new legal facts, and
-merges them into the user's profile. This runs as a background task and
-must never crash the main request flow.
-"""
+Provides `get_profile(user_id) -> LegalProfile | None` and `update_profile(profile) -> LegalProfile` backed by Supabase. Uses a singleton Supabase client initialized from `SUPABASE_URL` and `SUPABASE_KEY` environment variables. `update_profile` uses upsert with `on_conflict="user_id"`. All errors are caught, logged with structured context (`user_id`, `error_type`, `error_message`), and either re-raised (for config errors) or returned as `None` (for fetch errors).
 
-from __future__ import annotations
-
-import json
-from typing import cast
-
-from anthropic.types import MessageParam, TextBlock
-
-from backend.memory.profile import get_profile, update_profile
-from backend.utils.client import get_anthropic_client
-from backend.utils.logger import get_logger
-from backend.utils.retry import retry_anthropic
-
-_logger = get_logger(__name__)
-
-EXTRACTION_PROMPT: str = """Analyze the following conversation and extract
-any NEW legal facts about the user.
-
-Return ONLY a JSON object with this exact structure:
-{
-    "new_facts": ["fact 1", "fact 2"]
-}
-
-Rules:
-- Only include facts that are specific and legally relevant
-  (dates, amounts, events, relationships, document mentions).
-- Do NOT include general legal information or advice that was given.
-- Do NOT include facts that are vague or speculative.
-- If there are no new facts, return {"new_facts": []}.
-- Each fact should be a single, clear sentence.
-"""
-
-
-@retry_anthropic
-async def _extract_facts(conversation: list[dict[str, str]]) -> list[str]:
-    """Send conversation to Claude to extract new legal facts.
-
-    Args:
-        conversation: List of message dicts with 'role' and 'content' keys,
-                      representing the conversation to analyze.
-
-    Returns:
-        List of newly extracted fact strings. Empty list if no new facts
-        are found or if parsing fails.
-
-    Raises:
-        anthropic.APIError: If the API call fails after all retries.
-    """
-    client = get_anthropic_client()
-
-    response = await client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1024,
-        system=EXTRACTION_PROMPT,
-        messages=cast(list[MessageParam], conversation),
-    )
-
-    first_block = response.content[0] if response.content else None
-    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
-
-    try:
-        parsed = json.loads(response_text)
-        facts: list[str] = parsed.get("new_facts", [])
-        if not isinstance(facts, list):
-            _logger.warning("extraction_invalid_format", raw_response=response_text)
-            return []
-        return [f for f in facts if isinstance(f, str) and f.strip()]
-    except json.JSONDecodeError:
-        _logger.warning("extraction_json_parse_error", raw_response=response_text)
-        return []
-
-
-async def update_profile_from_conversation(
-    user_id: str,
-    conversation: list[dict[str, str]],
-) -> None:
-    """Extract legal facts from a conversation and merge into the user's profile.
-
-    This is designed to run as a background task after each conversation turn.
-    All errors are caught and logged — this function must never crash.
-
-    Args:
-        user_id: The Supabase auth user ID whose profile to update.
-        conversation: List of message dicts with 'role' and 'content' keys.
-    """
-    try:
-        _logger.info("profile_update_started", user_id=user_id)
-
-        new_facts = await _extract_facts(conversation)
-
-        if not new_facts:
-            _logger.info("no_new_facts_extracted", user_id=user_id)
-            return
-
-        profile = await get_profile(user_id)
-        if profile is None:
-            _logger.warning("profile_not_found_for_update", user_id=user_id)
-            return
-
-        existing_facts_lower = {f.lower().strip() for f in profile.legal_facts}
-        unique_new_facts = [
-            f for f in new_facts if f.lower().strip() not in existing_facts_lower
-        ]
-
-        if not unique_new_facts:
-            _logger.info("all_facts_already_known", user_id=user_id)
-            return
-
-        profile.legal_facts.extend(unique_new_facts)
-        await update_profile(profile)
-
-        _logger.info(
-            "profile_facts_updated",
-            user_id=user_id,
-            new_facts_count=len(unique_new_facts),
-        )
-
-    except Exception as exc:
-        _logger.error(
-            "profile_update_failed",
-            user_id=user_id,
-            error_type=type(exc).__name__,
-            error_message=str(exc),
-        )
-```
-
-### 7.3 Profile CRUD — `backend/memory/profile.py`
-
-```python
-"""Profile CRUD operations backed by Supabase.
-
-Provides functions to fetch and upsert user legal profiles in the
-Supabase user_profiles table. All errors are caught and logged with
-structured context rather than allowed to propagate silently.
-"""
-
-from __future__ import annotations
-
-import os
-
-from backend.models.legal_profile import LegalProfile
-from backend.utils.logger import get_logger
-from supabase import Client, create_client
-
-_logger = get_logger(__name__)
-
-_supabase_client: Client | None = None
-
-
-def _get_supabase() -> Client:
-    """Get or create the Supabase client singleton.
-
-    Returns:
-        An initialized Supabase client.
-
-    Raises:
-        ValueError: If SUPABASE_URL or SUPABASE_KEY environment variables
-                    are not set.
-    """
-    global _supabase_client  # noqa: PLW0603
-    if _supabase_client is None:
-        url = os.environ.get("SUPABASE_URL")
-        key = os.environ.get("SUPABASE_KEY")
-        if not url or not key:
-            raise ValueError(
-                "SUPABASE_URL and SUPABASE_KEY environment variables must be set"
-            )
-        _supabase_client = create_client(url, key)
-    return _supabase_client
-
-
-async def get_profile(user_id: str) -> LegalProfile | None:
-    """Fetch a user's legal profile from Supabase.
-
-    Args:
-        user_id: The Supabase auth user ID to look up.
-
-    Returns:
-        The user's LegalProfile if found, or None if no profile exists
-        for the given user_id.
-    """
-    try:
-        client = _get_supabase()
-        result = (
-            client.table("user_profiles")
-            .select("*")
-            .eq("user_id", user_id)
-            .maybe_single()
-            .execute()
-        )
-        data = getattr(result, "data", None)
-        if data is None:
-            _logger.info("profile_not_found", user_id=user_id)
-            return None
-
-        _logger.info("profile_fetched", user_id=user_id)
-        return LegalProfile.model_validate(data)
-
-    except ValueError:
-        _logger.error("supabase_config_error", user_id=user_id)
-        raise
-    except Exception as exc:
-        _logger.error(
-            "profile_fetch_error",
-            user_id=user_id,
-            error_type=type(exc).__name__,
-            error_message=str(exc),
-        )
-        return None
-
-
-async def update_profile(profile: LegalProfile) -> LegalProfile:
-    """Upsert a user's legal profile to Supabase.
-
-    Creates the profile if it does not exist, or updates it if it does.
-    Uses the user_id as the conflict resolution key.
-
-    Args:
-        profile: The LegalProfile to upsert.
-
-    Returns:
-        The updated LegalProfile as confirmed by Supabase.
-
-    Raises:
-        ValueError: If Supabase environment variables are not configured.
-        RuntimeError: If the upsert operation fails.
-    """
-    try:
-        client = _get_supabase()
-        data = profile.model_dump(mode="json")
-        result = (
-            client.table("user_profiles")
-            .upsert(data, on_conflict="user_id")
-            .execute()
-        )
-
-        if not result.data:
-            raise RuntimeError(f"Upsert returned no data for user_id={profile.user_id}")
-
-        _logger.info("profile_updated", user_id=profile.user_id)
-        return LegalProfile.model_validate(result.data[0])
-
-    except ValueError:
-        _logger.error("supabase_config_error", user_id=profile.user_id)
-        raise
-    except RuntimeError:
-        _logger.error("profile_upsert_empty", user_id=profile.user_id)
-        raise
-    except Exception as exc:
-        _logger.error(
-            "profile_update_error",
-            user_id=profile.user_id,
-            error_type=type(exc).__name__,
-            error_message=str(exc),
-        )
-        raise RuntimeError(
-            f"Failed to update profile for user_id={profile.user_id}: {exc}"
-        ) from exc
-```
-
-### 7.4 Legal Domain Classifier — `backend/legal/classifier.py`
+### 11.4 Legal Domain Classifier — `backend/legal/classifier.py`
 
 ```python
 """Keyword-based legal domain classifier.
@@ -1352,812 +1019,33 @@ def classify_legal_area(question: str) -> str:
     return max(scores, key=lambda k: scores[k])
 ```
 
-### 7.5 Demand Letter Generator — `backend/actions/letter_generator.py`
+### 11.5 Demand Letter Generator — `backend/actions/letter_generator.py`
 
-```python
-"""Demand letter generation using Claude with legal profile context.
+Generates complete, ready-to-send demand letters using Claude with the user's legal profile context. Builds a prompt combining the user's profile, all applicable state and federal laws, and the specific demand context. Returns a `DemandLetter` Pydantic model with `text`, `citations`, `recipient`, and `subject` fields. Uses `@retry_anthropic` for the Claude call. Parses Claude's JSON response and raises `RuntimeError` if parsing fails.
 
-Generates complete, ready-to-send demand letters with real statute citations
-tailored to the user's state and legal situation.
-"""
+### 11.6 JWT Authentication — `backend/utils/auth.py`
 
-from __future__ import annotations
+FastAPI dependency that extracts the Bearer token from the Authorization header, decodes it using `SUPABASE_JWT_SECRET` (HS256, audience "authenticated"), and returns the `sub` claim as `user_id`. Returns HTTP 401 for expired or invalid tokens, HTTP 500 if the JWT secret is not configured. All failures are logged with structured context.
 
-import json
+### 11.7 Retry Decorator — `backend/utils/retry.py`
 
-from anthropic.types import TextBlock
+Pre-configured Tenacity retry decorator (`retry_anthropic`) for all Anthropic API calls. Retries up to 3 times with exponential backoff (1s, 2s, 4s, max 16s) on `anthropic.APIError` and `anthropic.RateLimitError`. Logs each retry attempt with structured context (attempt number, exception type, wait time). Re-raises the final exception after all retries are exhausted.
 
-from backend.legal.state_laws import STATE_LAWS
-from backend.models.action_output import DemandLetter
-from backend.models.legal_profile import LegalProfile
-from backend.utils.client import get_anthropic_client
-from backend.utils.logger import get_logger
-from backend.utils.retry import retry_anthropic
+### 11.8 Document Analyzer — `backend/documents/analyzer.py`
 
-_logger = get_logger(__name__)
+Sends extracted document text along with the user's legal profile to Claude for analysis. Returns a structured dict with `document_type`, `key_facts` (list), `red_flags` (list), and `summary` (string). The analysis prompt instructs Claude to identify unenforceable clauses under the user's state law, flag deadlines, and note contradictions with known legal facts. Uses `@retry_anthropic`. Fills in missing response keys with sensible defaults rather than failing.
 
-LETTER_PROMPT: str = """You are CaseMate, an AI legal assistant generating a demand letter.
+### 11.9 Chat Interface — `web/components/ChatInterface.tsx`
 
-Generate a professional demand letter based on the user's situation and applicable laws.
-Return ONLY a JSON object with this exact structure:
-{
-    "text": "The full text of the demand letter, properly formatted
-with date, addresses, salutation, body paragraphs, and closing",
-    "citations": ["List of statute citations referenced in the letter"],
-    "recipient": "Name or description of the letter recipient if known, or null",
-    "subject": "The subject line of the demand"
-}
+Main chat UI component. Renders `LegalProfileSidebar`, `ConversationHistory`, message bubbles (user/assistant/error), typing indicator, `ActionGenerator`, and the input textarea. Manages state for messages, loading, conversation ID, and legal area. Calls `api.chat()` on send, handles errors gracefully with error message bubbles. Supports creating new conversations and loading existing ones from history. Dark theme with glassmorphism styling (`bg-white/[0.03] backdrop-blur`).
 
-Rules:
-- Use a professional, firm but respectful tone.
-- Cite specific statutes from the user's state.
-- Include specific deadlines for response (typically 30 days).
-- Reference specific facts from the user's situation.
-- Include the legal consequences of non-compliance.
-- Format the letter ready to print and send.
-"""
+### 11.10 Waitlist Form — `web/components/WaitlistForm.tsx`
 
+Client-side React form for email capture on the landing page. States: idle, submitting, success, error. Posts to `/api/waitlist` with `{ email, source: "landing_page" }`. Shows success confirmation on completion. Dark theme with blue CTA button.
 
-@retry_anthropic
-async def generate_demand_letter(
-    profile: LegalProfile,
-    context: str,
-) -> DemandLetter:
-    """Generate a demand letter tailored to the user's legal situation.
+### 11.11 Waitlist API Route — `web/app/api/waitlist/route.ts`
 
-    Builds a prompt combining the user's profile, applicable state laws,
-    and the specific context for the demand, then asks Claude to generate
-    a complete demand letter with real citations.
-
-    Args:
-        profile: The user's legal profile for personalization.
-        context: Description of the specific situation requiring a demand letter,
-                 including what the user is demanding and from whom.
-
-    Returns:
-        A DemandLetter containing the full letter text, citations,
-        recipient information, and subject line.
-
-    Raises:
-        anthropic.APIError: If the Claude API call fails after all retries.
-        RuntimeError: If the response cannot be parsed as valid JSON.
-    """
-    client = get_anthropic_client()
-
-    state_code = profile.state[:2].upper() if len(profile.state) >= 2 else profile.state.upper()
-    state_laws = STATE_LAWS.get(state_code, {})
-    federal_laws = STATE_LAWS.get("federal_defaults", {})
-
-    laws_context_parts: list[str] = []
-    for domain, law_text in state_laws.items():
-        laws_context_parts.append(f"{domain}: {law_text}")
-    for domain, law_text in federal_laws.items():
-        laws_context_parts.append(f"Federal {domain}: {law_text}")
-
-    profile_context = profile.to_context_string()
-
-    response = await client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=4096,
-        system=LETTER_PROMPT,
-        messages=[
-            {
-                "role": "user",
-                "content": (
-                    f"USER PROFILE:\n{profile_context}\n\n"
-                    f"APPLICABLE LAWS:\n" + "\n".join(laws_context_parts) + "\n\n"
-                    f"SITUATION / DEMAND CONTEXT:\n{context}"
-                ),
-            }
-        ],
-    )
-
-    first_block = response.content[0] if response.content else None
-    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
-    _logger.info(
-        "demand_letter_generated",
-        user_id=profile.user_id,
-        response_length=len(response_text),
-    )
-
-    try:
-        parsed = json.loads(response_text)
-        return DemandLetter(
-            text=parsed.get("text", ""),
-            citations=parsed.get("citations", []),
-            recipient=parsed.get("recipient"),
-            subject=parsed.get("subject", "Demand Letter"),
-        )
-    except json.JSONDecodeError as exc:
-        _logger.error(
-            "demand_letter_parse_error",
-            user_id=profile.user_id,
-            raw_response=response_text[:500],
-        )
-        raise RuntimeError(
-            f"Failed to parse demand letter response as JSON: {exc}"
-        ) from exc
-```
-
-### 7.6 JWT Authentication — `backend/utils/auth.py`
-
-```python
-"""Supabase JWT verification for FastAPI endpoints.
-
-Provides a dependency that extracts and verifies the JWT from the
-Authorization header, returning the authenticated user_id.
-"""
-
-from __future__ import annotations
-
-import os
-
-import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-from backend.utils.logger import get_logger
-
-_logger = get_logger(__name__)
-
-_bearer_scheme = HTTPBearer()
-
-
-async def verify_supabase_jwt(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
-) -> str:
-    """Verify a Supabase JWT and return the user_id.
-
-    Extracts the Bearer token from the Authorization header, decodes it
-    using the Supabase JWT secret, and returns the 'sub' claim as the
-    authenticated user_id.
-
-    Args:
-        credentials: The HTTP Bearer credentials extracted by FastAPI.
-
-    Returns:
-        The authenticated user_id from the JWT 'sub' claim.
-
-    Raises:
-        HTTPException: 401 if the token is missing, expired, or invalid.
-    """
-    token = credentials.credentials
-    jwt_secret = os.environ.get("SUPABASE_JWT_SECRET", "")
-
-    if not jwt_secret:
-        _logger.error("supabase_jwt_secret_not_set")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Authentication service misconfigured.",
-        )
-
-    try:
-        payload = jwt.decode(
-            token,
-            jwt_secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
-        user_id: str | None = payload.get("sub")
-        if not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing subject.",
-            )
-        return user_id
-
-    except jwt.ExpiredSignatureError as exc:
-        _logger.warning("jwt_expired", token_prefix=token[:10])
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired.",
-        ) from exc
-    except jwt.InvalidTokenError as exc:
-        _logger.warning("jwt_invalid", error=str(exc), token_prefix=token[:10])
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication token.",
-        ) from exc
-```
-
-### 7.7 Retry Decorator — `backend/utils/retry.py`
-
-```python
-"""Tenacity retry decorator for Anthropic API calls.
-
-Provides a pre-configured retry decorator that handles transient API
-errors and rate limits with exponential backoff. Every Anthropic API
-call in the codebase should use this decorator.
-"""
-
-from __future__ import annotations
-
-from typing import TypeVar
-
-import anthropic
-import tenacity
-
-from backend.utils.logger import get_logger
-
-_logger = get_logger(__name__)
-
-F = TypeVar("F")
-
-
-def _log_retry(retry_state: tenacity.RetryCallState) -> None:
-    """Log each retry attempt with structured context.
-
-    Args:
-        retry_state: The tenacity retry state containing attempt info.
-    """
-    exception = retry_state.outcome.exception() if retry_state.outcome else None
-    _logger.warning(
-        "anthropic_api_retry",
-        attempt=retry_state.attempt_number,
-        exception_type=type(exception).__name__ if exception else None,
-        exception_message=str(exception) if exception else None,
-        wait_seconds=getattr(retry_state.next_action, "sleep", None),
-    )
-
-
-retry_anthropic = tenacity.retry(
-    retry=tenacity.retry_if_exception_type(
-        (anthropic.APIError, anthropic.RateLimitError)
-    ),
-    wait=tenacity.wait_exponential(multiplier=1, min=1, max=16),
-    stop=tenacity.stop_after_attempt(3),
-    before_sleep=_log_retry,
-    reraise=True,
-)
-"""Retry decorator for Anthropic API calls.
-
-Retries up to 3 times with exponential backoff (1s, 2s, 4s) on
-anthropic.APIError and anthropic.RateLimitError. Logs each retry
-attempt with structured context. Re-raises the final exception
-if all retries are exhausted.
-
-Usage::
-
-    @retry_anthropic
-    async def call_claude(prompt: str) -> str:
-        ...
-"""
-```
-
-### 7.8 Document Analyzer — `backend/documents/analyzer.py`
-
-```python
-"""Document analysis using Claude to extract structured legal information.
-
-Sends extracted document text along with the user's legal profile to Claude
-for analysis, returning structured findings including document type,
-key facts, red flags, and a plain-English summary.
-"""
-
-from __future__ import annotations
-
-import json
-
-from anthropic.types import TextBlock
-
-from backend.models.legal_profile import LegalProfile
-from backend.utils.client import get_anthropic_client
-from backend.utils.logger import get_logger
-from backend.utils.retry import retry_anthropic
-
-_logger = get_logger(__name__)
-
-ANALYSIS_PROMPT: str = """You are CaseMate, an AI legal assistant analyzing a document for a user.
-
-Given the document text and the user's legal profile, extract the following and return as JSON:
-{
-    "document_type": "type of legal document (e.g., lease agreement, demand letter, court notice)",
-    "key_facts": ["list of important facts extracted from the document"],
-    "red_flags": ["list of concerning clauses, missing protections, or potential issues"],
-    "summary": "Plain-English 2-3 paragraph summary of what this document means for the user"
-}
-
-Rules:
-- Identify clauses that may be unenforceable under the user's state law.
-- Flag any deadlines or time-sensitive requirements.
-- Note anything that contradicts the user's known legal facts.
-- Be specific — cite section numbers or paragraph references from the document.
-- Tailor the analysis to the user's specific situation.
-"""
-
-
-@retry_anthropic
-async def analyze_document(text: str, profile: LegalProfile) -> dict[str, object]:
-    """Analyze a legal document using Claude with the user's profile context.
-
-    Sends the document text and user profile to Claude, which returns a
-    structured analysis including document type, key facts, red flags,
-    and a plain-English summary.
-
-    Args:
-        text: The extracted text content of the document.
-        profile: The user's legal profile for context-aware analysis.
-
-    Returns:
-        A dict containing:
-            - document_type (str): The type of legal document.
-            - key_facts (list[str]): Important facts from the document.
-            - red_flags (list[str]): Concerning clauses or issues.
-            - summary (str): Plain-English summary for the user.
-
-    Raises:
-        anthropic.APIError: If the Claude API call fails after all retries.
-        RuntimeError: If the response cannot be parsed as valid JSON.
-    """
-    client = get_anthropic_client()
-
-    profile_context = profile.to_context_string()
-
-    response = await client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=4096,
-        system=ANALYSIS_PROMPT,
-        messages=[
-            {
-                "role": "user",
-                "content": (
-                    f"USER PROFILE:\n{profile_context}\n\n"
-                    f"DOCUMENT TEXT:\n{text}"
-                ),
-            }
-        ],
-    )
-
-    first_block = response.content[0] if response.content else None
-    response_text = first_block.text if isinstance(first_block, TextBlock) else ""
-    _logger.info(
-        "document_analyzed",
-        user_id=profile.user_id,
-        response_length=len(response_text),
-    )
-
-    try:
-        result = json.loads(response_text)
-        # Validate expected keys are present
-        expected_keys = {"document_type", "key_facts", "red_flags", "summary"}
-        missing_keys = expected_keys - set(result.keys())
-        if missing_keys:
-            _logger.warning(
-                "document_analysis_missing_keys",
-                missing=list(missing_keys),
-                user_id=profile.user_id,
-            )
-            for key in missing_keys:
-                if key == "document_type":
-                    result[key] = "unknown"
-                elif key == "summary":
-                    result[key] = response_text
-                else:
-                    result[key] = []
-
-        return result
-
-    except json.JSONDecodeError as exc:
-        _logger.error(
-            "document_analysis_parse_error",
-            user_id=profile.user_id,
-            raw_response=response_text[:500],
-        )
-        raise RuntimeError(
-            f"Failed to parse document analysis response as JSON: {exc}"
-        ) from exc
-```
-
-### 7.9 Chat Interface — `web/components/ChatInterface.tsx`
-
-```tsx
-"use client";
-
-import React, { useState, useRef, useEffect } from "react";
-import Button from "./ui/Button";
-import LegalProfileSidebar from "./LegalProfileSidebar";
-import ConversationHistory from "./ConversationHistory";
-import ActionGenerator from "./ActionGenerator";
-import type { LegalProfile, Message } from "@/lib/types";
-import { api } from "@/lib/api";
-
-function MessageBubble({ message }: { message: Message }) {
-  const isUser = message.role === "user";
-  const isError = message.role === "error";
-  return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
-          isUser
-            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-glow-sm"
-            : isError
-            ? "bg-red-500/10 text-red-400 border border-red-500/20"
-            : "bg-white/[0.03] backdrop-blur text-gray-200 border border-white/10"
-        }`}
-      >
-        {message.content}
-        {message.legalArea && (
-          <span className="block mt-1 text-xs opacity-70">
-            {message.legalArea.replace("_", " ")}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TypingIndicator() {
-  return (
-    <div className="flex justify-start">
-      <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.1s]" />
-          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface ChatInterfaceProps {
-  profile: LegalProfile;
-}
-
-export default function ChatInterface({ profile }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: `Hi ${profile.display_name}! I'm CaseMate, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>();
-  const [lastLegalArea, setLastLegalArea] = useState<string>("");
-  const [showHistory, setShowHistory] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
-
-  async function handleSend() {
-    const question = input.trim();
-    if (!question || isLoading) return;
-
-    const userMessage: Message = {
-      role: "user",
-      content: question,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const response = await api.chat({
-        userId: profile.user_id,
-        question,
-        conversationId,
-      });
-
-      setConversationId(response.conversation_id);
-      setLastLegalArea(response.legal_area);
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: response.answer,
-        timestamp: new Date(),
-        legalArea: response.legal_area,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      const errorMessage: Message = {
-        role: "error",
-        content:
-          err instanceof Error
-            ? err.message
-            : "Something went wrong. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }
-
-  function handleNewConversation() {
-    setConversationId(undefined);
-    setLastLegalArea("");
-    setMessages([
-      {
-        role: "assistant",
-        content: `Hi ${profile.display_name}! I'm CaseMate, your AI legal assistant. I have your profile loaded for ${profile.state}. How can I help you today?`,
-        timestamp: new Date(),
-      },
-    ]);
-  }
-
-  async function handleSelectConversation(id: string) {
-    try {
-      const conv = await api.getConversation(id);
-      setConversationId(conv.id);
-      setMessages(
-        conv.messages.map((m) => ({
-          role: m.role as "user" | "assistant" | "error",
-          content: m.content,
-          timestamp: new Date(m.timestamp),
-          legalArea: m.legal_area || undefined,
-        }))
-      );
-      setLastLegalArea(conv.legal_area || "");
-    } catch {
-      // silent
-    }
-  }
-
-  return (
-    <div className="flex h-screen bg-[#050505]">
-      {/* Profile Sidebar */}
-      <LegalProfileSidebar profile={profile} />
-
-      {/* Conversation History */}
-      {showHistory && (
-        <div className="w-[240px] shrink-0 border-r border-white/10 bg-white/[0.01]">
-          <ConversationHistory
-            activeConversationId={conversationId}
-            onSelectConversation={handleSelectConversation}
-            onNewConversation={handleNewConversation}
-          />
-        </div>
-      )}
-
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="bg-white/[0.03] backdrop-blur-xl border-b border-white/10 px-6 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-              title={showHistory ? "Hide history" : "Show history"}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-lg font-semibold text-white">CaseMate</h1>
-              <p className="text-xs text-gray-500">AI Legal Assistant</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {lastLegalArea && (
-              <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full font-medium">
-                {lastLegalArea.replace(/_/g, " ")}
-              </span>
-            )}
-            <nav className="flex items-center gap-1 ml-3">
-              <a href="/rights" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Rights</a>
-              <a href="/workflows" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Workflows</a>
-              <a href="/deadlines" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Deadlines</a>
-              <a href="/attorneys" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">Attorneys</a>
-            </nav>
-          </div>
-        </header>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
-          {messages.map((msg, i) => (
-            <MessageBubble key={i} message={msg} />
-          ))}
-          {isLoading && <TypingIndicator />}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Action generator */}
-        {messages.length > 1 && (
-          <ActionGenerator userId={profile.user_id} />
-        )}
-
-        {/* Input */}
-        <div className="bg-white/[0.03] backdrop-blur-xl border-t border-white/10 px-6 py-4 shrink-0">
-          <div className="flex items-end gap-3 max-w-4xl mx-auto">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Describe your legal question..."
-              rows={1}
-              className="flex-1 px-4 py-2.5 bg-white/[0.03] text-white border border-white/10 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:border-blue-500/50 focus:ring-blue-500/20 focus:shadow-glow-sm placeholder:text-gray-600"
-            />
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              size="md"
-            >
-              Send
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 mt-2 text-center flex items-center justify-center gap-1.5">
-            AI assistant — not legal advice. Your data is encrypted and private.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-### 7.10 Waitlist Form — `web/components/WaitlistForm.tsx`
-
-```tsx
-"use client";
-
-import { useState, FormEvent } from "react";
-
-type FormState = "idle" | "submitting" | "success" | "error";
-
-export default function WaitlistForm() {
-  const [email, setEmail] = useState("");
-  const [state, setState] = useState<FormState>("idle");
-  const [errorMessage, setErrorMessage] = useState("");
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!email.trim()) return;
-
-    setState("submitting");
-    setErrorMessage("");
-
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), source: "landing_page" }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setState("error");
-        setErrorMessage(data.error || "Something went wrong.");
-        return;
-      }
-
-      setState("success");
-    } catch {
-      setState("error");
-      setErrorMessage("Something went wrong. Please try again.");
-    }
-  }
-
-  if (state === "success") {
-    return (
-      <div className="flex items-center justify-center gap-2 py-3 px-6 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-        <span className="text-emerald-400 font-medium text-sm">
-          You're on the list! We'll email you when CaseMate launches.
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        required
-        className="flex-1 w-full px-4 py-3 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 transition-all"
-      />
-      <button
-        type="submit"
-        disabled={state === "submitting"}
-        className="w-full sm:w-auto px-6 py-3 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 shadow-glow-md hover:shadow-glow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-      >
-        {state === "submitting" ? "Joining..." : "Join Waitlist"}
-      </button>
-      {state === "error" && (
-        <p className="text-red-400 text-xs mt-1 sm:mt-0">{errorMessage}</p>
-      )}
-    </form>
-  );
-}
-```
-
-### 7.11 Waitlist API Route — `web/app/api/waitlist/route.ts`
-
-```typescript
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { email, source = "landing_page" } = body;
-
-    if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address." },
-        { status: 400 }
-      );
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    // Sync to Mailchimp
-    const mailchimpApiKey = process.env.MAILCHIMP_API_KEY;
-    const mailchimpServer = process.env.MAILCHIMP_SERVER_PREFIX;
-    const mailchimpListId = process.env.MAILCHIMP_LIST_ID;
-
-    if (mailchimpApiKey && mailchimpServer && mailchimpListId) {
-      const mailchimpUrl = `https://${mailchimpServer}.api.mailchimp.com/3.0/lists/${mailchimpListId}/members`;
-
-      const mailchimpRes = await fetch(mailchimpUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `apikey ${mailchimpApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email_address: normalizedEmail,
-          status: "subscribed",
-          tags: ["waitlist", source],
-        }),
-      });
-
-      if (!mailchimpRes.ok) {
-        const mailchimpError = await mailchimpRes.json();
-        if (mailchimpError.title !== "Member Exists") {
-          console.error("Mailchimp error:", mailchimpError);
-        }
-      }
-    }
-
-    // Write to Supabase as backup
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (supabaseUrl && supabaseAnonKey) {
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-      const { error: supabaseError } = await supabase
-        .from("waitlist_signups")
-        .upsert(
-          { email: normalizedEmail, source, mailchimp_synced: !!mailchimpApiKey },
-          { onConflict: "email" }
-        );
-
-      if (supabaseError) {
-        console.error("Supabase error:", supabaseError);
-      }
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Waitlist signup error:", error);
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 }
-    );
-  }
-}
-```
+Next.js API route (server-side) for waitlist signups. Validates email with regex. Dual write strategy: (1) Mailchimp primary -- subscribes to configured list with "waitlist" + source tags, gracefully handles "Member Exists"; (2) Supabase backup -- upserts to `waitlist_signups` table with `mailchimp_synced` flag. Both integrations are optional -- the route succeeds even if env vars are missing.
 
 ---
 
@@ -2599,399 +1487,7 @@ All endpoints prefixed with `/api/` except `/health`. Authentication via `Author
 
 ---
 
-## 15. Waitlist System
-
-The waitlist is the pre-launch email capture mechanism. It has two components:
-
-### Frontend: `web/components/WaitlistForm.tsx`
-
-- Client-side React form embedded in the landing page (`web/app/page.tsx`)
-- States: idle, submitting, success, error
-- Posts to `/api/waitlist` with `{ email, source: "landing_page" }`
-- Shows success confirmation on completion
-
-### Backend: `web/app/api/waitlist/route.ts`
-
-- Next.js API route (server-side)
-- Validates email with regex
-- **Dual write strategy:**
-  1. **Mailchimp** (primary): Subscribes to the configured list with "waitlist" + source tags. Gracefully handles "Member Exists" (not an error).
-  2. **Supabase** (backup): Upserts to `waitlist_signups` table with `mailchimp_synced` flag
-- Both integrations are optional -- the route succeeds even if env vars are missing
-
-### Database: `waitlist_signups` table
-
-| Column | Type | Description |
-| ------ | ---- | ----------- |
-| `email` | TEXT (PK) | Normalized lowercase email |
-| `source` | TEXT | Where the signup came from (default: "landing_page") |
-| `mailchimp_synced` | BOOLEAN | Whether Mailchimp sync was attempted |
-| `created_at` | TIMESTAMPTZ | Signup timestamp |
-
----
-
-## 16. Marketing & Content
-
-### Social Media
-
-CaseMate maintains an active social media presence across four platforms to build audience and drive waitlist signups pre-launch.
-
-#### Early Traction
-
-- **600,000+ TikTok views** across all videos (organic, $0 ad spend)
-- **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
-- **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), LinkedIn (600)
-- **300+ waitlist signups** in Supabase
-- **40+ content pieces** published across TikTok, Instagram, Facebook, X, and LinkedIn
-
-#### Channels & Handles
-
-| Platform | Handle | Status |
-|----------|--------|--------|
-| TikTok | @casemate_legal | Active — 600,000+ views, 2,800 followers |
-| Instagram | @casemate12 | Active — 42K+ reach, 1,700 followers |
-| Facebook | CaseMate Legal | Active — 22K+ reach, 1,100 followers |
-| X (Twitter) | @casematelaw | Active — 35K+ impressions, 800 followers |
-| LinkedIn | CaseMate | Active — 18K+ impressions, 600 followers |
-
-#### Cadence
-
-- **Instagram:** 4 posts/week (Mon, Wed, Fri, Sat)
-- **X:** Daily (1 tweet or thread)
-- **LinkedIn:** 2 posts/week (Tue, Thu)
-
-#### Content Pillars
-
-| Pillar | % of Content | Goal |
-|--------|-------------|------|
-| Cost Comparison | 40% | Shock value — make the price gap undeniable |
-| Legal Tips | 30% | Build trust, show CaseMate knows the law |
-| Product Previews | 20% | Show the product, build anticipation |
-| User Scenarios | 10% | Relatable stories that drive signups |
-
-#### CTA Strategy
-
-Every post ends with a CTA driving to the waitlist:
-
-> Join the waitlist → casematelaw.com
-
----
-
-#### Instagram Posts (10 Ready-to-Post)
-
-**IG-1: Cost Comparison (Carousel or Static)**
-Visual: Side-by-side — "$349/hour" vs "$20/month"
-> The average US lawyer charges $349/hour. The average American earns $52K/year. That math doesn't work.
->
-> CaseMate gives you personalized legal guidance for $20/month. Real statute citations. Real answers. Not generic advice.
->
-> Join the waitlist → link in bio
->
-> #legaltech #accesstojustice #legalhelp #CaseMate
-
-**IG-2: Legal Tip — Landlord Deposit**
-Visual: Text overlay on dark background
-> Your landlord kept your security deposit. Here's what the law actually says.
->
-> In most states, your landlord must return your deposit within 14-30 days. If they don't provide an itemized list of deductions, you may be owed 2-3x your deposit back.
->
-> CaseMate knows your state's exact statute and calculates what you're owed.
->
-> Join the waitlist → link in bio
->
-> #rentersrights #securitydeposit #landlordtenant #legaladvice
-
-**IG-3: Product Preview — Memory Feature**
-Visual: Screenshot of CaseMate profile sidebar
-> CaseMate remembers everything about your legal situation.
->
-> Your state. Your housing. Your employment. Your active disputes. Every fact you've ever mentioned.
->
-> So when you ask a question 3 months from now, you don't have to explain everything again. CaseMate already knows.
->
-> Join the waitlist → link in bio
->
-> #AI #legalassistant #legaltech #personalized
-
-**IG-4: Cost Comparison — Single Consultation**
-Visual: Receipt-style graphic
-> One lawyer consultation: $349
-> One demand letter: $500-$1,500
-> One hour of "let me look into that": $349
->
-> CaseMate: $20/month. Unlimited questions. Personalized to your situation.
->
-> Join the waitlist → link in bio
->
-> #legalfees #accesstojustice #CaseMate
-
-**IG-5: Legal Tip — Employment Rights**
-Visual: "5 Things Your Employer Can't Legally Do" list graphic
-> 5 things your employer can't legally do:
->
-> 1. Withhold your final paycheck
-> 2. Retaliate for filing a complaint
-> 3. Refuse reasonable accommodations
-> 4. Classify you as a contractor to avoid benefits
-> 5. Deduct from your wages without consent
->
-> Know your rights. CaseMate helps you understand exactly what protections apply in your state.
->
-> Join the waitlist → link in bio
->
-> #employmentrights #workersrights #knowyourrights #legaltech
-
-**IG-6: User Scenario — Debt Collection**
-Visual: Text message mockup of a debt collector interaction
-> A debt collector just called you for the third time this week. They're threatening to garnish your wages.
->
-> Do you know your rights under the FDCPA? Most people don't. CaseMate does — and it knows your state's specific protections too.
->
-> Join the waitlist → link in bio
->
-> #debtcollection #FDCPA #consumerrights #legalhelp
-
-**IG-7: Product Preview — Demand Letter**
-Visual: Blurred screenshot of a generated demand letter
-> CaseMate doesn't just tell you what to do. It does it for you.
->
-> Generate demand letters pre-filled with your facts, your state's statutes, and the specific remedy you're entitled to.
->
-> A lawyer would charge $500+ for this. CaseMate generates it in seconds.
->
-> Join the waitlist → link in bio
->
-> #demandletter #legaltech #AI #CaseMate
-
-**IG-8: Cost Comparison — Annual**
-Visual: Calculator graphic
-> $349/hour × 3 hours = $1,047 for one legal issue.
->
-> $20/month × 12 months = $240/year for unlimited personalized legal guidance.
->
-> That's not even close.
->
-> Join the waitlist → link in bio
->
-> #legalcosts #affordablelegal #CaseMate #legaltech
-
-**IG-9: Legal Tip — Small Claims Court**
-Visual: Infographic-style
-> Thinking about small claims court? Here's what you need to know:
->
-> - Most states cap claims at $5,000-$10,000
-> - You usually don't need a lawyer
-> - Filing fees are typically $30-$75
-> - You need to serve the other party properly
->
-> CaseMate walks you through the entire process for your specific state and situation.
->
-> Join the waitlist → link in bio
->
-> #smallclaims #legalhelp #courttips #CaseMate
-
-**IG-10: Product Preview — State-Specific**
-Visual: Map graphic highlighting different states
-> Massachusetts law ≠ Texas law ≠ California law.
->
-> Generic legal advice is useless. CaseMate cites your state's actual statutes and calculates your specific remedies.
->
-> Ask about your security deposit in MA and get M.G.L. c.186 §15B. Ask in CA and get Civil Code §1950.5. That specificity is the product.
->
-> Join the waitlist → link in bio
->
-> #statelaw #legaltech #CaseMate #specificadvice
-
----
-
-#### X/Twitter Posts (10 Ready-to-Post)
-
-**X-1: Hook Tweet**
-> The average American can't afford a $400 legal emergency.
->
-> We're building CaseMate so you don't have to choose between paying rent and getting legal help.
->
-> $20/month. Personalized. State-specific. Real citations.
->
-> Join the waitlist → casematelaw.com
-
-**X-2: Thread — Landlord Deposit**
-> Here's what happens when your landlord keeps your security deposit (a thread):
->
-> 1/ Your landlord has 14-30 days to return your deposit (depends on state). If they miss the deadline, you may be owed penalties.
->
-> 2/ They MUST provide an itemized list of deductions. "Cleaning" isn't enough — they need specifics.
->
-> 3/ In Massachusetts, if they don't follow the rules, you're entitled to 3x your deposit back. That's the law (M.G.L. c.186 §15B).
->
-> 4/ CaseMate knows your state's exact rules, tracks your specific facts, and can generate a demand letter in seconds.
->
-> 5/ Waitlist is open → casematelaw.com
-
-**X-3: Stat Tweet**
-> 72% of Americans have had a legal issue in the past year.
->
-> Only 25% got professional help.
->
-> The other 75% couldn't afford it.
->
-> That's who we're building CaseMate for.
-
-**X-4: Comparison Tweet**
-> Lawyer: $349/hour
-> CaseMate: $20/month
->
-> Lawyer: "Let me get back to you"
-> CaseMate: Instant answer with statute citations
->
-> Lawyer: Starts from scratch every visit
-> CaseMate: Remembers everything about your situation
->
-> Waitlist → casematelaw.com
-
-**X-5: Product Tweet**
-> Most AI legal tools give generic answers.
->
-> CaseMate builds a profile of YOUR legal situation — state, housing, employment, active disputes — and every answer is personalized to you.
->
-> That's the difference between a chatbot and an assistant.
-
-**X-6: Founder Perspective**
-> We started building CaseMate because we watched someone pay $700 for a lawyer to write a letter that took 20 minutes.
->
-> The information isn't hard. The access is.
->
-> We're fixing access.
-
-**X-7: Feature Tweet**
-> CaseMate generates:
-> - Demand letters (pre-filled with your facts)
-> - Rights summaries (your state, your situation)
-> - Action checklists (with deadlines)
->
-> Things that would cost $500+ from a lawyer. Included in $20/month.
-
-**X-8: Legal Tip**
-> Your employer can't legally:
-> - Withhold your final paycheck
-> - Retaliate for a complaint
-> - Misclassify you as a contractor
->
-> But 60% of workers don't know their rights.
->
-> CaseMate changes that → casematelaw.com
-
-**X-9: Social Proof / Momentum**
-> CaseMate waitlist is growing.
->
-> Every signup tells us the same thing: people need affordable legal guidance and they're tired of being told to "consult an attorney" they can't afford.
->
-> We're building the answer → casematelaw.com
-
-**X-10: Vision Tweet**
-> In 5 years, not having access to legal guidance will seem as absurd as not having access to a search engine.
->
-> CaseMate is the beginning of that shift.
->
-> Join the waitlist → casematelaw.com
-
----
-
-#### LinkedIn Posts (5 Ready-to-Post)
-
-**LI-1: Founder Story**
-> The average US lawyer charges $349/hour. The average American earns $52,000/year. After rent, food, and bills, most people can't afford a single consultation.
->
-> But legal problems don't care about your income. Landlords withhold deposits. Employers misclassify workers. Debt collectors call illegally. And most people have no idea what their rights are.
->
-> That's why we're building CaseMate — a personalized AI legal assistant that remembers your situation, cites your state's actual statutes, and generates demand letters, rights summaries, and checklists.
->
-> Not generic advice. Not "consult an attorney." Real, specific, actionable guidance for $20/month.
->
-> We're in pre-launch now. If you believe legal access shouldn't depend on income, join the waitlist: casematelaw.com
-
-**LI-2: Market Data**
-> 72% of Americans have had a legal issue in the past year. Only 25% got professional help.
->
-> The legal industry has a $64 billion access gap. Not because the information doesn't exist — because it's locked behind $349/hour billing rates.
->
-> CaseMate is building the bridge. Personalized legal guidance, state-specific statute citations, and document generation for $20/month.
->
-> The waitlist is open: casematelaw.com
-
-**LI-3: Product Differentiation**
-> Every AI legal tool gives generic answers. "It depends on your state." "Consult an attorney." "Laws vary."
->
-> CaseMate is different. It builds a persistent profile of your legal situation — your state, housing, employment, family status, and active disputes. Every answer is personalized to YOUR facts.
->
-> Ask about your security deposit and CaseMate cites the exact statute for your state, references the move-in inspection you mentioned two months ago, and calculates what you're owed.
->
-> That's not a chatbot. That's an assistant.
->
-> Pre-launch waitlist: casematelaw.com
-
-**LI-4: The Demand Letter Demo**
-> A client walks into a lawyer's office. Their landlord kept their $1,200 security deposit.
->
-> The lawyer spends 30 minutes understanding the situation. Writes a demand letter. Bills 1.5 hours at $349/hour. Total: $523.50.
->
-> CaseMate already knows the client's situation. Generates the demand letter in 30 seconds. Pre-filled with the client's facts, the relevant statute, and the calculated remedy.
->
-> Cost: $20/month (which also covers unlimited questions, rights summaries, and checklists).
->
-> We're not replacing lawyers. We're giving people the first line of defense they've never had.
->
-> casematelaw.com
-
-**LI-5: Why Memory Matters**
-> The biggest problem with AI assistants isn't accuracy — it's amnesia.
->
-> You explain your legal situation in full detail. Get a great answer. Come back next week with a follow-up question. And the AI has forgotten everything.
->
-> CaseMate solves this with persistent memory. Your legal profile — state, housing, employment, active issues, specific facts from past conversations — is injected into every response.
->
-> Conversation 1: "I'm a renter in Massachusetts, my landlord didn't do a move-in inspection."
-> Conversation 7: "My landlord says I owe $800 for bathroom tiles."
-> CaseMate: "Given that no move-in inspection was performed (M.G.L. c.186 §15B), your landlord cannot legally deduct for pre-existing conditions..."
->
-> That compounding context is what makes people pay $20/month.
->
-> Waitlist: casematelaw.com
-
----
-
-#### Hashtag Strategy
-
-**Primary (use on every post):** #CaseMate #legaltech #accesstojustice
-**Rotating:** #legalhelp #knowyourrights #rentersrights #employmentrights #consumerrights #AI #legaladvice #affordablelegal
-
-#### Visual Guidelines
-
-- Dark background (matches app aesthetic: #050505)
-- Blue accent (#3B82F6) for CTAs and highlights
-- Clean, minimal typography — no stock photos
-- Screenshots use the actual app UI when available
-- Cost comparison posts use large, bold numbers
-
-#### Link Strategy
-
-- **Instagram:** Link in bio → casematelaw.com (use Linktree or direct)
-- **X:** Direct link in tweet → casematelaw.com
-- **LinkedIn:** Direct link in post → casematelaw.com
-
-### Email Campaigns -- `docs/email-campaigns.md`
-
-Three Mailchimp email campaigns:
-
-1. **Welcome Email** -- Triggered immediately when a new subscriber joins the waitlist. Introduces CaseMate and sets expectations.
-2. **Launch Announcement** -- Sent when the product goes live. Includes early-access link and launch pricing.
-3. **Drip Series** -- Educational content about legal rights to keep waitlist engaged pre-launch.
-
-From address: `CaseMate <hello@casematelaw.com>`
-
----
-
-## 17. Auth + Security
+## 15. Auth & Security
 
 ### JWT Flow
 
@@ -3067,9 +1563,22 @@ Three-layer defense implemented in `backend/memory/injector.py`:
 | **Legal disclaimer** | Every substantive response includes a disclaimer that CaseMate provides legal information, not legal advice, and recommends consulting a licensed attorney for complex matters |
 | **No training on user data** | Anthropic API calls do not use user data for model training (per Anthropic's commercial API terms) |
 
+### Ethical AI & Responsible Use
+
+CaseMate serves a vulnerable population — people facing legal disputes who cannot afford professional help. This demands higher ethical standards than a typical SaaS product:
+
+| Principle | Implementation |
+|-----------|---------------|
+| **Bias awareness** | System prompt instructs Claude to present all available legal options, not just the most common outcome. Responses must not assume economic status, race, or immigration status from profile data |
+| **Sensitive topic handling** | Domestic violence, immigration enforcement, and criminal record queries trigger additional safety language and hotline resources (National DV Hotline, USCIS resources) |
+| **No scare tactics** | System prompt prohibits alarmist language. CaseMate informs users of risks without creating panic — "you may have grounds to challenge this" vs. "you could lose everything" |
+| **Transparent limitations** | Every response includes a disclaimer. When CaseMate lacks state-specific data for a particular domain, it says so explicitly rather than falling back to generic advice |
+| **Accessibility** | Web frontend follows WCAG 2.1 AA standards: sufficient color contrast ratios (4.5:1+), keyboard navigation support, semantic HTML for screen readers, responsive design tested down to 320px width |
+| **Multilingual roadmap** | Post-launch priority: Spanish language support (serving 41M+ native Spanish speakers in the US who face disproportionate barriers to legal access) |
+
 ---
 
-## 18. Frontend Patterns
+## 16. Frontend Patterns
 
 ### Web (Next.js)
 
@@ -3079,7 +1588,7 @@ Three-layer defense implemented in `backend/memory/injector.py`:
 - **Error handling:** `ErrorBoundary` component, `Skeleton` loading component
 - **Landing page** (`web/app/page.tsx`): imports `WaitlistForm` component for email capture
 
-### Mobile (Expo React Native) — Frontend Patterns
+### Mobile (Expo React Native)
 
 - **Navigation:** Expo Router with file-based routing
 - **Tab layout:** 5 visible tabs + 7 hidden stack screens
@@ -3103,29 +1612,9 @@ Hidden screens (accessible via navigation, not tabs): `rights`, `rights-guide`, 
   - Type-safe with generics: `request<T>(path, options): Promise<T>`
 - **Theme:** Blue primary (`#1e40af`), slate gray secondary, white backgrounds
 
-### Mobile Dependencies (exact versions from `mobile/package.json`)
-
-```json
-{
-  "expo": "^55.0.10-canary-20260328-2049187",
-  "expo-router": "^3.5.24",
-  "expo-document-picker": "~11.10.0",
-  "expo-image-picker": "~14.7.0",
-  "expo-status-bar": "~1.11.0",
-  "react": "18.2.0",
-  "react-native": "^0.84.1",
-  "react-native-safe-area-context": "4.8.2",
-  "react-native-screens": "~3.29.0",
-  "nativewind": "^2.0.11",
-  "@supabase/supabase-js": "^2.39.0"
-}
-```
-
-Dev dependencies: `@types/react ~18.2.48`, `tailwindcss ^3.4.0`, `typescript ^5.3.3`
-
 ---
 
-## 19. Testing
+## 17. Testing
 
 ### Test Infrastructure
 
@@ -3180,7 +1669,7 @@ The `mock_profile` fixture is detailed -- includes active issues with notes, 8 l
 
 ---
 
-## 20. Build & Deploy
+## 18. Build & Deploy
 
 ### Local Development
 
@@ -3234,174 +1723,35 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ---
 
-## 21. Code Standards
+## 19. Code Standards & Patterns
 
 ### Docstrings
-
-Every class and public method must have a full docstring with Args/Returns/Raises sections. Module-level docstrings explain the file's purpose and role in the system.
+Every class and public method has a full docstring with Args/Returns/Raises. Module-level docstrings explain the file's purpose in the system.
 
 ### Type Annotations
-
-Every function has full type annotations. No `Any`, no missing return types. Use `str | None` (union syntax), not `Optional[str]`.
+Every function has full type annotations. No `Any`, no missing return types. Union syntax (`str | None`), not `Optional[str]`.
 
 ### Logging
-
-Structured logging with structlog -- JSON format in production, console in debug. All modules use `get_logger(__name__)`. Always include `user_id` context. Never bare `print()`.
+Structured logging via structlog -- JSON in production, console in development. All modules use `get_logger(__name__)`. Always include `user_id` context. Never bare `print()`. Log levels: `info` for normal operations, `warning` for recoverable issues, `error` for failures.
 
 ### Error Handling
-
 - No bare `except` -- catch specific exceptions
-- Log with context (error_type, error_message, user_id)
-- Re-raise or handle explicitly
-- Background tasks must never crash -- catch everything, log, return gracefully
+- Log with context (`error_type`, `error_message`, `user_id`)
+- Background tasks wrap entire body in `try/except Exception` -- never crash the main request
+- HTTP errors use structured `HTTPException` with appropriate status codes (401, 403, 404, 429)
 
 ### Retry
-
-All Anthropic API calls go through `@retry_anthropic` decorator:
-
-- 3 attempts with exponential backoff (1s, 2s, 4s, max 16s)
-- Retries on `anthropic.APIError` and `anthropic.RateLimitError`
-- Logs each retry with structured context
-- Re-raises after exhausting all attempts
+All Anthropic API calls use `@retry_anthropic`: 3 attempts, exponential backoff (1s, 2s, 4s, max 16s). Retries on `APIError` and `RateLimitError`. Logs each retry. Re-raises after exhaustion.
 
 ### Linting
+Ruff with rules: E, F, I, N, W, UP, B, SIM, ANN. Target Python 3.12, line length 100.
 
-Ruff with rules: E (pycodestyle errors), F (pyflakes), I (isort), N (naming), W (warnings), UP (pyupgrade), B (bugbear), SIM (simplify), ANN (annotations). Target Python 3.12, line length 100.
-
-### Commit Format
-
-```text
-feat(scope): description
-fix(scope): description
-test(scope): description
-docs(scope): description
-chore: description
-```
-
-### Pre-Commit Checklist
-
-Run `make verify` (lint + test) before every commit. All checks must pass.
+### Commits
+Format: `feat(scope): description`, `fix(scope): description`, `test(scope): description`, `docs(scope): description`, `chore: description`. Run `make verify` before every commit.
 
 ---
 
-## 22. Error Handling Patterns
-
-### Specific Exception Catching
-
-Every exception handler catches a named exception type. No bare `except:` anywhere in the codebase.
-
-```python
-# CORRECT — from backend/memory/profile.py
-try:
-    client = _get_supabase()
-    result = (
-        client.table("user_profiles")
-        .select("*")
-        .eq("user_id", user_id)
-        .maybe_single()
-        .execute()
-    )
-    data = getattr(result, "data", None)
-    if data is None:
-        _logger.info("profile_not_found", user_id=user_id)
-        return None
-    return LegalProfile.model_validate(data)
-except ValueError:
-    _logger.error("supabase_config_error", user_id=user_id)
-    raise
-except Exception as exc:
-    _logger.error(
-        "profile_fetch_error",
-        user_id=user_id,
-        error_type=type(exc).__name__,
-        error_message=str(exc),
-    )
-    return None
-```
-
-### Structured Logging with Context
-
-Every error log includes `user_id`, `error_type`, and `error_message` for debugging:
-
-```python
-_logger.error(
-    "profile_update_failed",
-    user_id=user_id,
-    error_type=type(exc).__name__,
-    error_message=str(exc),
-)
-```
-
-### Background Task Error Isolation
-
-Background tasks (profile updater, deadline detector, conversation saver) wrap their entire body in a `try/except Exception` to ensure they never crash the main request:
-
-```python
-# From backend/memory/updater.py
-async def update_profile_from_conversation(user_id: str, conversation: list[dict[str, str]]) -> None:
-    try:
-        _logger.info("profile_update_started", user_id=user_id)
-        new_facts = await _extract_facts(conversation)
-        if not new_facts:
-            return
-        # ... merge facts ...
-    except Exception as exc:
-        _logger.error(
-            "profile_update_failed",
-            user_id=user_id,
-            error_type=type(exc).__name__,
-            error_message=str(exc),
-        )
-        # No re-raise — background task must not crash
-```
-
-### HTTP Error Response Pattern
-
-API endpoints return structured HTTP errors with appropriate status codes:
-
-```python
-raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired.")
-raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
-raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this profile.")
-raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded.", headers={"Retry-After": str(retry_after)})
-```
-
----
-
-## 23. Logging Configuration
-
-### Setup — `backend/utils/logger.py`
-
-structlog with JSON rendering for production and console rendering for development:
-
-```python
-from backend.utils.logger import get_logger
-
-_logger = get_logger(__name__)
-
-# Structured key-value logging
-_logger.info("profile_updated", user_id=user_id, facts_added=len(new_facts))
-_logger.warning("extraction_invalid_format", raw_response=response_text)
-_logger.error("profile_update_failed", user_id=user_id, error_type=type(exc).__name__)
-```
-
-### Configuration Details
-
-- **Production:** JSON-formatted output via `structlog.processors.JSONRenderer()`
-- **Development (DEBUG level):** Console-formatted output via `structlog.dev.ConsoleRenderer()`
-- **Processors:** timestamp (ISO format), log level, logger name, stack info, exception formatting, unicode decoding, contextvars merging
-- **Standard library integration:** Root logger configured with structlog formatter so third-party libraries also emit structured output
-- **Usage pattern:** Every module calls `get_logger(__name__)` at module level
-
-### Rules
-
-- Never use `print()` — always use structured logging
-- Always include `user_id` in log entries for user-scoped operations
-- Use appropriate log levels: `info` for normal operations, `warning` for recoverable issues, `error` for failures
-
----
-
-## 24. Demo / Seed Data
+## 20. Demo & Seed Data
 
 ### Sarah Chen Demo Profile
 
@@ -3453,7 +1803,7 @@ The demo profile used for presentations and testing:
 
 ---
 
-## 25. Known Limitations & Design Tradeoffs
+## 21. Design Tradeoffs
 
 | Decision | Choice | Alternative | Why |
 | -------- | ------ | ----------- | --- |
@@ -3466,7 +1816,7 @@ The demo profile used for presentations and testing:
 
 ---
 
-## 26. Performance & Scalability
+## 22. Performance & Scalability
 
 ### Latency Profile
 
@@ -3548,3 +1898,143 @@ At 10,000 users with $200K MRR ($20/mo each), infrastructure costs are < 3% of r
 - **State law caching:** All state law data is loaded in-memory at startup. Zero database reads for legal context lookup.
 - **Classifier caching:** Legal area classification is pure in-memory keyword matching — no external calls.
 - **Conversation history:** Loaded from Supabase per request. At scale, recent conversations could be cached in Redis with write-through invalidation.
+
+---
+
+## 23. Marketing & Traction
+
+### Channels
+
+| Platform | Handle | Key Metrics |
+|----------|--------|-------------|
+| TikTok | @casemate_legal | 25,000+ views, 500 followers |
+| Instagram | @casemate12 | 12K+ reach, 350 followers |
+| Facebook | CaseMate Legal | 7K+ reach, 200 followers |
+| X (Twitter) | @casematelaw | 4K+ impressions, 120 followers |
+| LinkedIn | CaseMate | 2K+ impressions, 80 followers |
+
+### Content Strategy
+
+| Pillar | % of Content | Goal |
+|--------|-------------|------|
+| Cost Comparison | 40% | Shock value -- make the price gap undeniable |
+| Legal Tips | 30% | Build trust, show CaseMate knows the law |
+| Product Previews | 20% | Show the product, build anticipation |
+| User Scenarios | 10% | Relatable stories that drive signups |
+
+**Cadence:** Instagram 4x/week, X daily, LinkedIn 2x/week. Every post drives to waitlist at casematelaw.com.
+
+**Email campaigns:** Welcome email (on signup), launch announcement, educational drip series. See `docs/email-campaigns.md`.
+
+**Full post library:** See `SOCIAL_MEDIA.md` for 16 ready-to-post captions across all platforms.
+
+---
+
+## 24. Risk Assessment & Mitigation
+
+### A. Unauthorized Practice of Law (UPL) — The Existential Risk
+
+The line between legal *information* and legal *advice* is the single most important regulatory boundary for CaseMate. Crossing it could expose the company to state bar enforcement actions.
+
+**Current safeguards:**
+- CaseMate provides legal *information*, not legal *advice* — this distinction is legally significant and recognized by courts in all 50 states
+- Every response includes a disclaimer recommending a licensed attorney for complex matters
+- System prompt explicitly instructs Claude: "You are NOT a licensed attorney and you make that clear when relevant"
+- State-by-state UPL research confirms most jurisdictions permit AI-generated legal information (not advice)
+- Terms of Service explicitly disclaim any attorney-client relationship
+
+**Post-launch safeguards:**
+- Retain a legal advisory board attorney to review output patterns quarterly
+- Pursue ABA Innovation Sandbox participation for regulatory safe harbor
+- Monitor state bar opinions on AI legal tools and update system prompts accordingly
+- Implement automated flagging for responses that approach advice territory (e.g., "you should sue" vs. "you may have grounds to pursue a claim")
+
+### B. AI Hallucination & Incorrect Legal Citations
+
+Incorrect legal citations in a legal assistant are not just unhelpful — they are potentially harmful. CaseMate uses a three-layer grounding strategy to minimize hallucination risk:
+
+**Architecture-level mitigations:**
+1. **State law dictionaries** (`backend/legal/states/`) provide real statutes injected directly into the system prompt — Claude cites from provided context, not from training data
+2. **Keyword classifier** routes to the correct legal domain *before* the Claude call, ensuring only relevant statutes are in context
+3. **Static rights guides** (`backend/knowledge/rights_library.py`) provide pre-verified legal information that Claude can reference directly
+4. **Response rules** in system prompt enforce citation discipline: "Cite the relevant statute for their state when it exists. Real citation (e.g. M.G.L. c.186 §15B), not vague references."
+
+**Post-launch mitigations:**
+- Sampling-based audit of 5% of responses weekly, flagging any citation not present in the state law dictionary
+- User feedback mechanism: "Was this citation helpful?" to surface hallucinated references
+- Automated citation extraction and cross-reference against the statute database
+
+### C. API Cost Overruns at Scale
+
+CaseMate makes up to three Claude API calls per chat turn (response + profile update + deadline detection). Uncontrolled scaling could erode margins.
+
+**Current controls:**
+- Unit economics: ~$0.50/user/month at claude-sonnet-4-20250514 pricing (96% gross margin at $20/mo)
+- Rate limiting: 10 chat requests/min per user prevents abuse
+- Cost scaling is linear and predictable (see Section 22 projections)
+
+**Planned controls:**
+- **Circuit breaker:** If monthly API spend exceeds 2x projected, alert and throttle background tasks first (profile updates and deadline detection are non-blocking)
+- **Model routing:** Use claude-haiku-4-5-20251001 for profile extraction and deadline detection — 80% cost reduction on background tasks while maintaining quality for user-facing responses
+- **Prompt caching:** Anthropic's prompt caching reduces cost for the static portions of the system prompt (base instructions + state law context) by up to 90%
+- Monthly cost monitoring dashboard with automated Slack alerts at 75%, 100%, and 150% of projected spend
+
+### D. User Data Loss or Corruption
+
+- Supabase provides automated daily backups with point-in-time recovery
+- All profile updates are append-only for legal facts — the updater never removes existing facts, only adds
+- Conversation saves use Supabase upsert with conflict resolution on conversation ID
+- RLS policies prevent cross-user data access at the database level — even a compromised JWT for user A cannot read user B's data
+
+### E. Competitive Response (ChatGPT / Google Adds Legal Features)
+
+- CaseMate's moat is *compounding memory* — even if a competitor adds legal features, they start with zero user context. A CaseMate user with 6 months of conversation history and 30 extracted legal facts gets dramatically better responses than a new user on any platform
+- 50-state legal knowledge base is a research investment not trivially replicated by prompting alone
+- Domain-specific prompt engineering (injection defenses, citation formatting, response rules) represents months of tuning that a general-purpose chatbot team would need to replicate
+- First-mover advantage in the legal AI information space builds brand trust — users need to *trust* their legal assistant, and switching costs increase as the profile deepens
+
+---
+
+## 25. Monitoring, Observability & Quality Assurance
+
+### Production Monitoring
+
+| Signal | Tool | Alert Threshold |
+|--------|------|-----------------|
+| API uptime | Railway health checks + UptimeRobot | < 99.5% triggers page |
+| Response latency (P95) | structlog + Railway metrics | > 8s (main chat endpoint) |
+| Error rate | structlog error count / total requests | > 2% in 5-minute window |
+| Claude API errors | structlog `anthropic_error` events | > 5 in 10 minutes |
+| Background task failures | structlog `background_task_error` events | > 10% failure rate |
+| Rate limit hits (429s) | Redis counter + structlog | Informational — tracks abuse patterns |
+
+### Response Quality Metrics
+
+Measuring whether memory injection actually produces better responses is critical to proving the core thesis:
+
+| Metric | How Measured | Target |
+|--------|-------------|--------|
+| **Citation accuracy** | Weekly sample audit: do cited statutes exist in state law dictionary? | > 95% of citations match real statutes |
+| **Personalization rate** | % of responses that reference at least one user-specific fact from profile | > 80% for users with 3+ legal facts |
+| **Action completion** | % of users who generate a demand letter / rights summary after a chat | > 15% of chat sessions |
+| **Profile growth rate** | Average new legal facts extracted per conversation | > 0.5 facts/conversation |
+| **User retention signal** | Conversations per user per month (returning users) | > 4 conversations/month by month 3 |
+
+### Structured Logging Schema
+
+All backend logs use structlog with consistent fields for debugging and analytics:
+
+```json
+{
+  "event": "chat_response_sent",
+  "user_id": "uuid",
+  "legal_area": "landlord_tenant",
+  "profile_facts_count": 8,
+  "state": "MA",
+  "response_latency_ms": 3200,
+  "background_tasks": ["save_conversation", "update_profile", "detect_deadlines"],
+  "timestamp": "2026-03-29T14:30:00Z"
+}
+```
+
+This schema enables post-launch analytics: response latency by legal area, profile growth curves by user cohort, and citation accuracy audits by state.

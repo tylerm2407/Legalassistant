@@ -84,11 +84,11 @@ All metrics from native platform analytics dashboards. Screenshots in repo.
 
 | Metric | Value |
 |--------|-------|
-| TikTok views | 600,000+ |
-| Total followers | 7,000+ across 5 platforms |
-| Total engagements | 56,000+ |
+| Total views/reach | 50,000+ across all platforms |
+| Total followers | ~1,250 across 5 platforms |
+| Total engagements | ~4,900 |
 | Waitlist signups | 300+ in Supabase |
-| Content published | 40+ pieces |
+| Content published | 16 pieces |
 | Ad spend | $0 |
 
 ---
@@ -136,7 +136,7 @@ All metrics from native platform analytics dashboards. Screenshots in repo.
 | Name | Role |
 |------|------|
 | **Tyler Moore** | Founder & Lead Developer — Full-stack engineer, 5 SaaS products shipped, Python/TypeScript/React/Swift/Kotlin |
-| **Owen Ash** | Co-founder & Strategy — Product direction, pricing, go-to-market, social media (600K+ organic views) |
+| **Owen Ash** | Co-founder & Strategy — Product direction, pricing, go-to-market, social media (50K+ organic views) |
 
 Built at the **New England Inter-Collegiate AI Hackathon** (March 28-29, 2026).
 2-person team. Production-grade web app + mobile app + Python backend in 24 hours.

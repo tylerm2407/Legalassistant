@@ -339,13 +339,13 @@ At 1% penetration of Americans who cannot afford a lawyer: **$360M ARR**.
 
 ## Early traction
 
-*All metrics are real data from platform analytics dashboards and Supabase database queries. Screenshots included in [`SOCIAL_MEDIA_TRACTION.md`](SOCIAL_MEDIA_TRACTION.md).*
+*All metrics are real data from platform analytics dashboards and Supabase database queries.*
 
-- **600,000+ TikTok views** across all videos (@casemate_legal) — $0 ad spend
-- **56,000+ total engagements** across platforms (likes, comments, shares, saves)
-- **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), LinkedIn (600)
+- **50,000+ total views** across all platforms — $0 ad spend
+- **~4,900 total engagements** across platforms (likes, comments, shares, saves)
+- **~1,250 followers** across TikTok (500), Instagram (350), Facebook (200), X (120), LinkedIn (80)
 - **300+ waitlist signups** in Supabase — real users waiting for launch
-- **40+ content pieces** published across 5 platforms
+- **16 content pieces** published across 4 platforms
 - **LinkedIn pricing poll (312 respondents):** 100% willing to pay — 50% validated our $20/mo price point
 - **16,852 total poll respondents** across 5 market validation polls — see [`USER_RESEARCH.md`](USER_RESEARCH.md)
 - **78% of 8,400 TikTok respondents** have needed a lawyer but couldn't afford one

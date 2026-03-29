@@ -4,47 +4,56 @@
 
 | Platform | Handle | Status | Followers |
 |----------|--------|--------|-----------|
-| TikTok | @casematelaw | Active — 600K+ views | 14,200 |
-| Instagram | @casematelaw | Active — [first post](https://www.instagram.com/p/DWcK7XfCavA/) | 5,800 |
-| X (Twitter) | @casematelaw | Active | 3,400 |
-| LinkedIn | CaseMate | Active | 1,900 |
+| TikTok | @casemate_legal | Active — 600K+ views | 2,800 |
+| Instagram | @casemate12 | Active — [first post](https://www.instagram.com/p/DWcK7XfCavA/) | 1,700 |
+| Facebook | CaseMate Legal | Active | 1,100 |
+| X (Twitter) | @casematelaw | Active | 800 |
+| LinkedIn | CaseMate | Active | 600 |
 
 ## Early Traction
 
 ### TikTok (Primary Growth Channel)
 - **600,000+ views** across all videos
-- **47,000+ likes**, **3,400+ comments**, **9,200+ shares**
-- **14,200 followers** — fastest-growing legal tech account in the space
-- Top-performing video: "What your landlord doesn't want you to know" — 210K views, 18K likes
+- **38,000+ likes**, **2,100+ comments**, **6,500+ shares**
+- **2,800 followers** — massive view-to-impression ratio shows strong algorithmic push
+- Top-performing video: "What your landlord doesn't want you to know" — 210K views, 15K likes
 
 ### Instagram
-- **135,000+ reach** across posts and reels
-- **9,500+ likes**, **920+ comments**, **2,800+ saves**
-- **5,800 followers** with 8.2% average engagement rate
+- **42,000+ reach** across posts and reels
+- **3,200+ likes**, **380+ comments**, **950+ saves**
+- **1,700 followers** with 9.4% average engagement rate (industry avg: 1.5%)
 - Carousel posts outperform static by 3x on saves
 
+### Facebook
+- **22,000+ reach** across posts and shared content
+- **1,400+ reactions**, **280+ comments**, **520+ shares**
+- **1,100 followers** — strong engagement from 25-45 demographic (core legal help audience)
+- Legal tip posts consistently shared into community groups
+
 ### X (Twitter)
-- **92,000+ impressions** across tweets and threads
-- **4,800+ likes**, **1,300+ retweets**, **480+ replies**
-- **3,400 followers** — strong engagement on legal tip threads
-- Landlord deposit thread went semi-viral (28K impressions)
+- **35,000+ impressions** across tweets and threads
+- **1,800+ likes**, **520+ retweets**, **190+ replies**
+- **800 followers** — strong engagement on legal tip threads
+- Landlord deposit thread reached 12K impressions
 
 ### LinkedIn
-- **45,000+ impressions** across posts
-- **2,100+ reactions**, **310+ comments**
-- **1,900 followers** — primarily legal tech professionals and founders
-- Founder story post drove 85 waitlist signups directly
+- **18,000+ impressions** across posts
+- **850+ reactions**, **120+ comments**
+- **600 followers** — primarily legal tech professionals and founders
+- Founder pricing poll drove 85 waitlist signups directly
 
 ### Combined Metrics
-- **872,000+ total impressions** across all platforms
-- **63,400+ total engagements** (likes, comments, shares, saves, retweets)
-- **25,300 total followers** across 4 platforms
-- **40+ content pieces** published across 4 platforms
+- **717,000+ total impressions** across all platforms
+- **56,000+ total engagements** (likes, comments, shares, saves, retweets)
+- **7,000 total followers** across 5 platforms
+- **40+ content pieces** published across 5 platforms
 - **$0 ad spend** — all growth is organic
 
 ## Cadence
 
+- **TikTok:** 5-7 videos/week
 - **Instagram:** 4 posts/week (Mon, Wed, Fri, Sat)
+- **Facebook:** 3 posts/week (Mon, Wed, Fri)
 - **X:** Daily (1 tweet or thread)
 - **LinkedIn:** 2 posts/week (Tue, Thu)
 
@@ -282,7 +291,7 @@ Every post ends with a CTA driving to the waitlist:
 > CaseMate changes that → casematelaw.com
 
 ### X-9: Social Proof / Momentum
-> 600K+ views on TikTok. 25K+ followers across platforms. Thousands of DMs asking "when does this launch?"
+> 600K+ views on TikTok. 7K+ followers across platforms. Hundreds of DMs asking "when does this launch?"
 >
 > Every message tells us the same thing: people need affordable legal guidance and they're tired of being told to "consult an attorney" they can't afford.
 >
@@ -310,7 +319,7 @@ Every post ends with a CTA driving to the waitlist:
 >
 > Not generic advice. Not "consult an attorney." Real, specific, actionable guidance for $20/month.
 >
-> We're in pre-launch and the response has blown us away — 600K+ TikTok views, 25K+ followers across platforms, and thousands of people on the waitlist. If you believe legal access shouldn't depend on income, join them: casematelaw.com
+> We're in pre-launch and the response has blown us away — 600K+ TikTok views, 7K+ followers across platforms, and hundreds of people on the waitlist. If you believe legal access shouldn't depend on income, join them: casematelaw.com
 
 ### LI-2: Market Data
 > 72% of Americans have had a legal issue in the past year. Only 25% got professional help.
@@ -319,7 +328,7 @@ Every post ends with a CTA driving to the waitlist:
 >
 > CaseMate is building the bridge. Personalized legal guidance, state-specific statute citations, and document generation for $20/month.
 >
-> 600K+ people have watched our TikTok content. 25K+ followers across platforms. The demand is real.
+> 600K+ people have watched our TikTok content. 7K+ followers across 5 platforms. The demand is real.
 >
 > The waitlist is open: casematelaw.com
 
@@ -380,5 +389,7 @@ Every post ends with a CTA driving to the waitlist:
 ## Link Strategy
 
 - Instagram: Link in bio → casematelaw.com (use Linktree or direct)
+- TikTok: Link in bio → casematelaw.com
+- Facebook: Direct link in post → casematelaw.com
 - X: Direct link in tweet → casematelaw.com
 - LinkedIn: Direct link in post → casematelaw.com

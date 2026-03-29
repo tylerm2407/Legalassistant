@@ -23,9 +23,9 @@ Every Claude API call injects the user's complete legal profile as structured co
 ### Early Traction
 
 - **600,000+ TikTok views** across all videos (organic, $0 ad spend)
-- **63,400+ total engagements** across platforms (likes, comments, shares, saves, retweets)
-- **25,300+ followers** across TikTok (14.2K), Instagram (5.8K), X (3.4K), and LinkedIn (1.9K)
-- **40+ content pieces** published across 4 platforms
+- **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
+- **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), and LinkedIn (600)
+- **40+ content pieces** published across 5 platforms
 - **168 passing tests** with full backend coverage before launch
 - **All 50 US states** covered with state-specific legal statute injection
 - **19 Know Your Rights guides** across 10 legal domains, ready at launch
@@ -107,7 +107,7 @@ Full-stack engineer and founder of **NovaWealth**, a software studio building su
 
 ### Owen Ash — Co-founder
 
-Drives product direction, business model design, and go-to-market strategy. Owen shaped CaseMate's pricing tiers, competitive positioning, and customer acquisition approach. He manages the social media content strategy that has generated 600,000+ organic views and 25,300+ followers across four platforms pre-launch.
+Drives product direction, business model design, and go-to-market strategy. Owen shaped CaseMate's pricing tiers, competitive positioning, and customer acquisition approach. He manages the social media content strategy that has generated 600,000+ organic views and 7,000+ followers across five platforms pre-launch.
 
 ### What We Ship Together
 
@@ -2631,18 +2631,19 @@ CaseMate maintains an active social media presence across four platforms to buil
 #### Early Traction
 
 - **600,000+ TikTok views** across all videos (organic, $0 ad spend)
-- **63,400+ total engagements** across platforms (likes, comments, shares, saves, retweets)
-- **25,300+ followers** across TikTok (14.2K), Instagram (5.8K), X (3.4K), LinkedIn (1.9K)
-- **40+ content pieces** published across Instagram, X, LinkedIn, and TikTok
+- **56,000+ total engagements** across platforms (likes, comments, shares, saves, retweets)
+- **7,000+ followers** across TikTok (2.8K), Instagram (1.7K), Facebook (1.1K), X (800), LinkedIn (600)
+- **40+ content pieces** published across TikTok, Instagram, Facebook, X, and LinkedIn
 
 #### Channels & Handles
 
 | Platform | Handle | Status |
 |----------|--------|--------|
-| TikTok | @casematelaw | Active — 600,000+ views, 14,200 followers |
-| Instagram | @casematelaw | Active — 135K+ reach, 5,800 followers |
-| X (Twitter) | @casematelaw | Active — 92K+ impressions, 3,400 followers |
-| LinkedIn | CaseMate | Active — 45K+ impressions, 1,900 followers |
+| TikTok | @casemate_legal | Active — 600,000+ views, 2,800 followers |
+| Instagram | @casemate12 | Active — 42K+ reach, 1,700 followers |
+| Facebook | CaseMate Legal | Active — 22K+ reach, 1,100 followers |
+| X (Twitter) | @casematelaw | Active — 35K+ impressions, 800 followers |
+| LinkedIn | CaseMate | Active — 18K+ impressions, 600 followers |
 
 #### Cadence
 

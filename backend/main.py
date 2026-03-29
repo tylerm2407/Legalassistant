@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Awaitable, Callable
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import anthropic
 from anthropic.types import TextBlock
@@ -113,7 +113,9 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def attach_user_id_to_state(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+async def attach_user_id_to_state(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Extract user_id from JWT and attach to request.state for rate limiter.
 
     Parses the Authorization header to extract the user_id from the JWT

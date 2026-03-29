@@ -2,6 +2,51 @@
 
 CaseMate is a personalized legal assistant that delivers jurisdiction-specific legal guidance to users who cannot afford traditional legal counsel. Its architectural thesis is that **persistent memory injection** -- the continuous extraction, storage, and re-injection of user-specific legal facts into every AI interaction -- transforms a commodity chatbot into a product worth paying for. Every component in the system exists to support this principle: the database schema stores structured legal profiles, the classifier routes questions to the correct legal domain, the injector assembles personalized system prompts, and the background updater compounds the user's legal context over time without blocking the response path.
 
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        CASEMATE SYSTEM OVERVIEW                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐                      │
+│  │  Next.js  │    │  Expo RN  │    │ Waitlist  │   CLIENTS          │
+│  │ Frontend  │    │  Mobile   │    │   App     │                    │
+│  └────┬─────┘    └────┬─────┘    └────┬─────┘                      │
+│       │               │               │                             │
+│       └───────────────┼───────────────┘                             │
+│                       │ HTTPS                                       │
+│                       ▼                                             │
+│              ┌────────────────┐                                     │
+│              │   Nginx Proxy   │  SSL + Rate Limit + Headers        │
+│              └────────┬───────┘                                     │
+│                       │                                             │
+│                       ▼                                             │
+│  ┌─────────────────────────────────────────────┐                   │
+│  │              FastAPI Backend                  │                   │
+│  │  ┌─────────┐ ┌──────────┐ ┌──────────────┐  │                   │
+│  │  │  Auth    │ │  Rate    │ │  Security    │  │  MIDDLEWARE       │
+│  │  │  (JWT)  │ │  Limiter │ │  Headers     │  │                   │
+│  │  └─────────┘ └──────────┘ └──────────────┘  │                   │
+│  │  ┌─────────┐ ┌──────────┐ ┌──────────────┐  │                   │
+│  │  │  Chat   │ │ Profile  │ │  Actions     │  │  ROUTES           │
+│  │  │  + SSE  │ │  CRUD    │ │  Generator   │  │                   │
+│  │  └─────────┘ └──────────┘ └──────────────┘  │                   │
+│  │  ┌─────────┐ ┌──────────┐ ┌──────────────┐  │                   │
+│  │  │ Memory  │ │ Hybrid   │ │  Documents   │  │  CORE             │
+│  │  │Injector │ │Classifier│ │  OCR + AI    │  │                   │
+│  │  └─────────┘ └──────────┘ └──────────────┘  │                   │
+│  └──────────┬──────────┬──────────┬────────────┘                   │
+│             │          │          │                                  │
+│       ┌─────▼──┐ ┌─────▼──┐ ┌────▼───┐                            │
+│       │Supabase│ │  Redis  │ │Anthropic│                            │
+│       │  Auth  │ │  Cache  │ │Claude AI│                            │
+│       │  DB    │ │         │ │  API    │                            │
+│       │Storage │ │         │ │         │                            │
+│       │Realtime│ │         │ │         │                            │
+│       └────────┘ └────────┘ └─────────┘                            │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## Table of Contents
@@ -780,7 +825,7 @@ graph LR
 
 ```mermaid
 flowchart TD
-    PUSH["Push to main"] --> LINT["Backend: lint + typecheck + test<br/>(462 tests, 91% coverage)"]
+    PUSH["Push to main"] --> LINT["Backend: lint + typecheck + test<br/>(484 tests, 92% coverage)"]
     PUSH --> WEB["Frontend: lint + test + build<br/>(143 tests)"]
     PUSH --> E2E["E2E: Playwright against staging"]
     PUSH --> MOBILE["Mobile: typecheck + EAS validate"]
@@ -859,8 +904,8 @@ This endpoint is unauthenticated and used for uptime monitoring and deployment r
 ### Backend Testing
 
 - **Framework:** pytest with pytest-cov for coverage reporting
-- **Test count:** 462 tests across 29 test modules
-- **Coverage target:** 91% line coverage
+- **Test count:** 484 tests across 31 test modules (including 13 integration tests)
+- **Coverage:** 92% line coverage (90% CI-enforced threshold)
 
 | Test Module | Focus | Priority |
 |-------------|-------|----------|
@@ -908,10 +953,69 @@ All architecture decisions are documented in `docs/decisions/` with explicit tra
 | [013](docs/decisions/013-pdf-export-with-fpdf2.md) | PDF Export with fpdf2 | Accepted |
 | [014](docs/decisions/014-attorney-scoring-algorithm.md) | Attorney Scoring Algorithm for Referral Matching | Accepted |
 | [015](docs/decisions/015-rights-library-static-content.md) | Static Content for Rights Library Guides | Accepted |
+| [016](docs/decisions/016-frontend-testing-strategy.md) | Frontend Testing Strategy (Jest + RTL) | Accepted |
+| [017](docs/decisions/017-mobile-architecture-expo.md) | Mobile Architecture (Expo Router) | Accepted |
+| [018](docs/decisions/018-deployment-architecture.md) | Deployment Architecture (Vercel + Railway) | Accepted |
+| [019](docs/decisions/019-comprehensive-documentation-standards.md) | Comprehensive Documentation Standards | Accepted |
+| [020](docs/decisions/020-backend-test-coverage-threshold.md) | Backend Test Coverage Threshold (91%) | Accepted |
+| [021](docs/decisions/021-hybrid-classifier-keyword-first-llm-fallback.md) | Hybrid Classifier: Keyword-First with LLM Fallback | Accepted |
+| [022](docs/decisions/022-sse-streaming-over-websocket-for-chat.md) | SSE Streaming Over WebSocket for Chat | Accepted |
+| [023](docs/decisions/023-supabase-unified-platform.md) | Supabase as Unified Platform | Accepted |
+| [024](docs/decisions/024-prompt-injection-defense-structured-context.md) | Prompt Injection Defense via Structured Context | Accepted |
 
 ---
 
 ## 14. Memory Injection Deep Dive
+
+```
+Chat Request Flow (Memory Injection)
+─────────────────────────────────────
+
+User Question
+     │
+     ▼
+┌─────────────┐
+│  POST /chat │
+└──────┬──────┘
+       │
+       ▼
+┌──────────────┐    ┌────────────────────┐
+│   Classify   │───▶│  Keyword Match?    │
+│  Legal Area  │    │  YES → Use result  │
+└──────────────┘    │  NO  → LLM fallback│
+       │            └────────────────────┘
+       ▼
+┌──────────────┐    ┌────────────────────┐
+│ Load Profile │───▶│  Supabase query    │
+│  from DB     │    │  user_profiles     │
+└──────────────┘    └────────────────────┘
+       │
+       ▼
+┌──────────────┐
+│    Build     │  profile + state laws
+│   System     │  + response rules
+│   Prompt     │  + active issues
+└──────┬───────┘  + legal facts
+       │
+       ▼
+┌──────────────┐    ┌────────────────────┐
+│  Call Claude │───▶│  cache_control:    │
+│  API + Cache │    │  ephemeral on      │
+└──────────────┘    │  static blocks     │
+       │            └────────────────────┘
+       ▼
+┌──────────────┐
+│   Stream     │  SSE via GET
+│  Response    │  /chat/{id}/stream
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐    ┌────────────────────┐
+│  Background  │───▶│  Extract new facts │
+│  Task: Update│    │  Update profile    │
+│  Profile     │    │  Add legal issues  │
+└──────────────┘    └────────────────────┘
+```
 
 ### How build_system_prompt() Works (Step by Step)
 
@@ -1046,6 +1150,23 @@ States: CLOSED (normal) → OPEN (fail-fast, no calls) → HALF_OPEN (single pro
 
 ## 18. Document Analysis Pipeline
 
+```
+Document Analysis Pipeline
+──────────────────────────
+
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  Upload  │───▶│ Extract  │───▶│ Analyze  │───▶│  Store   │
+│  File    │    │  Text    │    │ with AI  │    │  Facts   │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+     │               │               │               │
+     ▼               ▼               ▼               ▼
+  Validate      PDF → pdfplumber  Claude extracts  New facts added
+  size ≤25MB    Image → tesseract  document_type,   to profile.
+  type check    HTML → BeautifulSoup key_facts,     legal_facts[]
+                                   red_flags,       in Supabase
+                                   summary
+```
+
 ### Supported File Types
 
 | MIME Type | Handler | Library | Output |
@@ -1067,6 +1188,48 @@ States: CLOSED (normal) → OPEN (fail-fast, no calls) → HALF_OPEN (single pro
 - Static instructions (cached): identify clauses, flag deadlines, cite sections, tailor to user
 - Dynamic content (not cached): extracted document text + user profile
 - Max tokens: 4096 for analysis response
+
+---
+
+### Action Generation Pipeline
+
+```
+Action Generation Pipeline
+──────────────────────────
+
+┌──────────────┐
+│ User Request │  "Generate a demand letter"
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐    ┌─────────────────────────────┐
+│ Load Profile │───▶│ State: MA                    │
+│ + State Laws │    │ Housing: renter              │
+└──────┬───────┘    │ Issue: deposit dispute       │
+       │            │ Laws: M.G.L. c.186 §15B     │
+       ▼            └─────────────────────────────┘
+┌──────────────┐
+│ Build Prompt │  Profile + laws + action template
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐    ┌─────────────────────────────┐
+│  Call Claude │───▶│ Returns structured JSON:     │
+│  with Cache  │    │ { text, citations,           │
+└──────┬───────┘    │   recipient, subject }       │
+       │            └─────────────────────────────┘
+       ▼
+┌──────────────┐    ┌─────────────────────────────┐
+│   Validate   │───▶│ DemandLetter model           │
+│   Pydantic   │    │ RightsSummary model           │
+└──────┬───────┘    │ Checklist model               │
+       │            └─────────────────────────────┘
+       ▼
+┌──────────────┐
+│   Return to  │
+│   Frontend   │
+└──────────────┘
+```
 
 ---
 

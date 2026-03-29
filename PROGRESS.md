@@ -7,16 +7,18 @@
 
 ## Current status
 
-**Phase:** Production Deployment Ready — 605 tests (462 backend + 143 frontend), full CI/CD pipeline, multi-platform deployment
+**Phase:** Production Deployment Ready — 627 tests (484 backend + 143 frontend), 92% backend coverage, full CI/CD pipeline, multi-platform deployment, integration + smoke tests
 
 ---
 
 ## [2026-03-29 — Current] MVP Finalization Sprint
 
 ### Phase 1: Backend Test Coverage (COMPLETE)
-- Coverage: 40% → 91% (462 tests, threshold: 90%)
-- New test files: test_legal_areas.py, test_profile_crud.py, test_document_extractor.py
+- Coverage: 40% → 92% (484 tests, threshold: 90%)
+- New test files: test_legal_areas.py, test_profile_crud.py, test_document_extractor.py, test_integration.py
 - Property-based testing with Hypothesis for edge case discovery
+- 13 end-to-end integration tests covering full API pipelines
+- Live deployment smoke test suite (scripts/smoke_test.py)
 
 ### Phase 2: Frontend Test Suite (COMPLETE)
 - 143 tests across 21 suites with Jest + React Testing Library

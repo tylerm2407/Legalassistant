@@ -5,6 +5,7 @@ import Button from "./ui/Button";
 import Card from "./ui/Card";
 import { api } from "@/lib/api";
 
+/** MIME types accepted for document upload and legal analysis. */
 const ACCEPTED_TYPES = [
   "application/pdf",
   "image/png",
@@ -13,8 +14,17 @@ const ACCEPTED_TYPES = [
   "text/plain",
 ];
 
+/** File extensions string for the HTML file input accept attribute. */
 const ACCEPTED_EXTENSIONS = ".pdf,.png,.jpg,.jpeg,.gif,.txt";
 
+/**
+ * Result returned from the document analysis API after upload.
+ *
+ * @property filename - Original filename of the uploaded document
+ * @property key_facts - Legal facts extracted from the document by Claude
+ * @property red_flags - Potential legal issues or concerns identified in the document
+ * @property summary - Brief AI-generated summary of the document's contents
+ */
 interface UploadResult {
   filename: string;
   key_facts: string[];
@@ -22,11 +32,29 @@ interface UploadResult {
   summary: string;
 }
 
+/**
+ * Props for the DocumentUpload component.
+ *
+ * @property userId - The authenticated user's Supabase ID for associating uploaded documents
+ * @property onUploadComplete - Optional callback fired after a successful upload and analysis
+ */
 interface DocumentUploadProps {
   userId: string;
   onUploadComplete?: () => void;
 }
 
+/**
+ * Drag-and-drop document upload with AI-powered legal analysis.
+ *
+ * Accepts PDFs, images, and text files up to 10MB. After upload, the backend
+ * extracts text (via pdfplumber for PDFs, OCR for images), sends it to Claude
+ * for legal analysis, and returns key facts, red flags, and a summary. Extracted
+ * facts are automatically added to the user's legal profile in Supabase.
+ *
+ * @param props - Component props
+ * @param props.userId - The authenticated user's Supabase ID
+ * @param props.onUploadComplete - Optional callback invoked after successful upload
+ */
 export default function DocumentUpload({
   userId,
   onUploadComplete,

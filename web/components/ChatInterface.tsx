@@ -8,6 +8,16 @@ import ActionGenerator from "./ActionGenerator";
 import type { LegalProfile, Message } from "@/lib/types";
 import { api } from "@/lib/api";
 
+/**
+ * Renders a single chat message bubble with role-based styling.
+ *
+ * User messages appear right-aligned with a blue gradient background.
+ * Assistant messages appear left-aligned with a glass-morphism style.
+ * Error messages are styled with a red border for visibility.
+ *
+ * @param props - Component props
+ * @param props.message - The chat message to render, including role, content, and optional legal area tag
+ */
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
   const isError = message.role === "error";
@@ -33,6 +43,12 @@ function MessageBubble({ message }: { message: Message }) {
   );
 }
 
+/**
+ * Animated typing indicator displayed while CaseMate is generating a response.
+ *
+ * Shows three bouncing dots to indicate the AI assistant is processing
+ * the user's legal question through the memory-injected Claude pipeline.
+ */
 function TypingIndicator() {
   return (
     <div className="flex justify-start">
@@ -47,10 +63,28 @@ function TypingIndicator() {
   );
 }
 
+/**
+ * Props for the ChatInterface component.
+ *
+ * @property profile - The authenticated user's legal profile, used to personalize
+ *   greetings, inject context into the sidebar, and pass user_id to the chat API
+ */
 interface ChatInterfaceProps {
   profile: LegalProfile;
 }
 
+/**
+ * Main chat interface with conversation history, profile sidebar, and action generator.
+ *
+ * This is the primary interaction surface for CaseMate. It displays the user's
+ * legal profile in a sidebar, maintains conversation history, sends questions
+ * to the backend (which injects the user's memory/profile into Claude's system prompt),
+ * and provides access to action generators for demand letters, rights summaries,
+ * and checklists.
+ *
+ * @param props - Component props
+ * @param props.profile - The authenticated user's complete legal profile from Supabase
+ */
 export default function ChatInterface({ profile }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {

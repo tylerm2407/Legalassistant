@@ -3,6 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
+/**
+ * Summary of a past conversation for display in the history sidebar.
+ *
+ * @property id - Unique conversation identifier from Supabase
+ * @property legal_area - The classified legal domain of the conversation (e.g., "landlord_tenant")
+ * @property updated_at - ISO timestamp of the last message in the conversation
+ * @property preview - Truncated text preview of the conversation's first message
+ * @property message_count - Total number of messages in the conversation
+ */
 interface ConversationSummary {
   id: string;
   legal_area: string | null;
@@ -11,12 +20,31 @@ interface ConversationSummary {
   message_count: number;
 }
 
+/**
+ * Props for the ConversationHistory component.
+ *
+ * @property activeConversationId - ID of the currently active conversation (highlighted in the list)
+ * @property onSelectConversation - Callback when the user clicks a past conversation to load it
+ * @property onNewConversation - Callback when the user clicks "New conversation" to start fresh
+ */
 interface ConversationHistoryProps {
   activeConversationId?: string;
   onSelectConversation: (id: string) => void;
   onNewConversation: () => void;
 }
 
+/**
+ * Sidebar panel listing past conversations with navigation and deletion controls.
+ *
+ * Shows a chronological list of the user's past legal conversations, each with
+ * a text preview, legal area tag, and date. Supports creating new conversations,
+ * switching between existing ones, and deleting conversations from history.
+ *
+ * @param props - Component props
+ * @param props.activeConversationId - Currently active conversation ID for highlighting
+ * @param props.onSelectConversation - Handler for loading a past conversation
+ * @param props.onNewConversation - Handler for starting a fresh conversation
+ */
 export default function ConversationHistory({
   activeConversationId,
   onSelectConversation,

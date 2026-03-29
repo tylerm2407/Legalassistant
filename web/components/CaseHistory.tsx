@@ -4,6 +4,7 @@ import React from "react";
 import Badge from "./ui/Badge";
 import type { LegalIssue, IssueStatus } from "@/lib/types";
 
+/** Maps issue status values to CSS color classes with glow effects for timeline dots. */
 const statusColor: Record<IssueStatus, string> = {
   open: "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.4)]",
   resolved: "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]",
@@ -11,6 +12,7 @@ const statusColor: Record<IssueStatus, string> = {
   escalated: "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]",
 };
 
+/** Maps issue status values to Badge variant styles for the case history timeline. */
 const statusVariant: Record<IssueStatus, "default" | "success" | "warning" | "error"> = {
   open: "default",
   resolved: "success",
@@ -18,10 +20,25 @@ const statusVariant: Record<IssueStatus, "default" | "success" | "warning" | "er
   escalated: "error",
 };
 
+/**
+ * Props for the CaseHistory component.
+ *
+ * @property issues - Array of the user's active and past legal issues to display on the timeline
+ */
 interface CaseHistoryProps {
   issues: LegalIssue[];
 }
 
+/**
+ * Vertical timeline displaying the user's active legal issues and case history.
+ *
+ * Each issue is shown as a card on a vertical timeline with color-coded status
+ * dots (blue=open, green=resolved, yellow=watching, red=escalated), issue type,
+ * summary, dates, and associated notes. Empty state shows "No active cases".
+ *
+ * @param props - Component props
+ * @param props.issues - Array of legal issues from the user's profile
+ */
 export default function CaseHistory({ issues }: CaseHistoryProps) {
   if (issues.length === 0) {
     return (

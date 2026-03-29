@@ -81,12 +81,12 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name="cases"
+        name="rights"
         options={{
-          title: "Cases",
-          headerTitle: "Your Cases",
+          title: "Rights",
+          headerTitle: "Know Your Rights",
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="📁" focused={focused} />
+            <TabIcon icon="⚖️" focused={focused} />
           ),
         }}
       />
@@ -97,16 +97,6 @@ export default function AppLayout() {
           headerTitle: "Legal Tools",
           tabBarIcon: ({ focused }) => (
             <TabIcon icon="🛠️" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="deadlines"
-        options={{
-          title: "Deadlines",
-          headerTitle: "Your Deadlines",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="⏰" focused={focused} />
           ),
         }}
       />
@@ -122,8 +112,12 @@ export default function AppLayout() {
       />
       {/* Hidden stack screens */}
       <Tabs.Screen
-        name="rights"
-        options={{ href: null, headerTitle: "Know Your Rights" }}
+        name="cases"
+        options={{ href: null, headerTitle: "Your Cases" }}
+      />
+      <Tabs.Screen
+        name="deadlines"
+        options={{ href: null, headerTitle: "Your Deadlines" }}
       />
       <Tabs.Screen
         name="rights-guide"

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,18 +9,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ChatBubble from "@/components/ChatBubble";
 import ActionSheet from "@/components/ActionSheet";
 import { chat, getConversation } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import type { Message } from "@/lib/types";
+import type { Message, ConversationDetail } from "@/lib/types";
 
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hi, I'm CaseMate — your AI legal assistant. Tell me about your legal situation and I'll help you understand your rights, generate documents, and figure out next steps. What's going on?",
+    "Hi, I'm CaseMate — your AI legal assistant. I remember everything about your situation so you never have to repeat yourself. Tell me about your legal issue and I'll help you understand your rights, generate documents, and figure out next steps. What's going on?",
   timestamp: new Date(),
 };
 
@@ -30,11 +31,11 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [showActions, setShowActions] = useState(false);
   const [currentLegalArea, setCurrentLegalArea] = useState("general");
   const flatListRef = useRef<FlatList<Message>>(null);
-
   const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
@@ -53,37 +54,59 @@ export default function ChatScreen() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Load existing conversation if navigated with a conversationId
   useEffect(() => {
     if (paramConvId) {
       setConversationId(paramConvId);
+      setIsLoadingHistory(true);
       getConversation(paramConvId)
-        .then((data) => {
+        .then((data: { conversation: ConversationDetail }) => {
           if (data.conversation?.messages) {
-            setMessages(data.conversation.messages.map((m: any) => ({
+            const loadedMessages: Message[] = data.conversation.messages.map((m) => ({
               role: m.role,
               content: m.content,
               timestamp: new Date(m.timestamp || Date.now()),
-              legalArea: m.legal_area,
-            })));
+              legalArea: m.legal_area || undefined,
+            }));
+            setMessages(loadedMessages);
+            if (data.conversation.legal_area) {
+              setCurrentLegalArea(data.conversation.legal_area);
+            }
           }
         })
-        .catch(() => {});
+        .catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : "Failed to load conversation";
+          Alert.alert("Error", message);
+        })
+        .finally(() => setIsLoadingHistory(false));
     }
   }, [paramConvId]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
+
+  const handleNewConversation = () => {
+    setMessages([WELCOME_MESSAGE]);
+    setConversationId(undefined);
+    setInput("");
+    setCurrentLegalArea("general");
+  };
 
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
+
+    if (!userId) {
+      Alert.alert("Not signed in", "Please sign in to use CaseMate.");
+      return;
+    }
 
     const userMessage: Message = {
       role: "user",
@@ -98,7 +121,7 @@ export default function ChatScreen() {
     try {
       const response = await chat(userId, trimmed, conversationId);
 
-      if (!conversationId) {
+      if (!conversationId && response.conversation_id) {
         setConversationId(response.conversation_id);
       }
 
@@ -119,7 +142,7 @@ export default function ChatScreen() {
       if (response.suggested_actions && response.suggested_actions.length > 0) {
         const actionsMessage: Message = {
           role: "assistant",
-          content: `Suggested actions: ${response.suggested_actions.join(", ")}. Tap the ⚡ button to generate documents.`,
+          content: `I can help you take action. Available: ${response.suggested_actions.join(", ")}. Tap the lightning button below to generate documents.`,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, actionsMessage]);
@@ -148,32 +171,63 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      {/* Messages */}
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(_, index) => index.toString()}
-        contentContainerStyle={styles.messagesList}
-        showsVerticalScrollIndicator={false}
-        onContentSizeChange={scrollToBottom}
-      />
+      {/* Top bar with New Chat + History */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={styles.topBarButton}
+          onPress={handleNewConversation}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.topBarButtonText}>+ New Chat</Text>
+        </TouchableOpacity>
 
-      {/* Loading indicator */}
+        {conversationId && (
+          <View style={styles.legalAreaIndicator}>
+            <Text style={styles.legalAreaIndicatorText}>
+              {currentLegalArea.replace(/_/g, " ")}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.topBarButton}
+          onPress={() => router.push("/(app)/conversations" as never)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.topBarButtonText}>History</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Loading history indicator */}
+      {isLoadingHistory ? (
+        <View style={styles.historyLoading}>
+          <ActivityIndicator size="large" color="#1e40af" />
+          <Text style={styles.historyLoadingText}>Loading conversation...</Text>
+        </View>
+      ) : (
+        /* Messages */
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(_, index) => index.toString()}
+          contentContainerStyle={styles.messagesList}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={scrollToBottom}
+        />
+      )}
+
+      {/* Typing indicator */}
       {isLoading && (
         <View style={styles.typingIndicator}>
-          <ActivityIndicator size="small" color="#1e40af" />
+          <View style={styles.typingDots}>
+            <View style={[styles.typingDot, styles.typingDot1]} />
+            <View style={[styles.typingDot, styles.typingDot2]} />
+            <View style={[styles.typingDot, styles.typingDot3]} />
+          </View>
           <Text style={styles.typingText}>CaseMate is thinking...</Text>
         </View>
       )}
-
-      {/* History button */}
-      <TouchableOpacity
-        style={styles.historyButton}
-        onPress={() => router.push("/(app)/conversations" as any)}
-      >
-        <Text style={styles.historyButtonText}>📜 History</Text>
-      </TouchableOpacity>
 
       {/* Input bar */}
       <View style={styles.inputBar}>
@@ -194,6 +248,8 @@ export default function ChatScreen() {
           multiline
           maxLength={2000}
           editable={!isLoading}
+          onSubmitEditing={handleSend}
+          returnKeyType="send"
         />
 
         <TouchableOpacity
@@ -232,6 +288,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8fafc",
   },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+  topBarButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: "#eff6ff",
+    borderRadius: 8,
+  },
+  topBarButtonText: {
+    fontSize: 13,
+    color: "#1e40af",
+    fontWeight: "600",
+  },
+  legalAreaIndicator: {
+    backgroundColor: "#f0fdf4",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  legalAreaIndicatorText: {
+    fontSize: 11,
+    color: "#15803d",
+    fontWeight: "700",
+    textTransform: "capitalize",
+  },
+  historyLoading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  historyLoadingText: {
+    fontSize: 15,
+    color: "#64748b",
+  },
   messagesList: {
     paddingVertical: 16,
     paddingBottom: 8,
@@ -239,27 +338,37 @@ const styles = StyleSheet.create({
   typingIndicator: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
     paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+  },
+  typingDots: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  typingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#1e40af",
+    opacity: 0.4,
+  },
+  typingDot1: {
+    opacity: 0.8,
+  },
+  typingDot2: {
+    opacity: 0.6,
+  },
+  typingDot3: {
+    opacity: 0.4,
   },
   typingText: {
     fontSize: 13,
     color: "#64748b",
     fontStyle: "italic",
-  },
-  historyButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "#eff6ff",
-    alignSelf: "center",
-    borderRadius: 16,
-    marginBottom: 4,
-  },
-  historyButtonText: {
-    fontSize: 13,
-    color: "#1e40af",
-    fontWeight: "600",
   },
   inputBar: {
     flexDirection: "row",

@@ -1,3 +1,10 @@
+/**
+ * Central type barrel file for the CaseMate frontend.
+ *
+ * Re-exports all shared types from domain-specific modules. Import types
+ * from "@/lib/types" rather than from individual shared-types files.
+ */
+
 export type {
   LegalProfile,
   LegalIssue,

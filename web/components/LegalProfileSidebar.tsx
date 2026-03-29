@@ -4,6 +4,7 @@ import React from "react";
 import Badge from "./ui/Badge";
 import type { LegalProfile, LegalIssue, IssueStatus } from "@/lib/types";
 
+/** Maps issue status values to Badge variant styles for visual differentiation. */
 const statusVariant: Record<IssueStatus, "default" | "success" | "warning" | "error"> = {
   open: "default",
   resolved: "success",
@@ -11,10 +12,28 @@ const statusVariant: Record<IssueStatus, "default" | "success" | "warning" | "er
   escalated: "error",
 };
 
+/**
+ * Props for the LegalProfileSidebar component.
+ *
+ * @property profile - The user's complete legal profile including state, housing,
+ *   employment, active issues, known facts, and uploaded documents
+ */
 interface LegalProfileSidebarProps {
   profile: LegalProfile;
 }
 
+/**
+ * Persistent sidebar displaying the user's legal profile during chat.
+ *
+ * This sidebar is the visible proof that CaseMate has memory. It shows the user's
+ * jurisdiction, housing/employment/family situation, active legal issues with
+ * status badges, known legal facts extracted from conversations, and uploaded
+ * documents. The "Memory Active" indicator confirms the profile is being injected
+ * into every Claude API call.
+ *
+ * @param props - Component props
+ * @param props.profile - The user's complete legal profile from Supabase
+ */
 export default function LegalProfileSidebar({ profile }: LegalProfileSidebarProps) {
   return (
     <aside className="w-[300px] shrink-0 border-r border-white/10 bg-white/[0.02] h-full overflow-y-auto scrollbar-thin">

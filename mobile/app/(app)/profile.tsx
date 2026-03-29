@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import ProfileCard from "@/components/ProfileCard";
 import IssueCard from "@/components/IssueCard";
 import { getProfile, createProfile } from "@/lib/api";
@@ -19,13 +19,17 @@ import type { LegalProfile } from "@/lib/types";
 export default function ProfileScreen() {
   const [profile, setProfile] = useState<LegalProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editName, setEditName] = useState("");
   const [editState, setEditState] = useState("");
   const [editHousing, setEditHousing] = useState("");
   const [editEmployment, setEditEmployment] = useState("");
   const [editFamily, setEditFamily] = useState("");
   const [userId, setUserId] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [showAllFacts, setShowAllFacts] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,6 +45,7 @@ export default function ProfileScreen() {
 
   const loadProfile = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const data = await getProfile(userId);
       setProfile(data);
@@ -49,8 +54,9 @@ export default function ProfileScreen() {
       setEditHousing(data.housing_situation);
       setEditEmployment(data.employment_type);
       setEditFamily(data.family_status);
-    } catch {
-      // Use empty profile on error
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to load profile";
+      setError(message);
       setProfile({
         user_id: userId,
         display_name: "",
@@ -69,7 +75,27 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const data = await getProfile(userId);
+      setProfile(data);
+      setEditName(data.display_name);
+      setEditState(data.state);
+      setEditHousing(data.housing_situation);
+      setEditEmployment(data.employment_type);
+      setEditFamily(data.family_status);
+      setError(null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to refresh profile";
+      setError(message);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [userId]);
+
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const updated = await createProfile({
         user_id: userId,
@@ -84,11 +110,26 @@ export default function ProfileScreen() {
       Alert.alert("Saved", "Your profile has been updated.");
     } catch (err: unknown) {
       Alert.alert("Error", err instanceof Error ? err.message : "Failed to save profile.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            await supabase.auth.signOut();
+          },
+        },
+      ]
+    );
   };
 
   if (isLoading) {
@@ -100,8 +141,33 @@ export default function ProfileScreen() {
     );
   }
 
+  const factsToShow = showAllFacts
+    ? (profile?.legal_facts || [])
+    : (profile?.legal_facts || []).slice(0, 5);
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          tintColor="#1e40af"
+          colors={["#1e40af"]}
+        />
+      }
+    >
+      {/* Error banner */}
+      {error && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{error}</Text>
+          <TouchableOpacity onPress={loadProfile}>
+            <Text style={styles.errorRetryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Profile Card */}
       {profile && <ProfileCard profile={profile} onPress={() => {}} />}
 
@@ -177,14 +243,64 @@ export default function ProfileScreen() {
           </View>
 
           <TouchableOpacity
-            style={styles.saveButton}
+            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={handleSave}
+            disabled={isSaving}
             activeOpacity={0.85}
           >
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Legal Facts -- THE core differentiator display */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            Legal Facts ({profile?.legal_facts.length || 0})
+          </Text>
+          <View style={styles.memoryBadge}>
+            <Text style={styles.memoryBadgeText}>Memory</Text>
+          </View>
+        </View>
+        <Text style={styles.sectionSubtitle}>
+          Facts CaseMate has learned about your situation from conversations.
+        </Text>
+        {!profile?.legal_facts.length ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>🧠</Text>
+            <Text style={styles.emptyStateText}>
+              No legal facts yet. Chat with CaseMate and it will automatically
+              remember important details about your situation.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.factsList}>
+            {factsToShow.map((fact, index) => (
+              <View key={index} style={styles.factItem}>
+                <View style={styles.factBullet} />
+                <Text style={styles.factText}>{fact}</Text>
+              </View>
+            ))}
+            {(profile?.legal_facts.length || 0) > 5 && (
+              <TouchableOpacity
+                style={styles.showMoreButton}
+                onPress={() => setShowAllFacts(!showAllFacts)}
+              >
+                <Text style={styles.showMoreText}>
+                  {showAllFacts
+                    ? "Show less"
+                    : `Show all ${profile?.legal_facts.length} facts`}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </View>
 
       {/* Active Issues */}
       <View style={styles.section}>
@@ -193,6 +309,7 @@ export default function ProfileScreen() {
         </Text>
         {!profile?.active_issues.length ? (
           <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>📁</Text>
             <Text style={styles.emptyStateText}>
               No active issues. Chat with CaseMate to get started.
             </Text>
@@ -213,8 +330,9 @@ export default function ProfileScreen() {
         </Text>
         {!profile?.documents.length ? (
           <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>📄</Text>
             <Text style={styles.emptyStateText}>
-              No documents uploaded yet.
+              No documents uploaded yet. Upload legal documents to extract facts automatically.
             </Text>
           </View>
         ) : (
@@ -241,7 +359,20 @@ export default function ProfileScreen() {
             <Text style={styles.statValue}>{profile?.legal_facts.length || 0}</Text>
             <Text style={styles.statLabel}>Legal Facts</Text>
           </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{profile?.documents.length || 0}</Text>
+            <Text style={styles.statLabel}>Documents</Text>
+          </View>
         </View>
+        {profile?.member_since && (
+          <Text style={styles.memberSince}>
+            Member since {new Date(profile.member_since).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </Text>
+        )}
       </View>
 
       {/* Logout */}
@@ -276,6 +407,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#64748b",
   },
+  errorBanner: {
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  errorBannerText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#dc2626",
+    marginRight: 12,
+  },
+  errorRetryText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#dc2626",
+  },
   editToggle: {
     alignSelf: "flex-end",
     marginTop: 12,
@@ -299,11 +452,38 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 24,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: "#0f172a",
     marginBottom: 12,
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    color: "#64748b",
+    lineHeight: 18,
+    marginBottom: 12,
+    marginTop: -8,
+  },
+  memoryBadge: {
+    backgroundColor: "#dbeafe",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  memoryBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#1e40af",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   field: {
     gap: 4,
@@ -330,11 +510,51 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
+  saveButtonDisabled: {
+    opacity: 0.6,
+  },
   saveButtonText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
   },
+  // Legal facts
+  factsList: {
+    gap: 8,
+  },
+  factItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    gap: 10,
+  },
+  factBullet: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#1e40af",
+    marginTop: 5,
+  },
+  factText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#334155",
+    lineHeight: 20,
+  },
+  showMoreButton: {
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  showMoreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1e40af",
+  },
+  // Issues
   issuesList: {
     gap: 12,
   },
@@ -345,12 +565,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#e2e8f0",
+    gap: 8,
+  },
+  emptyIcon: {
+    fontSize: 28,
   },
   emptyStateText: {
     fontSize: 14,
     color: "#94a3b8",
     textAlign: "center",
+    lineHeight: 20,
   },
+  // Documents
   documentsList: {
     gap: 8,
   },
@@ -373,30 +599,38 @@ const styles = StyleSheet.create({
     color: "#334155",
     fontWeight: "500",
   },
+  // Stats
   statsRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
   },
   statCard: {
     flex: 1,
     backgroundColor: "#ffffff",
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
   statValue: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "800",
     color: "#1e40af",
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#64748b",
     fontWeight: "500",
     marginTop: 4,
   },
+  memberSince: {
+    fontSize: 13,
+    color: "#94a3b8",
+    textAlign: "center",
+    marginTop: 12,
+  },
+  // Logout
   logoutButton: {
     marginTop: 32,
     backgroundColor: "#fee2e2",

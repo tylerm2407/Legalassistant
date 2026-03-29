@@ -2,8 +2,16 @@
 
 import { useState, FormEvent } from "react";
 
+/** Possible states of the waitlist form submission lifecycle. */
 type FormState = "idle" | "submitting" | "success" | "error";
 
+/**
+ * Email waitlist signup form for the CaseMate landing page.
+ *
+ * Collects email addresses and submits them to the /api/waitlist endpoint,
+ * which syncs to Mailchimp and stores in Supabase as backup. Shows a success
+ * confirmation after signup or error messages on failure.
+ */
 export default function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>("idle");

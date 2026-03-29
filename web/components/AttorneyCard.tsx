@@ -4,6 +4,21 @@ import React from "react";
 import Card from "./ui/Card";
 import Badge from "./ui/Badge";
 
+/**
+ * Attorney profile data for referral display.
+ *
+ * @property id - Unique attorney identifier
+ * @property name - Attorney's full name
+ * @property state - Two-letter state code where the attorney is licensed
+ * @property specializations - Legal practice areas (e.g., ["landlord_tenant", "consumer_protection"])
+ * @property rating - Average rating from 0 to 5
+ * @property cost_range - Display string for typical fee range (e.g., "$200-$400/hr")
+ * @property phone - Attorney's contact phone number
+ * @property email - Attorney's contact email address
+ * @property website - Attorney's website URL
+ * @property accepts_free_consultations - Whether the attorney offers free initial consultations
+ * @property bio - Brief professional biography
+ */
 interface Attorney {
   id: string;
   name: string;
@@ -18,12 +33,31 @@ interface Attorney {
   bio: string;
 }
 
+/**
+ * Props for the AttorneyCard component.
+ *
+ * @property attorney - Complete attorney profile data to display
+ * @property matchReason - AI-generated explanation of why this attorney matches the user's needs
+ * @property relevanceScore - Numeric relevance score (0-1) for ranking match quality
+ */
 interface AttorneyCardProps {
   attorney: Attorney;
   matchReason: string;
   relevanceScore: number;
 }
 
+/**
+ * Display card for an attorney referral with contact links and match details.
+ *
+ * Shows the attorney's name, specializations, rating, cost range, bio, and
+ * an AI-generated explanation of why they match the user's legal needs.
+ * Includes direct call, email, and website links for easy contact.
+ *
+ * @param props - Component props
+ * @param props.attorney - Attorney profile data
+ * @param props.matchReason - Why this attorney is a good match for the user
+ * @param props.relevanceScore - Numeric relevance ranking
+ */
 export default function AttorneyCard({ attorney, matchReason, relevanceScore }: AttorneyCardProps) {
   return (
     <Card>

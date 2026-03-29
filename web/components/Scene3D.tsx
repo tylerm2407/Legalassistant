@@ -5,6 +5,12 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
+/**
+ * Animated wireframe icosahedron that floats and rotates in 3D space.
+ *
+ * Used as the primary geometric element in the landing page hero background.
+ * Rotates continuously and bobs vertically using sine-wave animation.
+ */
 function FloatingGeometry() {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -30,6 +36,12 @@ function FloatingGeometry() {
   );
 }
 
+/**
+ * Randomly distributed particle field that slowly rotates for ambient visual depth.
+ *
+ * @param props - Component props
+ * @param props.count - Number of particles to render (reduced on mobile for performance)
+ */
 function ParticleField({ count }: { count: number }) {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -70,6 +82,12 @@ function ParticleField({ count }: { count: number }) {
   );
 }
 
+/**
+ * Slowly rotating wireframe torus ring with purple emissive glow.
+ *
+ * Positioned below the floating geometry as a decorative accent.
+ * Hidden on mobile devices for performance optimization.
+ */
 function GlowRing() {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -93,6 +111,13 @@ function GlowRing() {
   );
 }
 
+/**
+ * Three.js 3D scene for the CaseMate landing page hero background.
+ *
+ * Renders a floating wireframe icosahedron, ambient particle field, and
+ * decorative glow ring using React Three Fiber. Includes auto-rotation
+ * via OrbitControls and adapts particle count and DPR for mobile devices.
+ */
 export default function Scene3D() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const particleCount = isMobile ? 300 : 800;

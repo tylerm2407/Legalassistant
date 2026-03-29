@@ -5,6 +5,17 @@ import Card from "./ui/Card";
 import Button from "./ui/Button";
 import { api } from "@/lib/api";
 
+/**
+ * A single step within a guided legal workflow.
+ *
+ * @property id - Unique step identifier
+ * @property title - Display title for the step (e.g., "Gather Evidence")
+ * @property explanation - Detailed instructions for completing this step
+ * @property required_documents - List of documents needed for this step
+ * @property tips - Helpful tips for completing the step successfully
+ * @property deadlines - Time-sensitive deadlines associated with this step
+ * @property status - Current completion status of the step
+ */
 interface WorkflowStep {
   id: string;
   title: string;
@@ -15,6 +26,14 @@ interface WorkflowStep {
   status: string;
 }
 
+/**
+ * Props for the WorkflowWizard component.
+ *
+ * @property workflowId - Unique identifier for this workflow instance in Supabase
+ * @property title - Display title for the workflow (e.g., "Security Deposit Recovery")
+ * @property steps - Array of workflow steps with instructions, documents, tips, and deadlines
+ * @property initialStep - Zero-based index of the step to display initially
+ */
 interface WorkflowWizardProps {
   workflowId: string;
   title: string;
@@ -22,6 +41,20 @@ interface WorkflowWizardProps {
   initialStep: number;
 }
 
+/**
+ * Step-by-step guided workflow wizard for common legal processes.
+ *
+ * Walks users through multi-step legal procedures (e.g., filing small claims,
+ * recovering a security deposit) with detailed instructions, required documents,
+ * tips, and deadlines for each step. Progress is persisted to Supabase so users
+ * can resume where they left off.
+ *
+ * @param props - Component props
+ * @param props.workflowId - Workflow instance ID for persisting step progress
+ * @param props.title - Workflow title displayed at the top
+ * @param props.steps - Ordered array of workflow steps
+ * @param props.initialStep - Step index to start from (supports resuming)
+ */
 export default function WorkflowWizard({ workflowId, title, steps, initialStep }: WorkflowWizardProps) {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepStatuses, setStepStatuses] = useState<string[]>(steps.map((s: WorkflowStep) => s.status));

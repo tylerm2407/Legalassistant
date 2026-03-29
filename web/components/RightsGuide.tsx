@@ -3,6 +3,20 @@
 import React from "react";
 import Card from "./ui/Card";
 
+/**
+ * Complete rights guide data from the CaseMate knowledge base.
+ *
+ * @property id - Unique guide identifier
+ * @property domain - Legal domain category (e.g., "landlord_tenant", "employment_rights")
+ * @property title - Display title for the guide
+ * @property description - Brief summary shown in guide listings
+ * @property explanation - Detailed plain-language legal explanation
+ * @property your_rights - List of specific rights the user has under this area of law
+ * @property action_steps - Ordered list of concrete steps the user should take
+ * @property deadlines - Time-sensitive deadlines or statutes of limitations
+ * @property common_mistakes - Mistakes to avoid that could weaken the user's position
+ * @property when_to_get_a_lawyer - Guidance on when professional legal help is necessary
+ */
 interface Guide {
   id: string;
   domain: string;
@@ -16,10 +30,26 @@ interface Guide {
   when_to_get_a_lawyer: string;
 }
 
+/**
+ * Props for the RightsGuide component.
+ *
+ * @property guide - Complete rights guide data to render
+ */
 interface RightsGuideProps {
   guide: Guide;
 }
 
+/**
+ * Detailed rights guide display for the "Know Your Rights" library.
+ *
+ * Renders a comprehensive legal rights guide with sections for explanation,
+ * enumerated rights, ordered action steps, important deadlines, common mistakes
+ * to avoid, and guidance on when to hire a lawyer. Each section uses appropriate
+ * visual hierarchy and icons for scannability.
+ *
+ * @param props - Component props
+ * @param props.guide - The complete rights guide data to display
+ */
 export default function RightsGuide({ guide }: RightsGuideProps) {
   return (
     <div className="space-y-6">

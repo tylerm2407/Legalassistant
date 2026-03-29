@@ -6,6 +6,16 @@ import Button from "./ui/Button";
 import Badge from "./ui/Badge";
 import { api } from "@/lib/api";
 
+/**
+ * Local representation of a legal deadline for the dashboard UI.
+ *
+ * @property id - Unique deadline identifier from Supabase
+ * @property title - Short description of the deadline (e.g., "File small claims motion")
+ * @property date - ISO date string for the deadline date
+ * @property legal_area - Optional legal domain category (e.g., "landlord_tenant")
+ * @property status - Current status: "active", "completed", or "dismissed"
+ * @property notes - Optional user or AI-generated notes about the deadline
+ */
 interface Deadline {
   id: string;
   title: string;
@@ -15,6 +25,14 @@ interface Deadline {
   notes: string;
 }
 
+/**
+ * Dashboard for tracking legal deadlines and statutes of limitations.
+ *
+ * Displays active deadlines with urgency color coding (red for overdue,
+ * yellow for within 7 days, blue for within 30 days), allows manual deadline
+ * creation, and supports marking deadlines as completed or dismissed.
+ * Deadlines can also be auto-detected from chat conversations by the backend.
+ */
 export default function DeadlineDashboard() {
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
   const [loading, setLoading] = useState(true);

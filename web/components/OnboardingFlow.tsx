@@ -7,6 +7,7 @@ import Input from "./ui/Input";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
+/** All 50 US states used in the state selection dropdown during onboarding. */
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
   "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
@@ -18,8 +19,25 @@ const US_STATES = [
   "Virginia","Washington","West Virginia","Wisconsin","Wyoming",
 ];
 
+/** Total number of steps in the onboarding intake wizard. */
 const TOTAL_STEPS = 5;
 
+/**
+ * Form state for the onboarding intake wizard.
+ *
+ * Captures all information needed to build the user's initial LegalProfile
+ * in Supabase. Each field maps to a step in the 5-question wizard.
+ *
+ * @property displayName - User's preferred display name shown in the sidebar
+ * @property state - US state of residence, determines which laws apply
+ * @property housingSituation - Renter, homeowner, or other housing status
+ * @property housingDetails - Optional free-text housing details (e.g., lease type)
+ * @property employmentType - Employment classification (W-2, 1099, etc.)
+ * @property employmentDetails - Optional free-text employment details
+ * @property familyStatus - Marital/relationship status
+ * @property dependents - Number of dependents (affects family law rights)
+ * @property currentIssue - Optional description of an active legal issue
+ */
 interface FormData {
   displayName: string;
   state: string;
@@ -32,6 +50,20 @@ interface FormData {
   currentIssue: string;
 }
 
+/**
+ * Five-step onboarding intake wizard that builds the user's initial legal profile.
+ *
+ * Collects name, state, housing situation, employment type, family status,
+ * and an optional current legal issue. On completion, creates a LegalProfile
+ * in Supabase and redirects to the subscription page.
+ *
+ * Steps:
+ * 1. Name and state of residence
+ * 2. Housing situation (renter/homeowner/other)
+ * 3. Employment type (W-2, 1099, etc.)
+ * 4. Family status and dependents
+ * 5. Current legal issue (optional)
+ */
 export default function OnboardingFlow() {
   const router = useRouter();
   const { user } = useAuth();

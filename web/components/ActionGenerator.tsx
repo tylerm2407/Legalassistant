@@ -6,13 +6,36 @@ import Card from "./ui/Card";
 import { api } from "@/lib/api";
 import type { DemandLetter, RightsSummary, Checklist } from "@/lib/types";
 
+/** The three types of legal actions CaseMate can generate from the user's profile context. */
 type ActionType = "letter" | "rights" | "checklist";
+
+/** Union type for all possible action generation results. */
 type ActionResult = DemandLetter | RightsSummary | Checklist;
 
+/**
+ * Props for the ActionGenerator component.
+ *
+ * @property userId - The authenticated user's Supabase ID, used to fetch their
+ *   profile context when generating actions
+ */
 interface ActionGeneratorProps {
   userId: string;
 }
 
+/**
+ * Action generator toolbar for creating demand letters, rights summaries, and checklists.
+ *
+ * This is the demo-critical feature. It uses the user's legal profile and conversation
+ * context to generate three types of actionable legal documents via the backend API:
+ * - Demand letters with legal citations and pre-filled recipient details
+ * - Rights summaries listing the user's specific entitlements under their state law
+ * - Legal checklists with deadlines and concrete next steps
+ *
+ * Each generated result includes a copy-to-clipboard button and appropriate disclaimers.
+ *
+ * @param props - Component props
+ * @param props.userId - The authenticated user's Supabase ID
+ */
 export default function ActionGenerator({ userId }: ActionGeneratorProps) {
   const [activeAction, setActiveAction] = useState<ActionType | null>(null);
   const [loading, setLoading] = useState(false);

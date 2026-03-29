@@ -3,6 +3,29 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
+/**
+ * Configuration props for the LiquidEther fluid simulation component.
+ *
+ * @property mouseForce - Force multiplier applied to mouse/touch interactions
+ * @property cursorSize - Size of the cursor influence area in simulation units
+ * @property isViscous - Whether to enable viscous fluid simulation
+ * @property viscous - Viscosity coefficient for the fluid
+ * @property iterationsViscous - Number of viscous solver iterations per frame
+ * @property iterationsPoisson - Number of Poisson pressure solver iterations per frame
+ * @property dt - Simulation time step
+ * @property BFECC - Whether to use Back and Forth Error Compensation and Correction advection
+ * @property resolution - Simulation resolution as a fraction of screen size (0.0-1.0)
+ * @property isBounce - Whether fluid bounces off boundaries instead of wrapping
+ * @property colors - Array of hex color strings for the fluid palette gradient
+ * @property style - Additional CSS styles for the container div
+ * @property className - Additional CSS class names for the container div
+ * @property autoDemo - Whether to auto-animate the fluid when the user is idle
+ * @property autoSpeed - Speed of the automatic animation cursor movement
+ * @property autoIntensity - Force intensity multiplier during auto-animation
+ * @property takeoverDuration - Duration in seconds for transitioning from auto to user control
+ * @property autoResumeDelay - Milliseconds of inactivity before auto-animation resumes
+ * @property autoRampDuration - Duration in seconds for ramping up auto-animation intensity
+ */
 export interface LiquidEtherProps {
   mouseForce?: number;
   cursorSize?: number;
@@ -25,6 +48,7 @@ export interface LiquidEtherProps {
   autoRampDuration?: number;
 }
 
+/** Internal fluid simulation options passed to the WebGL shader pipeline. */
 interface SimOptions {
   iterations_poisson: number;
   iterations_viscous: number;
@@ -38,6 +62,7 @@ interface SimOptions {
   BFECC: boolean;
 }
 
+/** Internal interface for the WebGL manager controlling the fluid simulation lifecycle. */
 interface LiquidEtherWebGL {
   output?: { simulation?: { options: SimOptions; resize: () => void } };
   autoDriver?: {
@@ -54,8 +79,18 @@ interface LiquidEtherWebGL {
   dispose: () => void;
 }
 
+/** Default purple/pink color palette for the fluid simulation. */
 const defaultColors = ['#5227FF', '#FF9FFC', '#B19EEF'];
 
+/**
+ * GPU-accelerated fluid dynamics simulation for the CaseMate landing page background.
+ *
+ * Renders a real-time Navier-Stokes fluid simulation using WebGL shaders via Three.js.
+ * Responds to mouse and touch interactions with configurable force, and auto-animates
+ * when the user is idle. Uses BFECC advection, Jacobi pressure solving, and optional
+ * viscosity for high-quality fluid visuals. Includes IntersectionObserver for
+ * performance (pauses when off-screen) and ResizeObserver for responsive behavior.
+ */
 export default function LiquidEther({
   mouseForce = 20,
   cursorSize = 100,

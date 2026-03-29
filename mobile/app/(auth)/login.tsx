@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -19,13 +19,48 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // Auto-redirect if already authenticated
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.replace("/(app)/chat");
+      }
+      setIsCheckingSession(false);
+    });
+  }, [router]);
+
+  const validateForm = (): boolean => {
+    let valid = true;
+    setEmailError("");
+    setPasswordError("");
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setEmailError("Email is required");
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setEmailError("Please enter a valid email");
+      valid = false;
+    }
+
+    if (!password) {
+      setPasswordError("Password is required");
+      valid = false;
+    } else if (isSignUp && password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      valid = false;
+    }
+
+    return valid;
+  };
 
   const handleAuth = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Missing fields", "Please enter both email and password.");
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
@@ -57,6 +92,16 @@ export default function LoginScreen() {
     }
   };
 
+  if (isCheckingSession) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.sessionCheckContainer}>
+          <ActivityIndicator size="large" color="#1e40af" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -84,27 +129,45 @@ export default function LoginScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, emailError ? styles.inputError : null]}
                 placeholder="you@example.com"
                 placeholderTextColor="#94a3b8"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (emailError) setEmailError("");
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                textContentType="emailAddress"
+                editable={!isLoading}
               />
+              {emailError ? (
+                <Text style={styles.fieldError}>{emailError}</Text>
+              ) : null}
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
+                style={[styles.input, passwordError ? styles.inputError : null]}
+                placeholder={isSignUp ? "At least 6 characters" : "Enter your password"}
                 placeholderTextColor="#94a3b8"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError("");
+                }}
                 secureTextEntry
+                textContentType={isSignUp ? "newPassword" : "password"}
+                editable={!isLoading}
+                onSubmitEditing={handleAuth}
+                returnKeyType="go"
               />
+              {passwordError ? (
+                <Text style={styles.fieldError}>{passwordError}</Text>
+              ) : null}
             </View>
 
             <TouchableOpacity
@@ -126,7 +189,12 @@ export default function LoginScreen() {
           {/* Toggle */}
           <TouchableOpacity
             style={styles.toggleContainer}
-            onPress={() => setIsSignUp(!isSignUp)}
+            onPress={() => {
+              setIsSignUp(!isSignUp);
+              setEmailError("");
+              setPasswordError("");
+            }}
+            disabled={isLoading}
           >
             <Text style={styles.toggleText}>
               {isSignUp
@@ -142,6 +210,7 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={styles.backLink}
             onPress={() => router.back()}
+            disabled={isLoading}
           >
             <Text style={styles.backLinkText}>← Back to home</Text>
           </TouchableOpacity>
@@ -158,6 +227,11 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+  sessionCheckContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1,
@@ -212,6 +286,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: "#0f172a",
+  },
+  inputError: {
+    borderColor: "#fca5a5",
+    backgroundColor: "#fef2f2",
+  },
+  fieldError: {
+    fontSize: 13,
+    color: "#dc2626",
+    marginTop: 2,
   },
   authButton: {
     backgroundColor: "#1e40af",

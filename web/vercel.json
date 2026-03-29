@@ -2,11 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "rewrites": [
-    {
-      "source": "/api/proxy/:path*",
-      "destination": "${BACKEND_URL}/api/:path*"
-    }
-  ]
+  "outputDirectory": ".next"
 }

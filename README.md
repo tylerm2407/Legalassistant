@@ -11,6 +11,7 @@ CaseMate closes that gap with AI that remembers your situation, knows your state
 [![Test Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen)](tests/)
 [![Backend Tests](https://img.shields.io/badge/backend_tests-246-blue)](tests/)
 [![Frontend Tests](https://img.shields.io/badge/frontend_tests-139-blue)](web/__tests__/)
+[![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-6B57FF?logo=claude)](https://claude.ai/code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
@@ -138,6 +139,7 @@ For the full technical deep dive -- data flow diagrams, database schema, memory 
 | Validation | Pydantic v2 | Strict typing on all models and API contracts |
 | PDF Extraction | pdfplumber | Text extraction from uploaded legal documents |
 | Logging | structlog | Structured logging with user_id context |
+| Development | Claude Code (Anthropic) | AI-assisted architecture, implementation, testing, and deployment |
 | Deployment | Vercel (frontend) + Railway (backend) | Production hosting with CI/CD |
 
 ---
@@ -407,6 +409,54 @@ All architectural decisions are documented with context, options considered, and
 
 ---
 
+## Documentation
+
+Comprehensive documentation for every CaseMate subsystem lives in `docs/`:
+
+### Architecture & Design
+
+| Doc | Description |
+|-----|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Full technical architecture, data flow diagrams, system design |
+| [MEMORY_SYSTEM.md](docs/MEMORY_SYSTEM.md) | Core memory injection pattern — prompt assembly, fact extraction, conversation persistence |
+| [LEGAL_KNOWLEDGE_BASE.md](docs/LEGAL_KNOWLEDGE_BASE.md) | 50-state statute database, classifier algorithm, state law organization |
+| [LEGAL_DOMAINS.md](docs/LEGAL_DOMAINS.md) | 10 legal domains — keywords, statutes, response patterns, coverage matrix |
+| [FRONTEND.md](docs/FRONTEND.md) | Next.js 14 web app — pages, components, state management, API client |
+| [MOBILE.md](docs/MOBILE.md) | Expo React Native — screens, navigation, shared types, EAS builds |
+| [DATABASE.md](docs/DATABASE.md) | Supabase schema, JSONB structures, RLS policies, indexes, migrations |
+
+### Features & Subsystems
+
+| Doc | Description |
+|-----|-------------|
+| [ACTIONS.md](docs/ACTIONS.md) | Demand letter, rights summary, and checklist generators |
+| [DEADLINES.md](docs/DEADLINES.md) | Auto-detection from conversations + manual deadline tracking |
+| [REFERRALS.md](docs/REFERRALS.md) | Attorney matching with weighted relevance scoring |
+| [EXPORT.md](docs/EXPORT.md) | Branded PDF generation and email delivery |
+| [RIGHTS_LIBRARY.md](docs/RIGHTS_LIBRARY.md) | 19 pre-built Know Your Rights guides |
+| [PAYMENTS.md](docs/PAYMENTS.md) | Stripe integration — checkout, webhooks, subscriptions |
+| [WORKFLOWS.md](docs/WORKFLOWS.md) | Guided legal workflow engine and templates |
+| [DOCUMENT_PIPELINE.md](docs/DOCUMENT_PIPELINE.md) | PDF/image upload, text extraction, fact injection |
+
+### Development & Operations
+
+| Doc | Description |
+|-----|-------------|
+| [UTILS.md](docs/UTILS.md) | Auth, rate limiting, retry logic, API client, structured logging |
+| [TESTING.md](docs/TESTING.md) | Test strategy, fixtures, mocking patterns, coverage targets |
+| [EXTENDING.md](docs/EXTENDING.md) | How to add new domains, states, actions, workflows, and endpoints |
+| [API.md](docs/API.md) | Full API reference with request/response schemas |
+| [MODELS.md](docs/MODELS.md) | All Pydantic and TypeScript model definitions |
+| [SECURITY.md](docs/SECURITY.md) | Auth, secrets management, RLS, rate limiting |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | CI/CD pipeline, Docker, Vercel/Railway/EAS deployment |
+| [CI_CD.md](docs/CI_CD.md) | GitHub Actions workflows and build pipeline |
+
+### Decision Records
+
+20 Architecture Decision Records in [docs/decisions/](docs/decisions/) — see the [ADR table](#architecture-decision-records) below.
+
+---
+
 ## Business Model
 
 | Tier | Price | Includes |
@@ -464,6 +514,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
 
 ## Acknowledgments
 
+- [Claude Code](https://claude.ai/code) by Anthropic -- Built entirely with Claude Code, from architecture planning through implementation, testing (290+ tests), and deployment pipeline. Every commit in this repository is co-authored with Claude Opus 4.6.
 - [Anthropic Claude](https://anthropic.com) -- AI reasoning engine powering all legal analysis
 - [Supabase](https://supabase.com) -- Database, auth, and storage infrastructure
 - [Next.js](https://nextjs.org) -- Frontend framework

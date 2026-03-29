@@ -114,6 +114,15 @@ chore: update PROGRESS.md
 | mypy errors on fresh install | Run `make install` first, then `mypy backend/`. The dev dependencies include type stubs. |
 | Frontend tests fail with module errors | Run `cd web && npm install` to ensure all frontend dependencies are installed. |
 
+## Development Approach
+
+CaseMate is developed with [Claude Code](https://claude.ai/code), Anthropic's AI development CLI. Every commit is co-authored with Claude Opus 4.6. The workflow:
+
+1. Architecture decisions documented in ADRs (`docs/decisions/`)
+2. Implementation with Claude Code (memory injection, legal modules, tests)
+3. `make verify` before every commit (lint + 290+ tests)
+4. CI/CD validates on push, deploys on merge to main
+
 ## Architecture
 
 See `ARCHITECTURE.md` for the full system design. The memory injection pattern in `backend/memory/injector.py` is the core differentiator — protect it above everything else.

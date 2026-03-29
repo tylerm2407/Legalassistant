@@ -22,6 +22,25 @@ addopts = "-v --tb=short"
 
 `asyncio_mode = "auto"` means all `async def test_*` functions are automatically treated as async tests without needing the `@pytest.mark.asyncio` decorator.
 
+### Running Specific Tests
+
+```bash
+# Run a single test file
+python -m pytest tests/test_memory_injector.py -v
+
+# Run a single test class
+python -m pytest tests/test_memory_injector.py::TestBuildSystemPromptIncludesProfileData -v
+
+# Run a single test method
+python -m pytest tests/test_memory_injector.py::TestBuildSystemPromptIncludesProfileData::test_includes_state -v
+
+# Run with full output (no truncation)
+python -m pytest tests/test_memory_injector.py -v --tb=long
+
+# Run with coverage for a specific module
+python -m pytest tests/test_memory_injector.py --cov=backend.memory.injector --cov-report=term-missing
+```
+
 ## Test Files
 
 There are 18 test files in `tests/`:
@@ -91,10 +110,192 @@ Patches `backend.memory.profile._get_supabase` to intercept all `table().select(
 - **Supabase:** Always patched via `mock_supabase`. The client intercepts chained method calls on `.table()`.
 - **No real network calls:** Tests never hit Anthropic, Supabase, or Redis. If a test needs Redis behavior, mock the `_get_redis()` function in `backend/utils/rate_limiter.py`.
 
+### How to Mock Specific Behaviors
+
+#### Mock a Claude response with custom JSON
+
+```python
+async def test_fact_extraction(self, mock_anthropic, mock_anthropic_response):
+    mock_anthropic.messages.create.return_value = mock_anthropic_response(
+        '{"new_facts": ["Landlord did not return deposit within 30 days"]}'
+    )
+    # Now call the function under test — it will get this response from Claude
+```
+
+#### Mock a Supabase query result
+
+```python
+async def test_profile_lookup(self, mock_supabase):
+    # Configure the mock to return a profile dict
+    mock_supabase.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value.data = {
+        "user_id": "test-user",
+        "state": "MA",
+        # ... other fields
+    }
+```
+
+#### Mock Redis for rate limiting
+
+```python
+from unittest.mock import patch, AsyncMock
+
+async def test_rate_limit_exceeded(self):
+    mock_redis = AsyncMock()
+    mock_redis.incr.return_value = 21  # Over the 20/min limit
+    mock_redis.expire = AsyncMock()
+    with patch("backend.utils.rate_limiter._get_redis", return_value=mock_redis):
+        # Test that the endpoint returns 429
+```
+
 ## Test Organization
 
 Tests use class-based grouping (e.g. `TestBuildSystemPromptIncludesProfileData`) to logically group related assertions. Each test method verifies one specific behavior. See `test_memory_injector.py` for the canonical example — it has 6 test classes covering profile data, state laws, active issues, legal facts, response rules, and legal area classification.
 
+### Writing a New Test — Step by Step
+
+1. **Identify the module** you're testing and find or create the corresponding test file (`tests/test_{module}.py`)
+
+2. **Create a test class** that describes what you're testing:
+   ```python
+   class TestNewFeatureBehavior:
+       """Tests for the new feature's specific behavior."""
+   ```
+
+3. **Use fixtures** from `conftest.py` as function parameters:
+   ```python
+   async def test_does_something(self, mock_profile, mock_anthropic):
+   ```
+
+4. **Arrange → Act → Assert** pattern:
+   ```python
+   async def test_extracts_deadline_from_conversation(
+       self, mock_anthropic, mock_anthropic_response, mock_supabase
+   ):
+       # Arrange: set up mock responses
+       mock_anthropic.messages.create.return_value = mock_anthropic_response(
+           '[{"title": "File complaint", "date": "2026-04-15"}]'
+       )
+
+       # Act: call the function under test
+       result = await detect_deadlines(user_id="test", conversation=[...])
+
+       # Assert: verify the expected behavior
+       assert len(result) == 1
+       assert result[0].title == "File complaint"
+   ```
+
+5. **One assertion per test** (when practical) — each test method should verify one specific behavior
+
+6. **Run your test** to verify it passes:
+   ```bash
+   python -m pytest tests/test_new_module.py -v
+   ```
+
+## Frontend Testing
+
+The web frontend uses **Jest** + **React Testing Library** for component and integration tests.
+
+### Setup
+
+```bash
+cd web
+npm test              # Run all tests
+npm test -- --watch   # Watch mode for development
+npm test -- --coverage # With coverage report
+```
+
+### Test Files
+
+Frontend tests are co-located with components or in `web/__tests__/`:
+
+| File Pattern | What it tests |
+|-------------|---------------|
+| `__tests__/components/*.test.tsx` | React component rendering and interaction |
+| `__tests__/api/*.test.ts` | API client functions |
+| `__tests__/auth/*.test.tsx` | Authentication flow |
+| `__tests__/supabase/*.test.ts` | Supabase client integration |
+
+### Component Test Pattern
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ChatInterface } from '@/components/ChatInterface';
+
+describe('ChatInterface', () => {
+  it('renders message input', () => {
+    render(<ChatInterface />);
+    expect(screen.getByPlaceholderText('Type your legal question...')).toBeInTheDocument();
+  });
+
+  it('sends message on submit', async () => {
+    const mockSend = jest.fn();
+    render(<ChatInterface onSend={mockSend} />);
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test question' } });
+    fireEvent.click(screen.getByRole('button', { name: /send/i }));
+    expect(mockSend).toHaveBeenCalledWith('test question');
+  });
+});
+```
+
+### Mocking the API Client
+
+```typescript
+jest.mock('@/lib/api', () => ({
+  api: {
+    chat: jest.fn().mockResolvedValue({ response: 'mocked response', legal_area: 'general' }),
+    getProfile: jest.fn().mockResolvedValue({ state: 'MA', legal_facts: [] }),
+  },
+}));
+```
+
 ## Coverage
 
-Coverage is reported for the `backend/` package via `--cov=backend --cov-report=term-missing`. The `term-missing` report shows which lines are not covered. The memory injector (`backend/memory/injector.py`) should always have 100% coverage.
+Coverage is reported for the `backend/` package via `--cov=backend --cov-report=term-missing`. The `term-missing` report shows which lines are not covered.
+
+### Coverage Targets
+
+| Module | Target | Notes |
+|--------|--------|-------|
+| Overall backend | 89% | Current threshold |
+| `backend/memory/injector.py` | 100% | Core differentiator — no untested paths |
+| `backend/memory/updater.py` | 90%+ | Background task with error handling branches |
+| `backend/legal/classifier.py` | 90%+ | All 10 domains + edge cases |
+| `backend/actions/` | 90%+ | All three generators |
+| `backend/utils/` | 85%+ | Auth, rate limiting, retry |
+
+### Reading Coverage Output
+
+```
+Name                              Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------
+backend/memory/injector.py           45      0   100%
+backend/memory/updater.py            38      3    92%   67-69
+backend/legal/classifier.py          52      4    92%   88-91
+```
+
+- `Stmts`: Total executable statements
+- `Miss`: Statements not covered by any test
+- `Cover`: Percentage covered
+- `Missing`: Line numbers not covered — these are what you need to test
+
+### CI Integration
+
+`make verify` runs `make lint` then `make test`. This is the pre-commit gate:
+
+```bash
+make verify
+# Equivalent to:
+#   ruff check backend/ tests/
+#   ruff format --check backend/ tests/
+#   python -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing
+```
+
+If any lint error or test failure occurs, `make verify` exits non-zero. **Never commit with a failing `make verify`.**
+
+---
+
+## Related
+
+- [UTILS.md](UTILS.md) — Backend utilities that are heavily tested
+- [MEMORY_SYSTEM.md](MEMORY_SYSTEM.md) — The system most critical to test
+- [MODELS.md](MODELS.md) — Pydantic models used in test fixtures

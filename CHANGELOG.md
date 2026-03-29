@@ -3,6 +3,8 @@
 All notable changes to CaseMate are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+> All changes in this project are planned and implemented with [Claude Code](https://claude.ai/code) by Anthropic.
+
 ---
 
 ## [Unreleased]

@@ -1,0 +1,49 @@
+name: Feature Request
+description: Suggest a new feature for CaseMate
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should this feature work?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative approaches you've considered.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Memory / Profile
+        - Legal Intelligence
+        - Chat Interface
+        - Document Analysis
+        - Action Generator
+        - Deadlines / Workflows
+        - Attorney Referrals
+        - Mobile App
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, or references.
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        🤖 CaseMate is developed with [Claude Code](https://claude.ai/code) by Anthropic.

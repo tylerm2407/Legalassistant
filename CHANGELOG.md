@@ -7,9 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased]
+## [0.5.0] — 2026-03-29
 
 ### Added
+- **Rich OpenAPI documentation** — 12 tag groups, markdown description, contact/license info, error response schemas on all endpoints
+- **Standardized error response models** — `NotFoundResponse`, `ForbiddenResponse`, `PaymentRequiredResponse`, `RateLimitResponse`, `ServiceUnavailableResponse`, `BadRequestResponse`, `PayloadTooLargeResponse`, `InternalErrorResponse` in OpenAPI schema
+- **Backend smoke test in CI** — starts uvicorn in CI, runs `scripts/smoke_test.py` against live local server before Docker build
 - **SSE streaming chat** with two-phase send strategy (immediate acknowledgment + streamed response via GET `/api/chat/{id}/stream`)
 - **Hybrid legal classifier** with keyword-first classification and LLM fallback for ambiguous queries
 - **Anthropic prompt caching** with static/dynamic content split using `cache_control` blocks for reduced latency and cost

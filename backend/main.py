@@ -64,6 +64,16 @@ from backend.memory.profile import (
 )
 from backend.memory.updater import update_profile_from_conversation
 from backend.models.legal_profile import LegalProfile
+from backend.models.responses import (
+    BadRequestResponse,
+    ForbiddenResponse,
+    InternalErrorResponse,
+    NotFoundResponse,
+    PayloadTooLargeResponse,
+    PaymentRequiredResponse,
+    RateLimitResponse,
+    ServiceUnavailableResponse,
+)
 from backend.payments.stripe_webhooks import handle_webhook
 from backend.payments.subscription import (
     CheckoutSessionResponse,
@@ -100,10 +110,121 @@ from backend.workflows.templates.definitions import (
 configure_logging()
 _logger = get_logger(__name__)
 
+_OPENAPI_TAGS: list[dict[str, str]] = [
+    {
+        "name": "Health & Monitoring",
+        "description": "Service health checks, metrics, and audit verification.",
+    },
+    {
+        "name": "Chat",
+        "description": (
+            "Core conversation endpoints. Each response is personalized using "
+            "the user's legal profile, state-specific statutes, and conversation "
+            "history with token budget management."
+        ),
+    },
+    {
+        "name": "Profile",
+        "description": (
+            "Legal profile CRUD. The profile is the persistent memory layer — "
+            "state, housing, employment, legal facts, and active issues."
+        ),
+    },
+    {
+        "name": "Actions",
+        "description": (
+            "AI-generated legal documents: demand letters, rights summaries, "
+            "and next-steps checklists — all pre-filled with profile context "
+            "and statute citations."
+        ),
+    },
+    {
+        "name": "Documents",
+        "description": (
+            "Upload legal documents (PDF, images) for text extraction and "
+            "AI-powered analysis. Extracted facts are injected into the profile."
+        ),
+    },
+    {
+        "name": "Conversations",
+        "description": "List, retrieve, and delete conversation history.",
+    },
+    {
+        "name": "Deadlines",
+        "description": (
+            "Auto-detected and manually created legal deadline tracking "
+            "with status management."
+        ),
+    },
+    {
+        "name": "Rights Library",
+        "description": (
+            "19 pre-built Know Your Rights guides across 10 legal domains "
+            "with rights, action steps, deadlines, and citations."
+        ),
+    },
+    {
+        "name": "Workflows",
+        "description": (
+            "Guided step-by-step legal process templates (eviction defense, "
+            "wage claims, small claims, etc.)."
+        ),
+    },
+    {
+        "name": "Export",
+        "description": "Generate branded PDFs and send documents via email.",
+    },
+    {
+        "name": "Attorneys",
+        "description": (
+            "Attorney referral search with state and specialty-based "
+            "weighted relevance scoring."
+        ),
+    },
+    {
+        "name": "Payments",
+        "description": (
+            "Stripe subscription lifecycle: checkout sessions, webhook "
+            "processing, subscription status, and cancellation."
+        ),
+    },
+]
+
 app = FastAPI(
     title="CaseMate — AI Legal Assistant",
-    description="Personalized AI legal assistant that remembers your legal situation.",
-    version="0.3.0",
+    description=(
+        "## Personalized legal guidance powered by persistent memory\n\n"
+        "CaseMate is an AI legal assistant that **remembers your situation** — "
+        "your state, housing, employment, active legal disputes, and facts "
+        "extracted from past conversations. Every response cites jurisdiction-"
+        "specific statutes and calculates concrete remedies.\n\n"
+        "### Core capabilities\n\n"
+        "- **Persistent legal memory** — profile auto-updates from every "
+        "conversation\n"
+        "- **50-state coverage** — 10 legal domains × 50 states + federal\n"
+        "- **Action generation** — demand letters, rights summaries, "
+        "checklists\n"
+        "- **Document analysis** — PDF/image upload with fact extraction\n"
+        "- **Deadline tracking** — auto-detected from conversations\n"
+        "- **SSE streaming** — real-time token-by-token chat responses\n\n"
+        "### Authentication\n\n"
+        "All endpoints except `/health`, `/api/waitlist`, and "
+        "`/api/payments/webhook` require a valid Supabase JWT in the "
+        "`Authorization: Bearer <token>` header."
+    ),
+    version="0.5.0",
+    openapi_tags=_OPENAPI_TAGS,
+    contact={
+        "name": "CaseMate Support",
+        "url": "https://casematelaw.com",
+        "email": "support@casematelaw.com",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # ---------- CORS ----------
@@ -352,7 +473,7 @@ MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
 # ---------- Endpoints ----------
 
 
-@app.get("/health")
+@app.get("/health", tags=["Health & Monitoring"])
 async def health_check() -> dict[str, object]:
     """Health check endpoint with lifecycle state and uptime.
 
@@ -362,12 +483,12 @@ async def health_check() -> dict[str, object]:
     lifecycle = get_lifecycle_manager().get_health()
     return {
         "status": "ok",
-        "version": "0.4.0",
+        "version": "0.5.0",
         "lifecycle": lifecycle,
     }
 
 
-@app.get("/metrics")
+@app.get("/metrics", tags=["Health & Monitoring"])
 async def metrics_endpoint() -> Response:
     """Expose in-process metrics for Prometheus scraping or monitoring.
 
@@ -377,7 +498,7 @@ async def metrics_endpoint() -> Response:
     return get_metrics_response()
 
 
-@app.get("/api/audit/verify")
+@app.get("/api/audit/verify", tags=["Health & Monitoring"])
 async def verify_audit_chain(
     user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, object]:
@@ -400,7 +521,18 @@ async def verify_audit_chain(
     return {"verification": result.model_dump(mode="json")}
 
 
-@app.post("/api/chat", response_model=ChatResponse)
+@app.post(
+    "/api/chat",
+    response_model=ChatResponse,
+    tags=["Chat"],
+    responses={
+        402: {"model": PaymentRequiredResponse},
+        404: {"model": NotFoundResponse},
+        429: {"model": RateLimitResponse},
+        500: {"model": InternalErrorResponse},
+        503: {"model": ServiceUnavailableResponse},
+    },
+)
 async def chat(
     request: ChatRequest,
     background_tasks: BackgroundTasks,
@@ -578,7 +710,15 @@ async def chat(
     )
 
 
-@app.get("/api/chat/{conversation_id}/stream")
+@app.get(
+    "/api/chat/{conversation_id}/stream",
+    tags=["Chat"],
+    responses={
+        404: {"model": NotFoundResponse},
+        429: {"model": RateLimitResponse},
+        503: {"model": ServiceUnavailableResponse},
+    },
+)
 async def chat_stream(
     conversation_id: str,
     message: str,
@@ -717,7 +857,13 @@ async def chat_stream(
     )
 
 
-@app.post("/api/profile")
+@app.post(
+    "/api/profile",
+    tags=["Profile"],
+    responses={
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def upsert_profile(
     request: ProfileRequest,
     user_id: str = Depends(verify_supabase_jwt),
@@ -762,7 +908,14 @@ async def upsert_profile(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@app.get("/api/profile/{user_id}")
+@app.get(
+    "/api/profile/{user_id}",
+    tags=["Profile"],
+    responses={
+        403: {"model": ForbiddenResponse},
+        404: {"model": NotFoundResponse},
+    },
+)
 async def get_user_profile(
     user_id: str,
     authenticated_user_id: str = Depends(verify_supabase_jwt),
@@ -791,7 +944,7 @@ async def get_user_profile(
     return {"profile": profile.model_dump(mode="json")}
 
 
-@app.get("/api/conversations")
+@app.get("/api/conversations", tags=["Conversations"])
 async def list_user_conversations(
     user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, object]:
@@ -807,7 +960,11 @@ async def list_user_conversations(
     return {"conversations": conversations}
 
 
-@app.get("/api/conversations/{conversation_id}")
+@app.get(
+    "/api/conversations/{conversation_id}",
+    tags=["Conversations"],
+    responses={404: {"model": NotFoundResponse}},
+)
 async def get_user_conversation(
     conversation_id: str,
     user_id: str = Depends(verify_supabase_jwt),
@@ -830,7 +987,11 @@ async def get_user_conversation(
     return {"conversation": conversation.model_dump(mode="json")}
 
 
-@app.delete("/api/conversations/{conversation_id}")
+@app.delete(
+    "/api/conversations/{conversation_id}",
+    tags=["Conversations"],
+    responses={404: {"model": NotFoundResponse}},
+)
 async def delete_user_conversation(
     conversation_id: str,
     user_id: str = Depends(verify_supabase_jwt),
@@ -853,7 +1014,16 @@ async def delete_user_conversation(
     return {"status": "deleted"}
 
 
-@app.post("/api/actions/letter")
+@app.post(
+    "/api/actions/letter",
+    tags=["Actions"],
+    responses={
+        402: {"model": PaymentRequiredResponse},
+        404: {"model": NotFoundResponse},
+        429: {"model": RateLimitResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def create_demand_letter(
     request: ActionRequest,
     user_id: str = Depends(require_subscription_or_free_tier),
@@ -889,7 +1059,16 @@ async def create_demand_letter(
         raise HTTPException(status_code=500, detail="Failed to generate demand letter.") from exc
 
 
-@app.post("/api/actions/rights")
+@app.post(
+    "/api/actions/rights",
+    tags=["Actions"],
+    responses={
+        402: {"model": PaymentRequiredResponse},
+        404: {"model": NotFoundResponse},
+        429: {"model": RateLimitResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def create_rights_summary(
     request: ActionRequest,
     user_id: str = Depends(require_subscription_or_free_tier),
@@ -925,7 +1104,16 @@ async def create_rights_summary(
         raise HTTPException(status_code=500, detail="Failed to generate rights summary.") from exc
 
 
-@app.post("/api/actions/checklist")
+@app.post(
+    "/api/actions/checklist",
+    tags=["Actions"],
+    responses={
+        402: {"model": PaymentRequiredResponse},
+        404: {"model": NotFoundResponse},
+        429: {"model": RateLimitResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def create_checklist(
     request: ActionRequest,
     user_id: str = Depends(require_subscription_or_free_tier),
@@ -961,7 +1149,18 @@ async def create_checklist(
         raise HTTPException(status_code=500, detail="Failed to generate checklist.") from exc
 
 
-@app.post("/api/documents")
+@app.post(
+    "/api/documents",
+    tags=["Documents"],
+    responses={
+        400: {"model": BadRequestResponse},
+        402: {"model": PaymentRequiredResponse},
+        404: {"model": NotFoundResponse},
+        413: {"model": PayloadTooLargeResponse},
+        429: {"model": RateLimitResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def upload_document(
     file: UploadFile,
     background_tasks: BackgroundTasks,
@@ -1033,7 +1232,11 @@ async def upload_document(
 # ---------- Deadline Endpoints ----------
 
 
-@app.post("/api/deadlines")
+@app.post(
+    "/api/deadlines",
+    tags=["Deadlines"],
+    responses={500: {"model": InternalErrorResponse}},
+)
 async def create_user_deadline(
     request: DeadlineCreateRequest,
     user_id: str = Depends(verify_supabase_jwt),
@@ -1063,7 +1266,7 @@ async def create_user_deadline(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@app.get("/api/deadlines")
+@app.get("/api/deadlines", tags=["Deadlines"])
 async def list_user_deadlines(
     user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, object]:
@@ -1079,7 +1282,14 @@ async def list_user_deadlines(
     return {"deadlines": [d.model_dump(mode="json") for d in deadlines]}
 
 
-@app.patch("/api/deadlines/{deadline_id}")
+@app.patch(
+    "/api/deadlines/{deadline_id}",
+    tags=["Deadlines"],
+    responses={
+        404: {"model": NotFoundResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def update_user_deadline(
     deadline_id: str,
     request: DeadlineUpdateRequest,
@@ -1107,7 +1317,11 @@ async def update_user_deadline(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@app.delete("/api/deadlines/{deadline_id}")
+@app.delete(
+    "/api/deadlines/{deadline_id}",
+    tags=["Deadlines"],
+    responses={404: {"model": NotFoundResponse}},
+)
 async def delete_user_deadline(
     deadline_id: str,
     user_id: str = Depends(verify_supabase_jwt),
@@ -1133,7 +1347,7 @@ async def delete_user_deadline(
 # ---------- Rights Library Endpoints ----------
 
 
-@app.get("/api/rights/domains")
+@app.get("/api/rights/domains", tags=["Rights Library"])
 async def get_rights_domains(
     _user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, object]:
@@ -1148,7 +1362,7 @@ async def get_rights_domains(
     return {"domains": get_domains()}
 
 
-@app.get("/api/rights/guides")
+@app.get("/api/rights/guides", tags=["Rights Library"])
 async def get_rights_guides_list(
     domain: str | None = None,
     _user_id: str = Depends(verify_supabase_jwt),
@@ -1166,7 +1380,11 @@ async def get_rights_guides_list(
     return {"guides": [g.model_dump() for g in guides]}
 
 
-@app.get("/api/rights/guides/{guide_id}")
+@app.get(
+    "/api/rights/guides/{guide_id}",
+    tags=["Rights Library"],
+    responses={404: {"model": NotFoundResponse}},
+)
 async def get_rights_guide(
     guide_id: str,
     _user_id: str = Depends(verify_supabase_jwt),
@@ -1202,7 +1420,7 @@ class WorkflowStartRequest(BaseModel):
     template_id: str
 
 
-@app.get("/api/workflows/templates")
+@app.get("/api/workflows/templates", tags=["Workflows"])
 async def list_workflow_templates(
     domain: str | None = None,
     _user_id: str = Depends(verify_supabase_jwt),
@@ -1220,7 +1438,14 @@ async def list_workflow_templates(
     return {"templates": [t.model_dump() for t in templates]}
 
 
-@app.post("/api/workflows")
+@app.post(
+    "/api/workflows",
+    tags=["Workflows"],
+    responses={
+        404: {"model": NotFoundResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def start_user_workflow(
     request: WorkflowStartRequest,
     user_id: str = Depends(verify_supabase_jwt),
@@ -1249,7 +1474,7 @@ async def start_user_workflow(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@app.get("/api/workflows")
+@app.get("/api/workflows", tags=["Workflows"])
 async def list_user_workflows(
     user_id: str = Depends(verify_supabase_jwt),
 ) -> dict[str, object]:
@@ -1265,7 +1490,11 @@ async def list_user_workflows(
     return {"workflows": workflows}
 
 
-@app.get("/api/workflows/{workflow_id}")
+@app.get(
+    "/api/workflows/{workflow_id}",
+    tags=["Workflows"],
+    responses={404: {"model": NotFoundResponse}},
+)
 async def get_user_workflow(
     workflow_id: str,
     user_id: str = Depends(verify_supabase_jwt),
@@ -1288,7 +1517,14 @@ async def get_user_workflow(
     return {"workflow": workflow.model_dump(mode="json")}
 
 
-@app.patch("/api/workflows/{workflow_id}/steps")
+@app.patch(
+    "/api/workflows/{workflow_id}/steps",
+    tags=["Workflows"],
+    responses={
+        404: {"model": NotFoundResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def update_user_workflow_step(
     workflow_id: str,
     request: WorkflowStepUpdateRequest,
@@ -1375,7 +1611,14 @@ class ExportEmailRequest(BaseModel):
     email: str = Field(..., max_length=320)
 
 
-@app.post("/api/export/document")
+@app.post(
+    "/api/export/document",
+    tags=["Export"],
+    responses={
+        400: {"model": BadRequestResponse},
+        402: {"model": PaymentRequiredResponse},
+    },
+)
 async def export_document(
     request: ExportDocumentRequest,
     user_id: str = Depends(require_subscription_or_free_tier),
@@ -1435,7 +1678,14 @@ async def export_document(
     )
 
 
-@app.post("/api/export/email")
+@app.post(
+    "/api/export/email",
+    tags=["Export"],
+    responses={
+        402: {"model": PaymentRequiredResponse},
+        500: {"model": InternalErrorResponse},
+    },
+)
 async def export_email(
     request: ExportEmailRequest,
     user_id: str = Depends(require_subscription_or_free_tier),
@@ -1482,7 +1732,7 @@ async def export_email(
 # ---------- Attorney Referral Endpoints ----------
 
 
-@app.get("/api/attorneys/search")
+@app.get("/api/attorneys/search", tags=["Attorneys"])
 async def search_attorneys(
     state: str,
     legal_area: str | None = None,
@@ -1518,7 +1768,11 @@ async def search_attorneys(
 # ---------- Payment Endpoints ----------
 
 
-@app.post("/api/payments/create-checkout-session")
+@app.post(
+    "/api/payments/create-checkout-session",
+    tags=["Payments"],
+    responses={500: {"model": InternalErrorResponse}},
+)
 async def create_checkout(
     request: CreateCheckoutRequest,
     user_id: str = Depends(verify_supabase_jwt),
@@ -1543,7 +1797,11 @@ async def create_checkout(
     )
 
 
-@app.post("/api/payments/webhook")
+@app.post(
+    "/api/payments/webhook",
+    tags=["Payments"],
+    responses={400: {"model": BadRequestResponse}},
+)
 async def stripe_webhook(request: Request) -> dict[str, str]:
     """Handle incoming Stripe webhook events.
 
@@ -1564,7 +1822,7 @@ async def stripe_webhook(request: Request) -> dict[str, str]:
     return await handle_webhook(payload, sig_header)
 
 
-@app.get("/api/payments/subscription")
+@app.get("/api/payments/subscription", tags=["Payments"])
 async def get_user_subscription(
     user_id: str = Depends(verify_supabase_jwt),
 ) -> SubscriptionStatus:
@@ -1579,7 +1837,11 @@ async def get_user_subscription(
     return await get_subscription_status(user_id)
 
 
-@app.post("/api/payments/cancel")
+@app.post(
+    "/api/payments/cancel",
+    tags=["Payments"],
+    responses={400: {"model": BadRequestResponse}},
+)
 async def cancel_user_subscription(
     user_id: str = Depends(verify_supabase_jwt),
 ) -> SubscriptionStatus:

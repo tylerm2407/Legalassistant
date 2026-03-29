@@ -27,7 +27,7 @@ def _test(
     name: str,
     method: str,
     path: str,
-    expected_status: int,
+    expected_status: int | set[int],
     body: dict[str, str] | None = None,
 ) -> bool:
     """Run a single HTTP test against the deployment.
@@ -36,13 +36,18 @@ def _test(
         name: Human-readable test label.
         method: HTTP method (GET or POST).
         path: URL path to request.
-        expected_status: Expected HTTP status code.
+        expected_status: Expected HTTP status code, or a set of valid codes.
         body: Optional JSON body for POST requests.
 
     Returns:
         True if the response status matches expected_status.
     """
     url = f"{_base_url()}{path}"
+    valid = (
+        expected_status
+        if isinstance(expected_status, set)
+        else {expected_status}
+    )
     start = time.monotonic()
     try:
         if method == "GET":
@@ -51,11 +56,12 @@ def _test(
             resp = requests.post(url, json=body, timeout=30)
 
         latency_ms = round((time.monotonic() - start) * 1000)
-        if resp.status_code == expected_status:
+        if resp.status_code in valid:
             print(f"  PASS | {name} ({latency_ms}ms)")
             return True
+        expected_str = "/".join(str(c) for c in sorted(valid))
         print(
-            f"  FAIL | {name} — expected {expected_status},"
+            f"  FAIL | {name} — expected {expected_str},"
             f" got {resp.status_code} ({latency_ms}ms)",
         )
         return False
@@ -80,9 +86,13 @@ def main() -> None:
     results.append(_test("OpenAPI docs", "GET", "/docs", 200))
     results.append(_test("ReDoc", "GET", "/redoc", 200))
 
-    # Auth-gated endpoints return 401/403 without token
-    results.append(_test("Chat without auth → 401/403", "POST", "/api/chat", 403))
-    results.append(_test("Profile without auth → 401/403", "GET", "/api/profile/test", 403))
+    # Auth-gated endpoints return 401 or 403 without token
+    results.append(
+        _test("Chat without auth", "POST", "/api/chat", {401, 403}),
+    )
+    results.append(
+        _test("Profile without auth", "GET", "/api/profile/test", {401, 403}),
+    )
 
     # Non-existent routes
     results.append(_test("Unknown route → 404", "GET", "/api/nonexistent", 404))

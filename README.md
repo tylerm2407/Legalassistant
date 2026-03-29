@@ -403,7 +403,7 @@ CaseMate ships with a complete CI/CD pipeline, multi-platform deployment infrast
 
 | Service | URL | Verification |
 |---------|-----|--------------|
-| Backend API | `https://api.casematelaw.com` | `curl https://api.casematelaw.com/health` → `{"status": "ok", "version": "0.4.0"}` |
+| Backend API | `https://api.casematelaw.com` | `curl https://api.casematelaw.com/health` → `{"status": "ok", "version": "0.5.0"}` |
 | Frontend | `https://casematelaw.com` | HTTP 200 with CaseMate branding |
 | Health Check | `https://api.casematelaw.com/health` | Returns status, version, lifecycle state, and uptime |
 | Metrics | `https://api.casematelaw.com/metrics` | Prometheus-compatible request metrics |

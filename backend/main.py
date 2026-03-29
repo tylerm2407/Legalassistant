@@ -152,8 +152,7 @@ _OPENAPI_TAGS: list[dict[str, str]] = [
     {
         "name": "Deadlines",
         "description": (
-            "Auto-detected and manually created legal deadline tracking "
-            "with status management."
+            "Auto-detected and manually created legal deadline tracking with status management."
         ),
     },
     {
@@ -177,8 +176,7 @@ _OPENAPI_TAGS: list[dict[str, str]] = [
     {
         "name": "Attorneys",
         "description": (
-            "Attorney referral search with state and specialty-based "
-            "weighted relevance scoring."
+            "Attorney referral search with state and specialty-based weighted relevance scoring."
         ),
     },
     {

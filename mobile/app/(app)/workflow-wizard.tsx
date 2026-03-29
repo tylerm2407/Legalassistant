@@ -38,7 +38,7 @@ export default function WorkflowWizardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{workflow.template_name}</Text>
+      <Text style={styles.title}>{workflow.title}</Text>
       <Text style={styles.status}>Status: {workflow.status}</Text>
       <View style={styles.steps}>
         {workflow.steps.map((step: WorkflowStep, i: number) => (
@@ -49,7 +49,7 @@ export default function WorkflowWizardScreen() {
               </View>
               <Text style={[styles.stepTitle, step.status === "completed" && styles.stepTitleCompleted]}>{step.title}</Text>
             </View>
-            {step.description && <Text style={styles.stepDesc}>{step.description}</Text>}
+            {step.explanation && <Text style={styles.stepDesc}>{step.explanation}</Text>}
             {step.status !== "completed" && (
               <TouchableOpacity style={styles.completeBtn} onPress={() => handleStepComplete(i)}>
                 <Text style={styles.completeBtnText}>Mark Complete</Text>

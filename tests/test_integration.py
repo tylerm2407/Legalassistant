@@ -102,9 +102,7 @@ def test_openapi_docs_available(integration_client: TestClient) -> None:
 # ---------- Full Chat Pipeline ----------
 
 
-def test_full_chat_pipeline(
-    integration_client: TestClient, _sample_profile: LegalProfile
-) -> None:
+def test_full_chat_pipeline(integration_client: TestClient, _sample_profile: LegalProfile) -> None:
     """Complete chat flow: profile lookup -> classify -> prompt build -> response."""
     mock_claude_response = MagicMock()
     mock_claude_response.content = [TextBlock(type="text", text="Based on Massachusetts law...")]
@@ -122,7 +120,11 @@ def test_full_chat_pipeline(
             new_callable=AsyncMock,
             return_value=MagicMock(domain="landlord_tenant", confidence=0.9, method="keyword"),
         ),
-        patch("backend.main.create_conversation", new_callable=AsyncMock, return_value=mock_conversation),
+        patch(
+            "backend.main.create_conversation",
+            new_callable=AsyncMock,
+            return_value=mock_conversation,
+        ),
         patch("backend.main.save_conversation", new_callable=AsyncMock),
         patch("backend.main.update_profile_from_conversation", new_callable=AsyncMock),
         patch("backend.main.detect_and_save_deadlines", new_callable=AsyncMock),
@@ -209,7 +211,9 @@ def test_demand_letter_pipeline(
 
     with (
         patch("backend.main.get_profile", new_callable=AsyncMock, return_value=_sample_profile),
-        patch("backend.main.generate_demand_letter", new_callable=AsyncMock, return_value=mock_letter),
+        patch(
+            "backend.main.generate_demand_letter", new_callable=AsyncMock, return_value=mock_letter
+        ),
     ):
         resp = integration_client.post(
             "/api/actions/letter",
@@ -233,7 +237,9 @@ def test_rights_summary_pipeline(
 
     with (
         patch("backend.main.get_profile", new_callable=AsyncMock, return_value=_sample_profile),
-        patch("backend.main.generate_rights_summary", new_callable=AsyncMock, return_value=mock_rights),
+        patch(
+            "backend.main.generate_rights_summary", new_callable=AsyncMock, return_value=mock_rights
+        ),
     ):
         resp = integration_client.post(
             "/api/actions/rights",
@@ -243,9 +249,7 @@ def test_rights_summary_pipeline(
         assert "FLSA" in resp.json()["rights"]["text"]
 
 
-def test_checklist_pipeline(
-    integration_client: TestClient, _sample_profile: LegalProfile
-) -> None:
+def test_checklist_pipeline(integration_client: TestClient, _sample_profile: LegalProfile) -> None:
     """Full checklist generation pipeline."""
     mock_checklist = MagicMock()
     mock_checklist.model_dump.return_value = {
@@ -258,7 +262,9 @@ def test_checklist_pipeline(
 
     with (
         patch("backend.main.get_profile", new_callable=AsyncMock, return_value=_sample_profile),
-        patch("backend.main.generate_checklist", new_callable=AsyncMock, return_value=mock_checklist),
+        patch(
+            "backend.main.generate_checklist", new_callable=AsyncMock, return_value=mock_checklist
+        ),
     ):
         resp = integration_client.post(
             "/api/actions/checklist",

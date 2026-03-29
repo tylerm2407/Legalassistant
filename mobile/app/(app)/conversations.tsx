@@ -58,7 +58,7 @@ export default function ConversationsScreen() {
             <Text style={styles.cardArea}>{(item.legal_area || "general").replace("_", " ")}</Text>
             <Text style={styles.cardDate}>{new Date(item.updated_at).toLocaleDateString()}</Text>
           </View>
-          <Text style={styles.cardPreview} numberOfLines={2}>{item.last_message || "No messages"}</Text>
+          <Text style={styles.cardPreview} numberOfLines={2}>{item.preview || "No messages"}</Text>
           <Text style={styles.cardCount}>{item.message_count} messages</Text>
         </TouchableOpacity>
       )}

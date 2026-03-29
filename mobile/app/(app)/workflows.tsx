@@ -59,7 +59,7 @@ export default function WorkflowsScreen() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>{item.name}</Text>
+              <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.cardDesc}>{item.description}</Text>
               <Text style={styles.cardMeta}>{item.steps.length} steps • {item.domain.replace("_", " ")}</Text>
               <TouchableOpacity style={styles.startBtn} onPress={() => handleStart(item.id)}>
@@ -78,7 +78,7 @@ export default function WorkflowsScreen() {
               style={styles.card}
               onPress={() => router.push({ pathname: "/(app)/workflow-wizard", params: { workflowId: item.id } } as any)}
             >
-              <Text style={styles.cardTitle}>{item.template_name}</Text>
+              <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.cardMeta}>Status: {item.status} • {item.completed_steps}/{item.total_steps} steps</Text>
             </TouchableOpacity>
           )}

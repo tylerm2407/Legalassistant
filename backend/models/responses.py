@@ -93,10 +93,7 @@ class PaymentRequiredResponse(ErrorResponse):
 
     detail: str = Field(
         ...,
-        examples=[
-            "Free tier limit reached (5 messages/month). "
-            "Subscribe for unlimited access."
-        ],
+        examples=["Free tier limit reached (5 messages/month). Subscribe for unlimited access."],
     )
 
 

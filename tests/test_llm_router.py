@@ -220,6 +220,46 @@ class TestLLMRouterChat:
         assert metrics["anthropic"]["total_calls"] == 1
 
 
+class TestLLMRouterStream:
+    """Tests for the stream() method with mocked providers."""
+
+    @pytest.mark.asyncio
+    async def test_stream_primary_success(self, router: LLMRouter) -> None:
+        """Primary streaming returns openai provider name and stream object."""
+        mock_stream = AsyncMock()
+        mock_client = AsyncMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_stream)
+
+        with patch("backend.utils.llm_router.get_openai_client", return_value=mock_client):
+            provider, stream_obj = await router.stream("system", [{"role": "user", "content": "q"}])
+
+        assert provider == "openai"
+        assert stream_obj is mock_stream
+
+    @pytest.mark.asyncio
+    async def test_stream_fallback_on_primary_failure(self, router: LLMRouter) -> None:
+        """When primary streaming fails, falls back to Anthropic stream."""
+        import openai as openai_mod
+
+        mock_oai = AsyncMock()
+        mock_oai.chat.completions.create = AsyncMock(
+            side_effect=openai_mod.APIError(message="down", request=MagicMock(), body=None)
+        )
+
+        mock_anthropic_stream = MagicMock()
+        mock_anthropic = MagicMock()
+        mock_anthropic.messages.stream = MagicMock(return_value=mock_anthropic_stream)
+
+        with (
+            patch("backend.utils.llm_router.get_openai_client", return_value=mock_oai),
+            patch("backend.utils.llm_router.get_anthropic_client", return_value=mock_anthropic),
+        ):
+            provider, stream_obj = await router.stream("system", [{"role": "user", "content": "q"}])
+
+        assert provider == "anthropic"
+        assert stream_obj is mock_anthropic_stream
+
+
 class TestLLMRouterSingleton:
     """Tests for the get_llm_router singleton."""
 

@@ -27,7 +27,9 @@ Reference doc for Mailchimp setup. Three campaigns to configure before launch.
 > We'll email you the moment CaseMate is live. Early waitlist members get priority access and launch pricing.
 >
 > In the meantime, follow us for legal tips and updates:
-> - Instagram: @casematelaw
+> - TikTok: @casemate_legal
+> - Instagram: @casemate12
+> - Facebook: CaseMate Legal
 > - X: @casematelaw
 > - LinkedIn: CaseMate
 >

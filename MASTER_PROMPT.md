@@ -29,7 +29,7 @@ Every Claude API call injects the user's complete legal profile as structured co
 - **168 passing tests** with full backend coverage before launch
 - **All 50 US states** covered with state-specific legal statute injection
 - **19 Know Your Rights guides** across 10 legal domains, ready at launch
-- Active Instagram with first post live: [@casematelaw](https://www.instagram.com/p/DWcK7XfCavA/)
+- Active Instagram with first post live: [@casemate12](https://www.instagram.com/p/DWcK7XfCavA/)
 
 ### What CaseMate Is NOT
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { findAttorneys } from "@/lib/api";
+import { colors } from "@/lib/theme";
 import type { ReferralSuggestion } from "@/lib/types";
 
 export default function AttorneysScreen() {
@@ -24,15 +25,15 @@ export default function AttorneysScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.searchBar}>
-        <TextInput style={styles.input} placeholder="State (e.g. CA)" value={state} onChangeText={setState} autoCapitalize="characters" maxLength={2} placeholderTextColor="#94a3b8" />
-        <TextInput style={[styles.input, { flex: 2 }]} placeholder="Legal area (optional)" value={legalArea} onChangeText={setLegalArea} placeholderTextColor="#94a3b8" />
+        <TextInput style={styles.input} placeholder="State (e.g. CA)" value={state} onChangeText={setState} autoCapitalize="characters" maxLength={2} placeholderTextColor={colors.textMuted} />
+        <TextInput style={[styles.input, { flex: 2 }]} placeholder="Legal area (optional)" value={legalArea} onChangeText={setLegalArea} placeholderTextColor={colors.textMuted} />
         <TouchableOpacity style={styles.searchBtn} onPress={handleSearch} disabled={loading}>
           <Text style={styles.searchBtnText}>Search</Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
-        <View style={styles.center}><ActivityIndicator size="large" color="#1e40af" /></View>
+        <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : (
         <FlatList
           data={results}
@@ -55,23 +56,23 @@ export default function AttorneysScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
+  container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   searchBar: { flexDirection: "row", padding: 16, gap: 8 },
   input: {
-    flex: 1, backgroundColor: "#ffffff", borderRadius: 10, paddingHorizontal: 12,
-    paddingVertical: 10, fontSize: 14, color: "#0f172a", borderWidth: 1, borderColor: "#e2e8f0",
+    flex: 1, backgroundColor: colors.inputBg, borderRadius: 10, paddingHorizontal: 12,
+    paddingVertical: 10, fontSize: 14, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
-  searchBtn: { backgroundColor: "#1e40af", paddingHorizontal: 16, borderRadius: 10, justifyContent: "center" },
+  searchBtn: { backgroundColor: colors.primary, paddingHorizontal: 16, borderRadius: 10, justifyContent: "center" },
   searchBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 14 },
   list: { paddingHorizontal: 16, gap: 12, paddingBottom: 16 },
   card: {
-    backgroundColor: "#ffffff", borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: "#e2e8f0",
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: colors.border,
   },
-  cardName: { fontSize: 16, fontWeight: "700", color: "#0f172a", marginBottom: 4 },
-  cardDetail: { fontSize: 13, color: "#64748b", marginBottom: 4 },
-  cardReason: { fontSize: 12, color: "#1e40af", fontWeight: "500" },
-  cardContact: { fontSize: 13, color: "#475569", marginTop: 4 },
-  emptyText: { color: "#94a3b8", fontSize: 14, textAlign: "center", padding: 40 },
+  cardName: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  cardDetail: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
+  cardReason: { fontSize: 12, color: colors.primary, fontWeight: "500" },
+  cardContact: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center", padding: 40 },
 });

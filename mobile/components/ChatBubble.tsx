@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { colors } from "@/lib/theme";
 import type { Message } from "@/lib/types";
 
 interface ChatBubbleProps {
@@ -94,23 +95,23 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   bubbleUser: {
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     borderBottomRightRadius: 4,
   },
   bubbleAssistant: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
   },
   bubbleError: {
-    backgroundColor: "#fef2f2",
+    backgroundColor: colors.error + "15",
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: "#fecaca",
+    borderColor: colors.error,
   },
   legalAreaTag: {
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
@@ -120,20 +121,20 @@ const styles = StyleSheet.create({
   legalAreaText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#1e40af",
+    color: colors.primary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   messageText: {
     fontSize: 15,
     lineHeight: 21,
-    color: "#1e293b",
+    color: colors.textSecondary,
   },
   messageTextUser: {
     color: "#ffffff",
   },
   messageTextError: {
-    color: "#991b1b",
+    color: colors.error,
   },
   boldText: {
     fontWeight: "700",
@@ -147,9 +148,9 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   timestampAssistant: {
-    color: "#94a3b8",
+    color: colors.textMuted,
   },
   timestampError: {
-    color: "#f87171",
+    color: colors.error,
   },
 });

@@ -16,6 +16,7 @@ import ChatBubble from "@/components/ChatBubble";
 import ActionSheet from "@/components/ActionSheet";
 import { chat, getConversation } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 import type { Message, ConversationDetail } from "@/lib/types";
 
 const WELCOME_MESSAGE: Message = {
@@ -54,7 +55,6 @@ export default function ChatScreen() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load existing conversation if navigated with a conversationId
   useEffect(() => {
     if (paramConvId) {
       setConversationId(paramConvId);
@@ -138,7 +138,6 @@ export default function ChatScreen() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Show suggested actions if any
       if (response.suggested_actions && response.suggested_actions.length > 0) {
         const actionsMessage: Message = {
           role: "assistant",
@@ -191,7 +190,7 @@ export default function ChatScreen() {
 
         <TouchableOpacity
           style={styles.topBarButton}
-          onPress={() => router.push("/(app)/conversations" as never)}
+          onPress={() => router.push("/(app)/(chat)/conversations" as never)}
           activeOpacity={0.7}
         >
           <Text style={styles.topBarButtonText}>History</Text>
@@ -201,11 +200,10 @@ export default function ChatScreen() {
       {/* Loading history indicator */}
       {isLoadingHistory ? (
         <View style={styles.historyLoading}>
-          <ActivityIndicator size="large" color="#1e40af" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.historyLoadingText}>Loading conversation...</Text>
         </View>
       ) : (
-        /* Messages */
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -242,7 +240,7 @@ export default function ChatScreen() {
         <TextInput
           style={styles.input}
           placeholder="Describe your legal situation..."
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={colors.textMuted}
           value={input}
           onChangeText={setInput}
           multiline
@@ -286,7 +284,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: "row",
@@ -294,30 +292,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: colors.border,
   },
   topBarButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     borderRadius: 8,
   },
   topBarButtonText: {
     fontSize: 13,
-    color: "#1e40af",
+    color: colors.primary,
     fontWeight: "600",
   },
   legalAreaIndicator: {
-    backgroundColor: "#f0fdf4",
+    backgroundColor: colors.elevated,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   legalAreaIndicatorText: {
     fontSize: 11,
-    color: "#15803d",
+    color: colors.success,
     fontWeight: "700",
     textTransform: "capitalize",
   },
@@ -329,7 +327,7 @@ const styles = StyleSheet.create({
   },
   historyLoadingText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   messagesList: {
     paddingVertical: 16,
@@ -341,9 +339,9 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: colors.border,
   },
   typingDots: {
     flexDirection: "row",
@@ -353,7 +351,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     opacity: 0.4,
   },
   typingDot1: {
@@ -367,7 +365,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textMuted,
     fontStyle: "italic",
   },
   inputBar: {
@@ -375,16 +373,16 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: colors.border,
     gap: 8,
   },
   actionButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 2,
@@ -394,12 +392,12 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: colors.inputBg,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
-    color: "#0f172a",
+    color: colors.text,
     maxHeight: 120,
     minHeight: 40,
   },
@@ -407,13 +405,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 2,
   },
   sendButtonDisabled: {
-    backgroundColor: "#cbd5e1",
+    backgroundColor: colors.border,
   },
   sendButtonIcon: {
     color: "#ffffff",

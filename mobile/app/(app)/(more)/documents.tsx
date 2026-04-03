@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import DocumentPickerComponent from "@/components/DocumentPicker";
 import { getProfile } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 
 interface DocumentEntry {
   id: string;
@@ -23,14 +25,20 @@ export default function DocumentsScreen() {
   const [documents, setDocuments] = useState<DocumentEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<DocumentEntry | null>(null);
-
-  const userId = "user_placeholder";
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    loadDocuments();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) setUserId(session.user.id);
+    });
   }, []);
 
+  useEffect(() => {
+    if (userId) loadDocuments();
+  }, [userId]);
+
   const loadDocuments = async () => {
+    if (!userId) return;
     setIsLoading(true);
     try {
       const profile = await getProfile(userId);
@@ -110,7 +118,7 @@ export default function DocumentsScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1e40af" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading documents...</Text>
       </View>
     );
@@ -118,7 +126,6 @@ export default function DocumentsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Document Picker */}
       <View style={styles.pickerSection}>
         <DocumentPickerComponent
           userId={userId}
@@ -126,7 +133,6 @@ export default function DocumentsScreen() {
         />
       </View>
 
-      {/* Documents list */}
       <FlatList
         data={documents}
         renderItem={renderDocument}
@@ -143,7 +149,6 @@ export default function DocumentsScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Detail modal */}
       <Modal
         visible={selectedDoc !== null}
         animationType="slide"
@@ -213,17 +218,18 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   pickerSection: {
     padding: 20,
@@ -236,7 +242,7 @@ const styles = StyleSheet.create({
   },
   listHeader: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
     fontWeight: "500",
     marginBottom: 12,
     marginTop: 8,
@@ -244,11 +250,11 @@ const styles = StyleSheet.create({
   documentCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     marginBottom: 10,
     gap: 14,
   },
@@ -256,7 +262,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 10,
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -270,15 +276,15 @@ const styles = StyleSheet.create({
   docFilename: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#0f172a",
+    color: colors.text,
   },
   docDate: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: colors.textMuted,
   },
   docFactsBadge: {
     alignItems: "center",
-    backgroundColor: "#f1f5f9",
+    backgroundColor: colors.elevated,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -286,11 +292,11 @@ const styles = StyleSheet.create({
   docFactsCount: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1e40af",
+    color: colors.primary,
   },
   docFactsLabel: {
     fontSize: 10,
-    color: "#64748b",
+    color: colors.textMuted,
     fontWeight: "500",
   },
   emptyContainer: {
@@ -307,12 +313,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },
@@ -322,7 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalSheet: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
@@ -337,32 +343,32 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#d1d5db",
+    backgroundColor: colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 4,
   },
   modalDate: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: colors.textMuted,
   },
   modalDivider: {
     height: 1,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: colors.border,
     marginVertical: 16,
   },
   modalSectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 12,
   },
   noFactsText: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: colors.textMuted,
     lineHeight: 20,
   },
   factsList: {
@@ -377,25 +383,25 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     marginTop: 6,
   },
   factText: {
     flex: 1,
     fontSize: 14,
-    color: "#334155",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   closeButton: {
     marginTop: 20,
     alignItems: "center",
     paddingVertical: 14,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: colors.elevated,
     borderRadius: 12,
   },
   closeButtonText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#64748b",
+    color: colors.textSecondary,
   },
 });

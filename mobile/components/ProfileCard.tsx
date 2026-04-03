@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { colors } from "@/lib/theme";
 import type { LegalProfile } from "@/lib/types";
 
 interface ProfileCardProps {
@@ -41,7 +42,7 @@ export default function ProfileCard({ profile, onPress }: ProfileCardProps) {
     if (onPress) {
       onPress();
     } else {
-      router.push("/(app)/profile");
+      router.push("/(app)/(profile)" as never);
     }
   };
 
@@ -84,12 +85,12 @@ export default function ProfileCard({ profile, onPress }: ProfileCardProps) {
         <Badge
           label="Legal Facts"
           count={profile.legal_facts.length}
-          color="#1e40af"
+          color={colors.primary}
         />
         <Badge
           label="Active Issues"
           count={profile.active_issues.filter((i) => i.status === "open").length}
-          color="#dc2626"
+          color={colors.error}
         />
       </View>
     </TouchableOpacity>
@@ -98,16 +99,11 @@ export default function ProfileCard({ profile, onPress }: ProfileCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    borderColor: colors.border,
   },
   header: {
     flexDirection: "row",
@@ -118,7 +114,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 14,
@@ -137,10 +133,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
   },
   stateBadge: {
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -148,13 +144,13 @@ const styles = StyleSheet.create({
   stateBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1e40af",
+    color: colors.primary,
   },
   infoSection: {
     gap: 8,
     marginBottom: 16,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: colors.border,
     paddingTop: 14,
   },
   infoRow: {
@@ -164,19 +160,19 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: "#64748b",
+    color: colors.textSecondary,
     fontWeight: "500",
   },
   infoValue: {
     fontSize: 14,
-    color: "#0f172a",
+    color: colors.text,
     fontWeight: "600",
   },
   badgeRow: {
     flexDirection: "row",
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: colors.border,
     paddingTop: 14,
   },
   badge: {

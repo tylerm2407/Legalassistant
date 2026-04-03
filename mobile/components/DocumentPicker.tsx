@@ -10,6 +10,7 @@ import {
 import * as ExpoDocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { uploadDocument } from "@/lib/api";
+import { colors } from "@/lib/theme";
 
 interface DocumentPickerProps {
   userId: string;
@@ -93,7 +94,6 @@ export default function DocumentPickerComponent({
     setUploadProgress(0);
     setExtractedFacts([]);
 
-    // Simulate progress since fetch doesn't support progress natively
     const progressInterval = setInterval(() => {
       setUploadProgress((prev) => {
         if (prev >= 90) {
@@ -121,7 +121,6 @@ export default function DocumentPickerComponent({
 
   return (
     <View style={styles.container}>
-      {/* Upload button */}
       <TouchableOpacity
         style={[styles.uploadButton, isUploading && styles.uploadButtonDisabled]}
         onPress={() => setShowOptions(!showOptions)}
@@ -134,7 +133,6 @@ export default function DocumentPickerComponent({
         </Text>
       </TouchableOpacity>
 
-      {/* Options */}
       {showOptions && !isUploading && (
         <View style={styles.optionsContainer}>
           <TouchableOpacity
@@ -157,7 +155,6 @@ export default function DocumentPickerComponent({
         </View>
       )}
 
-      {/* Progress */}
       {isUploading && (
         <View style={styles.progressContainer}>
           <View style={styles.progressTrack}>
@@ -166,13 +163,12 @@ export default function DocumentPickerComponent({
             />
           </View>
           <View style={styles.progressInfo}>
-            <ActivityIndicator size="small" color="#1e40af" />
+            <ActivityIndicator size="small" color={colors.primary} />
             <Text style={styles.progressText}>{uploadProgress}%</Text>
           </View>
         </View>
       )}
 
-      {/* Extracted facts */}
       {extractedFacts.length > 0 && (
         <View style={styles.factsContainer}>
           <Text style={styles.factsTitle}>
@@ -198,9 +194,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     borderWidth: 2,
-    borderColor: "#bfdbfe",
+    borderColor: colors.primary,
     borderStyle: "dashed",
     borderRadius: 14,
     paddingVertical: 20,
@@ -215,7 +211,7 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1e40af",
+    color: colors.primary,
   },
   optionsContainer: {
     flexDirection: "row",
@@ -226,9 +222,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingVertical: 14,
     gap: 8,
@@ -239,20 +235,20 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#334155",
+    color: colors.text,
   },
   progressContainer: {
     gap: 8,
   },
   progressTrack: {
     height: 6,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: colors.border,
     borderRadius: 3,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     borderRadius: 3,
   },
   progressInfo: {
@@ -263,20 +259,20 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
     fontWeight: "600",
   },
   factsContainer: {
-    backgroundColor: "#f0fdf4",
+    backgroundColor: colors.success + "15",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#bbf7d0",
+    borderColor: colors.success,
   },
   factsTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#166534",
+    color: colors.success,
     marginBottom: 10,
   },
   factItem: {
@@ -289,13 +285,13 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#22c55e",
+    backgroundColor: colors.success,
     marginTop: 6,
   },
   factText: {
     flex: 1,
     fontSize: 14,
-    color: "#15803d",
+    color: colors.success,
     lineHeight: 20,
   },
 });

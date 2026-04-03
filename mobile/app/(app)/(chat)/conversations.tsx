@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, 
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { getConversations, deleteConversation } from "@/lib/api";
+import { colors } from "@/lib/theme";
 import type { ConversationSummary } from "@/lib/types";
 
 export default function ConversationsScreen() {
@@ -39,7 +40,7 @@ export default function ConversationsScreen() {
   };
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#1e40af" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>;
   }
 
   return (
@@ -51,7 +52,7 @@ export default function ConversationsScreen() {
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.card}
-          onPress={() => router.push({ pathname: "/(app)/chat", params: { conversationId: item.id } } as any)}
+          onPress={() => router.push({ pathname: "/(app)/(chat)", params: { conversationId: item.id } } as any)}
           onLongPress={() => handleDelete(item.id)}
         >
           <View style={styles.cardHeader}>
@@ -72,18 +73,18 @@ export default function ConversationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
   list: { padding: 16, gap: 12 },
   card: {
-    backgroundColor: "#ffffff", borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: "#e2e8f0",
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: colors.border,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
-  cardArea: { fontSize: 13, color: "#1e40af", fontWeight: "600", textTransform: "capitalize" },
-  cardDate: { fontSize: 12, color: "#94a3b8" },
-  cardPreview: { fontSize: 14, color: "#334155", lineHeight: 20, marginBottom: 6 },
-  cardCount: { fontSize: 12, color: "#94a3b8" },
+  cardArea: { fontSize: 13, color: colors.primary, fontWeight: "600", textTransform: "capitalize" },
+  cardDate: { fontSize: 12, color: colors.textMuted },
+  cardPreview: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: 6 },
+  cardCount: { fontSize: 12, color: colors.textMuted },
   empty: { padding: 40, alignItems: "center" },
-  emptyText: { color: "#94a3b8", fontSize: 14, textAlign: "center" },
+  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center" },
 });

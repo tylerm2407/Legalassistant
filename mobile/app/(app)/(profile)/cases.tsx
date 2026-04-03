@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import IssueCard from "@/components/IssueCard";
 import { getProfile } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 import type { LegalIssue, IssueStatus } from "@/lib/types";
 
 type FilterOption = "all" | IssueStatus;
@@ -27,24 +29,33 @@ export default function CasesScreen() {
   const [filter, setFilter] = useState<FilterOption>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) setUserId(session.user.id);
+    });
+  }, []);
 
   const loadCases = useCallback(async () => {
+    if (!userId) return;
     try {
-      const profile = await getProfile("user_placeholder");
+      const profile = await getProfile(userId);
       setIssues(profile.active_issues);
     } catch {
       // Keep existing issues on error
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
+    if (!userId) return;
     const load = async () => {
       setIsLoading(true);
       await loadCases();
       setIsLoading(false);
     };
     load();
-  }, [loadCases]);
+  }, [loadCases, userId]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -82,7 +93,7 @@ export default function CasesScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1e40af" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading your cases...</Text>
       </View>
     );
@@ -138,8 +149,8 @@ export default function CasesScreen() {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            tintColor="#1e40af"
-            colors={["#1e40af"]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -151,22 +162,23 @@ export default function CasesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   filterBar: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: colors.border,
   },
   filterList: {
     paddingHorizontal: 16,
@@ -177,23 +189,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: colors.elevated,
     marginRight: 8,
   },
   filterChipActive: {
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
   },
   filterChipText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   filterChipTextActive: {
-    color: "#ffffff",
+    color: colors.text,
   },
   countText: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
     fontWeight: "500",
     paddingHorizontal: 20,
     paddingTop: 14,
@@ -221,12 +233,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },

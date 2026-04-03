@@ -5,14 +5,15 @@ import {
 } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { getDeadlines, createDeadline, deleteDeadline } from "@/lib/api";
+import { colors } from "@/lib/theme";
 import type { Deadline } from "@/lib/types";
 
 function getUrgencyColor(dateStr: string): string {
   const days = Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
-  if (days < 0) return "#ef4444";
+  if (days < 0) return colors.error;
   if (days <= 3) return "#f97316";
-  if (days <= 7) return "#eab308";
-  return "#22c55e";
+  if (days <= 7) return colors.warning;
+  return colors.success;
 }
 
 function DeadlineCard({ deadline, onDelete }: { deadline: Deadline; onDelete: () => void }) {
@@ -98,7 +99,7 @@ export default function DeadlinesScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1e40af" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -126,10 +127,10 @@ export default function DeadlinesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>New Deadline</Text>
-            <TextInput style={styles.input} placeholder="Title" value={title} onChangeText={setTitle} placeholderTextColor="#94a3b8" />
-            <TextInput style={styles.input} placeholder="Date (YYYY-MM-DD)" value={date} onChangeText={setDate} placeholderTextColor="#94a3b8" />
-            <TextInput style={styles.input} placeholder="Legal area (optional)" value={legalArea} onChangeText={setLegalArea} placeholderTextColor="#94a3b8" />
-            <TextInput style={styles.input} placeholder="Notes (optional)" value={notes} onChangeText={setNotes} placeholderTextColor="#94a3b8" multiline />
+            <TextInput style={styles.input} placeholder="Title" value={title} onChangeText={setTitle} placeholderTextColor={colors.textMuted} />
+            <TextInput style={styles.input} placeholder="Date (YYYY-MM-DD)" value={date} onChangeText={setDate} placeholderTextColor={colors.textMuted} />
+            <TextInput style={styles.input} placeholder="Legal area (optional)" value={legalArea} onChangeText={setLegalArea} placeholderTextColor={colors.textMuted} />
+            <TextInput style={styles.input} placeholder="Notes (optional)" value={notes} onChangeText={setNotes} placeholderTextColor={colors.textMuted} multiline />
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowForm(false)}>
                 <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -146,41 +147,41 @@ export default function DeadlinesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
   list: { padding: 16, gap: 12 },
   empty: { padding: 40, alignItems: "center" },
-  emptyText: { color: "#94a3b8", fontSize: 14 },
+  emptyText: { color: colors.textSecondary, fontSize: 14 },
   deadlineCard: {
-    backgroundColor: "#ffffff", borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: "#e2e8f0", borderLeftWidth: 4,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
   },
   deadlineHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
-  deadlineTitle: { fontSize: 16, fontWeight: "700", color: "#0f172a", flex: 1 },
+  deadlineTitle: { fontSize: 16, fontWeight: "700", color: colors.text, flex: 1 },
   urgencyBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   urgencyText: { fontSize: 11, fontWeight: "700" },
-  deadlineDate: { fontSize: 13, color: "#64748b", marginBottom: 4 },
-  deadlineArea: { fontSize: 12, color: "#1e40af", fontWeight: "500", marginBottom: 4, textTransform: "capitalize" },
-  deadlineNotes: { fontSize: 13, color: "#475569", marginTop: 4 },
+  deadlineDate: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
+  deadlineArea: { fontSize: 12, color: colors.primary, fontWeight: "500", marginBottom: 4, textTransform: "capitalize" },
+  deadlineNotes: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
   deleteBtn: { alignSelf: "flex-end", marginTop: 8 },
-  deleteBtnText: { color: "#ef4444", fontSize: 13, fontWeight: "600" },
+  deleteBtnText: { color: colors.error, fontSize: 13, fontWeight: "600" },
   fab: {
     position: "absolute", bottom: 24, right: 24, width: 56, height: 56,
-    borderRadius: 28, backgroundColor: "#1e40af", justifyContent: "center",
+    borderRadius: 28, backgroundColor: colors.primary, justifyContent: "center",
     alignItems: "center", elevation: 4, shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4,
   },
   fabText: { color: "#ffffff", fontSize: 28, fontWeight: "600", marginTop: -2 },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
-  modalContent: { backgroundColor: "#ffffff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, gap: 12 },
-  modalTitle: { fontSize: 20, fontWeight: "700", color: "#0f172a", marginBottom: 4 },
+  modalContent: { backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, gap: 12 },
+  modalTitle: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 4 },
   input: {
-    backgroundColor: "#f1f5f9", borderRadius: 10, paddingHorizontal: 14,
-    paddingVertical: 12, fontSize: 15, color: "#0f172a",
+    backgroundColor: colors.inputBg, borderRadius: 10, paddingHorizontal: 14,
+    paddingVertical: 12, fontSize: 15, color: colors.text,
   },
   modalButtons: { flexDirection: "row", gap: 12, marginTop: 8 },
-  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center", backgroundColor: "#f1f5f9" },
-  cancelBtnText: { color: "#64748b", fontWeight: "600", fontSize: 15 },
-  createBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center", backgroundColor: "#1e40af" },
+  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center", backgroundColor: colors.elevated },
+  cancelBtnText: { color: colors.textSecondary, fontWeight: "600", fontSize: 15 },
+  createBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center", backgroundColor: colors.primary },
   createBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 15 },
 });

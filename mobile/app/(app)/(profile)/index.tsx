@@ -14,6 +14,7 @@ import ProfileCard from "@/components/ProfileCard";
 import IssueCard from "@/components/IssueCard";
 import { getProfile, createProfile } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 import type { LegalProfile } from "@/lib/types";
 
 export default function ProfileScreen() {
@@ -135,7 +136,7 @@ export default function ProfileScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1e40af" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading profile...</Text>
       </View>
     );
@@ -153,8 +154,8 @@ export default function ProfileScreen() {
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
-          tintColor="#1e40af"
-          colors={["#1e40af"]}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
         />
       }
     >
@@ -194,7 +195,7 @@ export default function ProfileScreen() {
               value={editName}
               onChangeText={setEditName}
               placeholder="Your name"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
 
@@ -205,7 +206,7 @@ export default function ProfileScreen() {
               value={editState}
               onChangeText={setEditState}
               placeholder="Your state"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
 
@@ -216,7 +217,7 @@ export default function ProfileScreen() {
               value={editHousing}
               onChangeText={setEditHousing}
               placeholder="Housing situation"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
 
@@ -227,7 +228,7 @@ export default function ProfileScreen() {
               value={editEmployment}
               onChangeText={setEditEmployment}
               placeholder="Employment type"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
 
@@ -238,7 +239,7 @@ export default function ProfileScreen() {
               value={editFamily}
               onChangeText={setEditFamily}
               placeholder="Family status"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
 
@@ -392,7 +393,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   content: {
     padding: 20,
@@ -402,15 +403,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   errorBanner: {
-    backgroundColor: "#fef2f2",
+    backgroundColor: colors.errorMuted + "20",
     borderWidth: 1,
-    borderColor: "#fecaca",
+    borderColor: colors.error,
     borderRadius: 12,
     padding: 14,
     flexDirection: "row",
@@ -421,13 +423,13 @@ const styles = StyleSheet.create({
   errorBannerText: {
     flex: 1,
     fontSize: 14,
-    color: "#dc2626",
+    color: colors.error,
     marginRight: 12,
   },
   errorRetryText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#dc2626",
+    color: colors.error,
   },
   editToggle: {
     alignSelf: "flex-end",
@@ -438,14 +440,14 @@ const styles = StyleSheet.create({
   editToggleText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#1e40af",
+    color: colors.primary,
   },
   editSection: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     marginTop: 8,
     gap: 14,
   },
@@ -461,18 +463,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 12,
   },
   sectionSubtitle: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
     lineHeight: 18,
     marginBottom: 12,
     marginTop: -8,
   },
   memoryBadge: {
-    backgroundColor: "#dbeafe",
+    backgroundColor: colors.elevated,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -481,7 +483,7 @@ const styles = StyleSheet.create({
   memoryBadgeText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#1e40af",
+    color: colors.primary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -491,20 +493,20 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   fieldInput: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.inputBg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: "#0f172a",
+    color: colors.text,
   },
   saveButton: {
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -518,31 +520,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-  // Legal facts
   factsList: {
     gap: 8,
   },
   factItem: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     gap: 10,
   },
   factBullet: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     marginTop: 5,
   },
   factText: {
     flex: 1,
     fontSize: 14,
-    color: "#334155",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   showMoreButton: {
@@ -552,19 +553,18 @@ const styles = StyleSheet.create({
   showMoreText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#1e40af",
+    color: colors.primary,
   },
-  // Issues
   issuesList: {
     gap: 12,
   },
   emptyState: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 24,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     gap: 8,
   },
   emptyIcon: {
@@ -572,22 +572,21 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
   },
-  // Documents
   documentsList: {
     gap: 8,
   },
   documentItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     gap: 10,
   },
   documentIcon: {
@@ -596,50 +595,48 @@ const styles = StyleSheet.create({
   documentName: {
     flex: 1,
     fontSize: 14,
-    color: "#334155",
+    color: colors.textSecondary,
     fontWeight: "500",
   },
-  // Stats
   statsRow: {
     flexDirection: "row",
     gap: 10,
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
   },
   statValue: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#1e40af",
+    color: colors.primary,
   },
   statLabel: {
     fontSize: 11,
-    color: "#64748b",
+    color: colors.textMuted,
     fontWeight: "500",
     marginTop: 4,
   },
   memberSince: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: colors.textSecondary,
     textAlign: "center",
     marginTop: 12,
   },
-  // Logout
   logoutButton: {
     marginTop: 32,
-    backgroundColor: "#fee2e2",
+    backgroundColor: colors.error + "15",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
   },
   logoutButtonText: {
-    color: "#dc2626",
+    color: colors.error,
     fontSize: 16,
     fontWeight: "700",
   },

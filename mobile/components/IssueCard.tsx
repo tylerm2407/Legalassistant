@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { colors } from "@/lib/theme";
 import type { LegalIssue, IssueStatus } from "@/lib/types";
 
 interface IssueCardProps {
@@ -83,16 +84,11 @@ export default function IssueCard({ issue }: IssueCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    borderColor: colors.border,
   },
   header: {
     flexDirection: "row",
@@ -103,7 +99,7 @@ const styles = StyleSheet.create({
   issueType: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     textTransform: "capitalize",
     flex: 1,
     marginRight: 8,
@@ -121,19 +117,19 @@ const styles = StyleSheet.create({
   },
   summary: {
     fontSize: 14,
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 20,
     marginBottom: 10,
   },
   date: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: colors.textMuted,
     marginBottom: 4,
   },
   notesSection: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: colors.border,
     paddingTop: 10,
   },
   notesToggle: {
@@ -144,11 +140,11 @@ const styles = StyleSheet.create({
   notesToggleText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#1e40af",
+    color: colors.primary,
   },
   notesChevron: {
     fontSize: 10,
-    color: "#1e40af",
+    color: colors.primary,
   },
   notesList: {
     marginTop: 10,
@@ -163,13 +159,13 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#cbd5e1",
+    backgroundColor: colors.textMuted,
     marginTop: 6,
   },
   noteText: {
     flex: 1,
     fontSize: 13,
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 19,
   },
 });

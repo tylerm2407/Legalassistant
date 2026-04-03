@@ -12,6 +12,8 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createProfile } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -90,7 +92,8 @@ export default function OnboardingScreen() {
 
     setIsSubmitting(true);
     try {
-      const userId = `user_${Date.now()}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || `user_${Date.now()}`;
       await createProfile({
         user_id: userId,
         display_name: name.trim(),
@@ -170,7 +173,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.textInput}
               placeholder="Enter your name"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
               value={name}
               onChangeText={setName}
               autoFocus
@@ -184,7 +187,7 @@ export default function OnboardingScreen() {
               <Text
                 style={[
                   styles.pickerButtonText,
-                  !state && { color: "#94a3b8" },
+                  !state && { color: colors.textMuted },
                 ]}
               >
                 {state || "Select your state"}
@@ -199,7 +202,7 @@ export default function OnboardingScreen() {
                 <TextInput
                   style={styles.stateSearchInput}
                   placeholder="Search states..."
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={colors.textMuted}
                   value={stateSearch}
                   onChangeText={setStateSearch}
                 />
@@ -295,7 +298,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={[styles.textInput, styles.textArea]}
               placeholder="e.g., My landlord is refusing to return my security deposit..."
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textMuted}
               value={legalIssue}
               onChangeText={setLegalIssue}
               multiline
@@ -374,7 +377,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   flex: {
     flex: 1,
@@ -386,19 +389,19 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     height: 6,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: colors.border,
     borderRadius: 3,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     borderRadius: 3,
   },
   progressText: {
     marginTop: 8,
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
     textAlign: "center",
   },
   scrollContent: {
@@ -411,40 +414,40 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 4,
   },
   stepSubtitle: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 12,
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#334155",
+    color: colors.textSecondary,
     marginTop: 8,
     marginBottom: 4,
   },
   textInput: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.inputBg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#0f172a",
+    color: colors.text,
   },
   textArea: {
     minHeight: 140,
     paddingTop: 14,
   },
   pickerButton: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.inputBg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -454,16 +457,16 @@ const styles = StyleSheet.create({
   },
   pickerButtonText: {
     fontSize: 16,
-    color: "#0f172a",
+    color: colors.text,
   },
   pickerChevron: {
     fontSize: 12,
-    color: "#64748b",
+    color: colors.textMuted,
   },
   statePickerContainer: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 12,
     maxHeight: 240,
     overflow: "hidden",
@@ -473,8 +476,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-    color: "#0f172a",
+    borderBottomColor: colors.border,
+    color: colors.text,
   },
   stateList: {
     maxHeight: 192,
@@ -483,38 +486,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
+    borderBottomColor: colors.border,
   },
   stateItemSelected: {
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
   },
   stateItemText: {
     fontSize: 15,
-    color: "#334155",
+    color: colors.textSecondary,
   },
   stateItemTextSelected: {
-    color: "#1e40af",
+    color: colors.primary,
     fontWeight: "600",
   },
   optionButton: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
   },
   optionButtonSelected: {
-    borderColor: "#1e40af",
-    backgroundColor: "#eff6ff",
+    borderColor: colors.primary,
+    backgroundColor: colors.elevated,
   },
   optionButtonText: {
     fontSize: 16,
-    color: "#334155",
+    color: colors.textSecondary,
     fontWeight: "500",
   },
   optionButtonTextSelected: {
-    color: "#1e40af",
+    color: colors.primary,
     fontWeight: "700",
   },
   navContainer: {
@@ -524,8 +527,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-    backgroundColor: "#ffffff",
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
   },
   backButton: {
     paddingVertical: 12,
@@ -533,11 +536,11 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    color: "#64748b",
+    color: colors.textSecondary,
     fontWeight: "600",
   },
   nextButton: {
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 12,

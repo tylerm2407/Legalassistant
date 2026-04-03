@@ -1,12 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { colors } from "@/lib/theme";
 
 const TOOLS = [
-  { title: "Documents", icon: "📄", description: "Upload and analyze legal documents", route: "/(app)/documents" },
-  { title: "Know Your Rights", icon: "⚖️", description: "Browse rights guides by legal area", route: "/(app)/rights" },
-  { title: "Legal Workflows", icon: "📋", description: "Step-by-step guides for legal processes", route: "/(app)/workflows" },
-  { title: "Find Attorneys", icon: "👨‍⚖️", description: "Search for attorneys by state and specialty", route: "/(app)/attorneys" },
+  { title: "Documents", icon: "📄", description: "Upload and analyze legal documents", route: "/(app)/(more)/documents" },
+  { title: "Know Your Rights", icon: "⚖️", description: "Browse rights guides by legal area", route: "/(app)/(rights)" },
+  { title: "Legal Workflows", icon: "📋", description: "Step-by-step guides for legal processes", route: "/(app)/(tools)/workflows" },
+  { title: "Find Attorneys", icon: "👨‍⚖️", description: "Search for attorneys by state and specialty", route: "/(app)/(more)/attorneys" },
 ];
 
 export default function ToolsScreen() {
@@ -35,19 +36,19 @@ export default function ToolsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20 },
-  heading: { fontSize: 24, fontWeight: "800", color: "#0f172a", marginBottom: 4 },
-  subheading: { fontSize: 14, color: "#64748b", marginBottom: 24 },
+  heading: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 4 },
+  subheading: { fontSize: 14, color: colors.textSecondary, marginBottom: 24 },
   grid: { gap: 14 },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
   },
   cardIcon: { fontSize: 28, marginBottom: 8 },
-  cardTitle: { fontSize: 17, fontWeight: "700", color: "#0f172a", marginBottom: 4 },
-  cardDescription: { fontSize: 13, color: "#64748b", lineHeight: 18 },
+  cardTitle: { fontSize: 17, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  cardDescription: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
 });

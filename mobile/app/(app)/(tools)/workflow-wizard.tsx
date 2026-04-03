@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { getWorkflow, updateWorkflowStep } from "@/lib/api";
+import { colors } from "@/lib/theme";
 import type { WorkflowInstance, WorkflowStep } from "@/lib/types";
 
 export default function WorkflowWizardScreen() {
@@ -29,7 +30,7 @@ export default function WorkflowWizardScreen() {
   };
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#1e40af" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>;
   }
 
   if (!workflow) {
@@ -63,28 +64,28 @@ export default function WorkflowWizardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { color: "#ef4444", fontSize: 16 },
-  title: { fontSize: 22, fontWeight: "800", color: "#0f172a", marginBottom: 4 },
-  status: { fontSize: 13, color: "#64748b", marginBottom: 20, textTransform: "capitalize" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  errorText: { color: colors.error, fontSize: 16 },
+  title: { fontSize: 22, fontWeight: "800", color: colors.text, marginBottom: 4 },
+  status: { fontSize: 13, color: colors.textSecondary, marginBottom: 20, textTransform: "capitalize" },
   steps: { gap: 12 },
   step: {
-    backgroundColor: "#ffffff", borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: "#e2e8f0",
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: colors.border,
   },
-  stepCompleted: { opacity: 0.7, borderColor: "#22c55e" },
+  stepCompleted: { opacity: 0.7, borderColor: colors.success },
   stepHeader: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 6 },
   stepCircle: {
-    width: 28, height: 28, borderRadius: 14, backgroundColor: "#e2e8f0",
+    width: 28, height: 28, borderRadius: 14, backgroundColor: colors.elevated,
     justifyContent: "center", alignItems: "center",
   },
-  stepCircleCompleted: { backgroundColor: "#22c55e" },
+  stepCircleCompleted: { backgroundColor: colors.success },
   stepCircleText: { color: "#ffffff", fontWeight: "700", fontSize: 13 },
-  stepTitle: { fontSize: 15, fontWeight: "700", color: "#0f172a", flex: 1 },
-  stepTitleCompleted: { textDecorationLine: "line-through", color: "#64748b" },
-  stepDesc: { fontSize: 13, color: "#64748b", lineHeight: 18, marginLeft: 40 },
-  completeBtn: { marginTop: 10, marginLeft: 40, backgroundColor: "#1e40af", paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, alignSelf: "flex-start" },
+  stepTitle: { fontSize: 15, fontWeight: "700", color: colors.text, flex: 1 },
+  stepTitleCompleted: { textDecorationLine: "line-through", color: colors.textMuted },
+  stepDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 18, marginLeft: 40 },
+  completeBtn: { marginTop: 10, marginLeft: 40, backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, alignSelf: "flex-start" },
   completeBtnText: { color: "#ffffff", fontWeight: "600", fontSize: 13 },
 });

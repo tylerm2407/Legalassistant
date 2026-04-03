@@ -13,6 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -24,7 +25,6 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Auto-redirect if already authenticated
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -96,7 +96,7 @@ export default function LoginScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.sessionCheckContainer}>
-          <ActivityIndicator size="large" color="#1e40af" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -131,7 +131,7 @@ export default function LoginScreen() {
               <TextInput
                 style={[styles.input, emailError ? styles.inputError : null]}
                 placeholder="you@example.com"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textMuted}
                 value={email}
                 onChangeText={(text) => {
                   setEmail(text);
@@ -153,7 +153,7 @@ export default function LoginScreen() {
               <TextInput
                 style={[styles.input, passwordError ? styles.inputError : null]}
                 placeholder={isSignUp ? "At least 6 characters" : "Enter your password"}
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textMuted}
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
@@ -223,7 +223,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   flex: {
     flex: 1,
@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
@@ -258,12 +259,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
     textAlign: "center",
   },
   form: {
@@ -275,29 +276,29 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#334155",
+    color: colors.textSecondary,
   },
   input: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.inputBg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#0f172a",
+    color: colors.text,
   },
   inputError: {
-    borderColor: "#fca5a5",
-    backgroundColor: "#fef2f2",
+    borderColor: colors.error,
+    backgroundColor: colors.error + "15",
   },
   fieldError: {
     fontSize: 13,
-    color: "#dc2626",
+    color: colors.error,
     marginTop: 2,
   },
   authButton: {
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -317,10 +318,10 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   toggleLink: {
-    color: "#1e40af",
+    color: colors.primary,
     fontWeight: "700",
   },
   backLink: {
@@ -329,6 +330,6 @@ const styles = StyleSheet.create({
   },
   backLinkText: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: colors.textMuted,
   },
 });

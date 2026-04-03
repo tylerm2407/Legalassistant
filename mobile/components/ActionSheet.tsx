@@ -8,13 +8,14 @@ import {
   Modal,
   ActivityIndicator,
   Alert,
-  Clipboard,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import {
   generateLetter,
   generateRights,
   generateChecklist,
 } from "@/lib/api";
+import { colors } from "@/lib/theme";
 
 interface ActionSheetProps {
   visible: boolean;
@@ -84,8 +85,8 @@ export default function ActionSheet({
     }
   };
 
-  const handleCopy = () => {
-    Clipboard.setString(resultText);
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(resultText);
     Alert.alert("Copied", "Text copied to clipboard.");
   };
 
@@ -173,7 +174,7 @@ export default function ActionSheet({
           {/* Loading */}
           {loading && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#1e40af" />
+              <ActivityIndicator size="large" color={colors.primary} />
               <Text style={styles.loadingText}>
                 Generating your{" "}
                 {activeAction === "letter"
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
@@ -257,17 +258,17 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#d1d5db",
+    backgroundColor: colors.border,
   },
   title: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: "#64748b",
+    color: colors.textSecondary,
     marginBottom: 20,
   },
   actions: {
@@ -276,9 +277,9 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.elevated,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     borderRadius: 14,
     padding: 16,
     gap: 14,
@@ -294,12 +295,12 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 2,
   },
   actionDesc: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   loadingContainer: {
     alignItems: "center",
@@ -308,22 +309,22 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   resultContainer: {
     flex: 1,
   },
   resultScroll: {
     maxHeight: 300,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.elevated,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
   },
   resultText: {
     fontSize: 14,
-    color: "#1e293b",
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   resultActions: {
@@ -333,7 +334,7 @@ const styles = StyleSheet.create({
   },
   copyButton: {
     flex: 1,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -345,13 +346,13 @@ const styles = StyleSheet.create({
   },
   newActionButton: {
     flex: 1,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: colors.elevated,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
   },
   newActionButtonText: {
-    color: "#334155",
+    color: colors.textSecondary,
     fontSize: 15,
     fontWeight: "600",
   },
@@ -362,7 +363,7 @@ const styles = StyleSheet.create({
   },
   dismissButtonText: {
     fontSize: 15,
-    color: "#94a3b8",
+    color: colors.textMuted,
     fontWeight: "600",
   },
 });

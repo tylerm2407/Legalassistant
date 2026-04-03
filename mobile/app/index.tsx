@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { colors } from "@/lib/theme";
 
 
 export default function SplashScreen() {
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
   },
   gradientBg: {
     flex: 1,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: colors.primary + "30",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
@@ -94,13 +95,13 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#bfdbfe",
+    color: "#c4b5fd",
     textAlign: "center",
     marginBottom: 16,
   },
   description: {
     fontSize: 15,
-    color: "#93bbfd",
+    color: "#a78bfa",
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 48,
@@ -110,31 +111,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   primaryButtonText: {
-    color: "#1e40af",
+    color: "#ffffff",
     fontSize: 18,
     fontWeight: "700",
   },
   secondaryButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "transparent",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderColor: colors.primary,
   },
   secondaryButtonText: {
-    color: "#ffffff",
+    color: colors.text,
     fontSize: 18,
     fontWeight: "600",
   },

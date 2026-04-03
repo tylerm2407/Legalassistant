@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  ScrollView,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { getRightsDomains, getRightsGuides } from "@/lib/api";
+import { colors } from "@/lib/theme";
 import type { RightsDomain, RightsGuide } from "@/lib/types";
 
 const DOMAIN_ICONS: Record<string, string> = {
@@ -103,7 +103,7 @@ export default function RightsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1e40af" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading rights library...</Text>
       </View>
     );
@@ -115,7 +115,6 @@ export default function RightsScreen() {
 
     return (
       <View style={styles.container}>
-        {/* Back button + domain title */}
         <View style={styles.guideHeader}>
           <TouchableOpacity onPress={handleBackToDomains} style={styles.backBtn}>
             <Text style={styles.backBtnText}>← All Topics</Text>
@@ -123,13 +122,12 @@ export default function RightsScreen() {
           <Text style={styles.domainHeading}>{domainLabel}</Text>
         </View>
 
-        {/* Search within guides */}
         <View style={styles.searchContainer}>
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
             placeholder="Search guides..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCorrect={false}
@@ -143,7 +141,7 @@ export default function RightsScreen() {
 
         {guidesLoading ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color="#1e40af" />
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
@@ -182,7 +180,6 @@ export default function RightsScreen() {
 
                 {item.expanded && (
                   <View style={styles.guideExpanded}>
-                    {/* Explanation */}
                     {item.explanation ? (
                       <View style={styles.guideSection}>
                         <Text style={styles.guideSectionTitle}>Overview</Text>
@@ -190,7 +187,6 @@ export default function RightsScreen() {
                       </View>
                     ) : null}
 
-                    {/* Your Rights */}
                     {item.your_rights && item.your_rights.length > 0 && (
                       <View style={styles.guideSection}>
                         <Text style={styles.guideSectionTitle}>Your Rights</Text>
@@ -203,7 +199,6 @@ export default function RightsScreen() {
                       </View>
                     )}
 
-                    {/* Action Steps */}
                     {item.action_steps && item.action_steps.length > 0 && (
                       <View style={styles.guideSection}>
                         <Text style={styles.guideSectionTitle}>Action Steps</Text>
@@ -218,7 +213,6 @@ export default function RightsScreen() {
                       </View>
                     )}
 
-                    {/* Deadlines */}
                     {item.deadlines && item.deadlines.length > 0 && (
                       <View style={styles.guideSection}>
                         <Text style={styles.guideSectionTitle}>Important Deadlines</Text>
@@ -231,20 +225,18 @@ export default function RightsScreen() {
                       </View>
                     )}
 
-                    {/* Common Mistakes */}
                     {item.common_mistakes && item.common_mistakes.length > 0 && (
                       <View style={styles.guideSection}>
                         <Text style={styles.guideSectionTitle}>Common Mistakes</Text>
                         {item.common_mistakes.map((mistake, i) => (
                           <View key={i} style={styles.bulletRow}>
-                            <Text style={[styles.bulletDot, { color: "#dc2626" }]}>✕</Text>
+                            <Text style={[styles.bulletDot, { color: colors.error }]}>✕</Text>
                             <Text style={styles.bulletText}>{mistake}</Text>
                           </View>
                         ))}
                       </View>
                     )}
 
-                    {/* When to Get a Lawyer */}
                     {item.when_to_get_a_lawyer ? (
                       <View style={[styles.guideSection, styles.lawyerSection]}>
                         <Text style={styles.lawyerTitle}>When to Get a Lawyer</Text>
@@ -252,12 +244,11 @@ export default function RightsScreen() {
                       </View>
                     ) : null}
 
-                    {/* View full guide */}
                     <TouchableOpacity
                       style={styles.fullGuideButton}
                       onPress={() =>
                         router.push({
-                          pathname: "/(app)/rights-guide",
+                          pathname: "/(app)/(rights)/[guideId]",
                           params: { guideId: item.id },
                         } as never)
                       }
@@ -288,13 +279,12 @@ export default function RightsScreen() {
   // Domain list view
   return (
     <View style={styles.container}>
-      {/* Search bar */}
       <View style={styles.searchContainer}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search legal topics..."
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={colors.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoCorrect={false}
@@ -359,28 +349,29 @@ export default function RightsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 15,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     marginHorizontal: 16,
     marginTop: 12,
     marginBottom: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     paddingHorizontal: 14,
     height: 48,
     gap: 10,
@@ -391,12 +382,12 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: "#0f172a",
+    color: colors.text,
     paddingVertical: 0,
   },
   clearIcon: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: colors.textMuted,
     fontWeight: "700",
     padding: 4,
   },
@@ -404,22 +395,21 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 10,
   },
-  // Domain cards
   domainCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     gap: 14,
   },
   domainIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -432,19 +422,18 @@ const styles = StyleSheet.create({
   domainTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 2,
   },
   domainCount: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
   },
   domainChevron: {
     fontSize: 24,
-    color: "#94a3b8",
+    color: colors.textMuted,
     fontWeight: "300",
   },
-  // Guide header
   guideHeader: {
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -454,21 +443,20 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   backBtnText: {
-    color: "#1e40af",
+    color: colors.primary,
     fontSize: 15,
     fontWeight: "600",
   },
   domainHeading: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#0f172a",
+    color: colors.text,
   },
-  // Guide cards
   guideCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
     overflow: "hidden",
   },
   guideTitleRow: {
@@ -483,25 +471,24 @@ const styles = StyleSheet.create({
   guideTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0f172a",
+    color: colors.text,
     marginBottom: 4,
   },
   guideDesc: {
     fontSize: 13,
-    color: "#64748b",
+    color: colors.textSecondary,
     lineHeight: 18,
   },
   expandIcon: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: colors.textMuted,
     marginTop: 4,
   },
-  // Expanded guide content
   guideExpanded: {
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: colors.border,
   },
   guideSection: {
     marginTop: 16,
@@ -509,12 +496,12 @@ const styles = StyleSheet.create({
   guideSectionTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1e293b",
+    color: colors.text,
     marginBottom: 8,
   },
   guideSectionText: {
     fontSize: 14,
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 21,
   },
   bulletRow: {
@@ -525,14 +512,14 @@ const styles = StyleSheet.create({
   },
   bulletDot: {
     fontSize: 14,
-    color: "#1e40af",
+    color: colors.primary,
     marginTop: 1,
     fontWeight: "700",
   },
   bulletText: {
     flex: 1,
     fontSize: 14,
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   stepRow: {
@@ -545,7 +532,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -557,7 +544,7 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 14,
-    color: "#334155",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   deadlineRow: {
@@ -573,38 +560,37 @@ const styles = StyleSheet.create({
   deadlineText: {
     flex: 1,
     fontSize: 14,
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   lawyerSection: {
-    backgroundColor: "#fef3c7",
+    backgroundColor: "#78350f20",
     borderRadius: 10,
     padding: 14,
   },
   lawyerTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#92400e",
+    color: colors.warning,
     marginBottom: 6,
   },
   lawyerText: {
     fontSize: 14,
-    color: "#78350f",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   fullGuideButton: {
     marginTop: 16,
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.elevated,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
   fullGuideButtonText: {
-    color: "#1e40af",
+    color: colors.primary,
     fontSize: 15,
     fontWeight: "700",
   },
-  // Error state
   errorContainer: {
     flex: 1,
     justifyContent: "center",
@@ -617,12 +603,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 15,
-    color: "#dc2626",
+    color: colors.error,
     textAlign: "center",
     lineHeight: 22,
   },
   retryButton: {
-    backgroundColor: "#1e40af",
+    backgroundColor: colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 10,
@@ -633,7 +619,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
   },
-  // Empty state
   emptyState: {
     alignItems: "center",
     padding: 40,
@@ -643,7 +628,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   emptyText: {
-    color: "#94a3b8",
+    color: colors.textSecondary,
     fontSize: 15,
     textAlign: "center",
     lineHeight: 22,

@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { Tabs } from "expo-router";
 import { Text, StyleSheet, ActivityIndicator, View } from "react-native";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/lib/theme";
 
 function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
   return (
@@ -37,8 +38,8 @@ export default function AppLayout() {
 
   if (checking) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#ffffff" }}>
-        <ActivityIndicator size="large" color="#1e40af" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -46,11 +47,11 @@ export default function AppLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#1e40af",
-        tabBarInactiveTintColor: "#94a3b8",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopColor: "#e2e8f0",
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingBottom: 4,
           paddingTop: 4,
@@ -61,9 +62,9 @@ export default function AppLayout() {
           fontWeight: "600",
         },
         headerStyle: {
-          backgroundColor: "#1e40af",
+          backgroundColor: colors.surface,
         },
-        headerTintColor: "#ffffff",
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: "700",
           fontSize: 18,
@@ -71,77 +72,44 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen
-        name="chat"
+        name="(chat)"
         options={{
           title: "Chat",
           headerTitle: "CaseMate",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="💬" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon icon="💬" focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="rights"
-        options={{
-          title: "Rights",
-          headerTitle: "Know Your Rights",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="⚖️" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tools"
-        options={{
-          title: "Tools",
-          headerTitle: "Legal Tools",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="🛠️" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
+        name="(profile)"
         options={{
           title: "Profile",
           headerTitle: "Your Profile",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="👤" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon icon="👤" focused={focused} />,
         }}
       />
-      {/* Hidden stack screens */}
       <Tabs.Screen
-        name="cases"
-        options={{ href: null, headerTitle: "Your Cases" }}
+        name="(rights)"
+        options={{
+          title: "Rights",
+          headerTitle: "Know Your Rights",
+          tabBarIcon: ({ focused }) => <TabIcon icon="⚖️" focused={focused} />,
+        }}
       />
       <Tabs.Screen
-        name="deadlines"
-        options={{ href: null, headerTitle: "Your Deadlines" }}
+        name="(tools)"
+        options={{
+          title: "Tools",
+          headerTitle: "Legal Tools",
+          tabBarIcon: ({ focused }) => <TabIcon icon="🛠️" focused={focused} />,
+        }}
       />
       <Tabs.Screen
-        name="rights-guide"
-        options={{ href: null, headerTitle: "Rights Guide" }}
-      />
-      <Tabs.Screen
-        name="workflows"
-        options={{ href: null, headerTitle: "Legal Workflows" }}
-      />
-      <Tabs.Screen
-        name="workflow-wizard"
-        options={{ href: null, headerTitle: "Workflow" }}
-      />
-      <Tabs.Screen
-        name="attorneys"
-        options={{ href: null, headerTitle: "Find Attorneys" }}
-      />
-      <Tabs.Screen
-        name="conversations"
-        options={{ href: null, headerTitle: "Conversations" }}
-      />
-      <Tabs.Screen
-        name="documents"
-        options={{ href: null, headerTitle: "Documents" }}
+        name="(more)"
+        options={{
+          title: "More",
+          headerTitle: "More",
+          tabBarIcon: ({ focused }) => <TabIcon icon="☰" focused={focused} />,
+        }}
       />
     </Tabs>
   );

@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createProfile } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -412,16 +412,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   stepTitle: {
-    fontSize: 28,
-    fontWeight: "800",
+    fontSize: 32,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.5,
   },
   stepSubtitle: {
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 12,
+    fontFamily: fonts.sans,
   },
   label: {
     fontSize: 14,
@@ -434,11 +437,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     color: colors.text,
+    fontFamily: fonts.sans,
   },
   textArea: {
     minHeight: 140,
@@ -448,7 +452,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     flexDirection: "row",
@@ -467,7 +471,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 8,
     maxHeight: 240,
     overflow: "hidden",
   },
@@ -501,9 +505,9 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 20,
   },
@@ -543,7 +547,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 32,
-    borderRadius: 12,
+    borderRadius: 8,
   },
   nextButtonDisabled: {
     opacity: 0.4,
@@ -551,6 +555,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
+    fontFamily: fonts.sans,
   },
 });

@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 12.0.0",
+    "version": ">= 15.0.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -15,8 +15,20 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "http://localhost:8000",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://dev.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "dev-key"
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ngqpsuixmumdnqbqxjxv.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ncXBzdWl4bXVtZG5xYnF4anh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNjY0OTgsImV4cCI6MjA4ODc0MjQ5OH0.YzDw6jbhaRGqoTIKUPoN46nSd7catUcykaOlEBrFAoo"
+      }
+    },
+    "development-device": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:8000",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ngqpsuixmumdnqbqxjxv.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ncXBzdWl4bXVtZG5xYnF4anh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNjY0OTgsImV4cCI6MjA4ODc0MjQ5OH0.YzDw6jbhaRGqoTIKUPoN46nSd7catUcykaOlEBrFAoo"
       }
     },
     "preview": {
@@ -52,8 +64,7 @@
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "APPLE_APP_ID",
-        "appleTeamId": "APPLE_TEAM_ID"
+        "appleId": "your-apple-id@email.com"
       },
       "android": {
         "serviceAccountKeyPath": "./google-services.json",

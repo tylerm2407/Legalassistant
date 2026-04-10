@@ -11,7 +11,7 @@ import {
 import IssueCard from "@/components/IssueCard";
 import { getProfile } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import type { LegalIssue, IssueStatus } from "@/lib/types";
 
 type FilterOption = "all" | IssueStatus;
@@ -79,7 +79,6 @@ export default function CasesScreen() {
 
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>📁</Text>
         <Text style={styles.emptyTitle}>No active cases</Text>
         <Text style={styles.emptyText}>
           {filter === "all"
@@ -188,7 +187,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 8,
     backgroundColor: colors.elevated,
     marginRight: 8,
   },
@@ -199,9 +198,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: colors.textSecondary,
+    fontFamily: fonts.sans,
   },
   filterChipTextActive: {
-    color: colors.text,
+    color: "#ffffff",
   },
   countText: {
     fontSize: 13,
@@ -226,20 +226,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 60,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 8,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   emptyText: {
     fontSize: 15,
     color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
+    fontFamily: fonts.sans,
   },
 });

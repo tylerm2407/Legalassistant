@@ -5,6 +5,7 @@ import RightsGuide from "@/components/RightsGuide";
 import { useTranslation } from "@/lib/i18n";
 import { RIGHTS_DOMAINS, RIGHTS_GUIDES } from "@/lib/rights-data";
 import type { RightsGuide as GuideType, RightsDomain } from "@/lib/rights-data";
+import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
 
 /**
  * "Know Your Rights" library page with domain browsing and guide detail views.
@@ -32,15 +33,13 @@ export default function RightsPage() {
 
   if (selectedGuide) {
     return (
-      <div className="min-h-screen bg-[#050505] p-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-bg">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <button
             onClick={() => setSelectedGuide(null)}
-            className="text-sm text-gray-400 hover:text-white mb-6 flex items-center gap-1.5 transition-colors"
+            className="font-sans text-sm text-ink-secondary hover:text-ink-primary mb-8 flex items-center gap-2 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <ArrowLeft className="w-4 h-4" weight="regular" />
             {t("backToGuides")}
           </button>
           <RightsGuide guide={selectedGuide} />
@@ -50,26 +49,26 @@ export default function RightsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-bg">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-12 max-w-[65ch]">
           {selectedDomain && (
             <button
               onClick={() => { setSelectedDomain(null); }}
-              className="text-sm text-gray-400 hover:text-white mb-4 flex items-center gap-1.5 transition-colors"
+              className="font-sans text-sm text-ink-secondary hover:text-ink-primary mb-6 flex items-center gap-2 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
+              <ArrowLeft className="w-4 h-4" weight="regular" />
               {t("allCategories")}
             </button>
           )}
-          <h1 className="text-2xl font-bold text-white mb-2">{t("knowYourRights")}</h1>
-          <p className="text-gray-400">
+          <h1 className="font-serif text-5xl md:text-6xl font-medium tracking-tight leading-tight text-ink-primary">
+            Know your rights
+          </h1>
+          <p className="font-sans text-base text-ink-secondary mt-4">
             {selectedDomain
-              ? t("selectGuidePrompt")
-              : t("browseByCategory")}
+              ? "Pick a guide to read what you're entitled to and what to do next."
+              : "Plain-language guides for the situations people actually find themselves in."}
           </p>
         </div>
 
@@ -80,12 +79,12 @@ export default function RightsPage() {
               <button
                 key={d.domain}
                 onClick={() => handleDomainSelect(d.domain)}
-                className="text-left p-5 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 hover:border-blue-500/30 hover:shadow-glow-sm transition-all group"
+                className="text-left bg-white border border-border rounded-lg p-6 hover:border-border-strong hover:bg-bg-hover transition-colors group"
               >
-                <h3 className="text-base font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors">
+                <h3 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-2 group-hover:text-accent transition-colors">
                   {d.label}
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="font-sans text-sm text-ink-tertiary">
                   {d.guide_count} {d.guide_count === 1 ? t("guide") : t("guides")}
                 </p>
               </button>
@@ -97,10 +96,19 @@ export default function RightsPage() {
               <button
                 key={guide.id}
                 onClick={() => setSelectedGuide(guide)}
-                className="w-full text-left p-5 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 hover:border-blue-500/30 hover:shadow-glow-sm transition-all"
+                className="w-full text-left bg-white border border-border rounded-lg p-6 hover:border-border-strong hover:bg-bg-hover transition-colors group"
               >
-                <h3 className="text-base font-semibold text-white mb-1">{guide.title}</h3>
-                <p className="text-sm text-gray-400">{guide.description}</p>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-2 group-hover:text-accent transition-colors">
+                      {guide.title}
+                    </h3>
+                    <p className="font-sans text-base text-ink-secondary max-w-[65ch]">
+                      {guide.description}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-ink-tertiary shrink-0 mt-1 group-hover:text-accent transition-colors" weight="regular" />
+                </div>
               </button>
             ))}
           </div>

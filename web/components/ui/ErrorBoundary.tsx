@@ -13,6 +13,11 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+/**
+ * Editorial error boundary. Calm terracotta tone, never a loud red alert.
+ * Communicates "something went wrong and here is the next step" rather
+ * than shouting at a user who is probably already stressed.
+ */
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
@@ -38,14 +43,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 p-8">
-          <p className="text-lg font-semibold text-red-400">Something went wrong</p>
-          <p className="mt-2 text-sm text-gray-400">
-            {this.state.error?.message || "An unexpected error occurred."}
+        <div className="flex flex-col items-center justify-center rounded-lg border border-warning/30 bg-warning-subtle p-10">
+          <p className="font-serif text-2xl font-medium text-ink-primary">
+            Something went wrong
+          </p>
+          <p className="mt-3 text-base text-ink-secondary max-w-[50ch] text-center">
+            {this.state.error?.message || "An unexpected error occurred. You can try again below."}
           </p>
           <button
             onClick={this.handleReset}
-            className="mt-4 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-gray-300 transition hover:bg-white/20"
+            className="mt-6 rounded-md bg-accent px-6 py-3 text-base font-sans font-medium text-white transition-colors hover:bg-accent-hover"
           >
             Try again
           </button>

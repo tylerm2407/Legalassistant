@@ -3,7 +3,6 @@
 import React from "react";
 import { useAuth } from "@/lib/auth";
 import DeadlineDashboard from "@/components/DeadlineDashboard";
-import { useTranslation } from "@/lib/i18n";
 
 /**
  * Deadlines page for tracking legal deadlines and statutes of limitations.
@@ -14,21 +13,27 @@ import { useTranslation } from "@/lib/i18n";
  */
 export default function DeadlinesPage() {
   const { user, loading: authLoading } = useAuth();
-  const { t } = useTranslation();
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="font-sans text-ink-secondary">Loading…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-white mb-2">{t("deadlinesTitle")}</h1>
-        <p className="text-gray-400 mb-8">{t("deadlinesDescription")}</p>
+    <div className="min-h-screen bg-bg">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-10">
+          <h1 className="font-serif text-5xl md:text-6xl font-medium tracking-tight leading-tight text-ink-primary">
+            Deadlines
+          </h1>
+          <p className="font-sans text-base text-ink-secondary mt-4 max-w-[65ch]">
+            Legal matters have clocks on them. We'll keep track of the ones
+            that matter to you so nothing important slips past.
+          </p>
+        </div>
         <DeadlineDashboard />
       </div>
     </div>

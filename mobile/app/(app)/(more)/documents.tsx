@@ -12,7 +12,7 @@ import {
 import DocumentPickerComponent from "@/components/DocumentPicker";
 import { getProfile } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 interface DocumentEntry {
   id: string;
@@ -84,9 +84,6 @@ export default function DocumentsScreen() {
       onPress={() => setSelectedDoc(item)}
       activeOpacity={0.7}
     >
-      <View style={styles.docIconContainer}>
-        <Text style={styles.docIcon}>📄</Text>
-      </View>
       <View style={styles.docInfo}>
         <Text style={styles.docFilename} numberOfLines={1}>
           {item.filename}
@@ -105,7 +102,6 @@ export default function DocumentsScreen() {
 
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>📄</Text>
         <Text style={styles.emptyTitle}>No documents yet</Text>
         <Text style={styles.emptyText}>
           Upload legal documents like leases, contracts, or court papers. CaseMate
@@ -230,6 +226,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 15,
     color: colors.textSecondary,
+    fontFamily: fonts.sans,
   },
   pickerSection: {
     padding: 20,
@@ -241,46 +238,41 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   listHeader: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: "500",
+    fontSize: 11,
+    color: colors.textMuted,
+    fontWeight: "600",
     marginBottom: 12,
     marginTop: 8,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
   },
   documentCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
     marginBottom: 10,
     gap: 14,
   },
-  docIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: colors.elevated,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  docIcon: {
-    fontSize: 22,
-  },
   docInfo: {
     flex: 1,
     gap: 2,
   },
   docFilename: {
-    fontSize: 15,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "500",
     color: colors.text,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.2,
   },
   docDate: {
     fontSize: 12,
     color: colors.textMuted,
+    fontFamily: fonts.sans,
   },
   docFactsBadge: {
     alignItems: "center",
@@ -291,36 +283,39 @@ const styles = StyleSheet.create({
   },
   docFactsCount: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: colors.primary,
+    fontFamily: fonts.sans,
   },
   docFactsLabel: {
     fontSize: 10,
     color: colors.textMuted,
     fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 40,
-    paddingVertical: 40,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
+    paddingVertical: 60,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 8,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   emptyText: {
     fontSize: 15,
     color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
+    fontFamily: fonts.sans,
   },
   modalOverlay: {
     flex: 1,
@@ -329,8 +324,8 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
     paddingHorizontal: 24,
     paddingBottom: 40,
     maxHeight: "70%",
@@ -346,14 +341,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   modalDate: {
     fontSize: 13,
     color: colors.textMuted,
+    fontFamily: fonts.sans,
   },
   modalDivider: {
     height: 1,
@@ -361,15 +359,19 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   modalSectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textMuted,
     marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
   },
   noFactsText: {
     fontSize: 14,
     color: colors.textMuted,
     lineHeight: 20,
+    fontFamily: fonts.sans,
   },
   factsList: {
     gap: 10,
@@ -391,17 +393,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+    fontFamily: fonts.sans,
   },
   closeButton: {
     marginTop: 20,
     alignItems: "center",
     paddingVertical: 14,
     backgroundColor: colors.elevated,
-    borderRadius: 12,
+    borderRadius: 8,
   },
   closeButtonText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: colors.textSecondary,
+    fontFamily: fonts.sans,
   },
 });

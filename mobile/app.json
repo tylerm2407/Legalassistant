@@ -6,23 +6,35 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "casemate",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#0F0D23"
+      "backgroundColor": "#FBF9F4"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.casemate.legalassistant"
+      "bundleIdentifier": "com.casemate.legalassistant",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0F0D23"
+        "backgroundColor": "#FBF9F4"
       },
       "package": "com.casemate.legalassistant"
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-dev-client"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a8842cf3-d784-4434-a22a-23f24c3d1ea8"
+      },
+      "router": {}
+    },
+    "owner": "tyler13"
   }
 }

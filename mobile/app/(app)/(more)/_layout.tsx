@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 export default function MoreLayout() {
   return (
@@ -7,7 +7,8 @@ export default function MoreLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: "700" },
+        headerTitleStyle: { fontFamily: fonts.serif, fontWeight: "500", fontSize: 18, color: colors.text },
+        headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
       }}
     >

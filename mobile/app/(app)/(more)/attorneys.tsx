@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { findAttorneys } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import type { ReferralSuggestion } from "@/lib/types";
 
 export default function AttorneysScreen() {
@@ -60,19 +60,27 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   searchBar: { flexDirection: "row", padding: 16, gap: 8 },
   input: {
-    flex: 1, backgroundColor: colors.inputBg, borderRadius: 10, paddingHorizontal: 12,
+    flex: 1, backgroundColor: colors.inputBg, borderRadius: 8, paddingHorizontal: 12,
     paddingVertical: 10, fontSize: 14, color: colors.text, borderWidth: 1, borderColor: colors.border,
+    fontFamily: fonts.sans,
   },
-  searchBtn: { backgroundColor: colors.primary, paddingHorizontal: 16, borderRadius: 10, justifyContent: "center" },
-  searchBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 14 },
+  searchBtn: { backgroundColor: colors.primary, paddingHorizontal: 16, borderRadius: 8, justifyContent: "center" },
+  searchBtnText: { color: "#ffffff", fontWeight: "600", fontSize: 14, fontFamily: fonts.sans },
   list: { paddingHorizontal: 16, gap: 12, paddingBottom: 16 },
   card: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 16,
     borderWidth: 1, borderColor: colors.border,
   },
-  cardName: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 4 },
-  cardDetail: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
-  cardReason: { fontSize: 12, color: colors.primary, fontWeight: "500" },
-  cardContact: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
-  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center", padding: 40 },
+  cardName: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
+  },
+  cardDetail: { fontSize: 13, color: colors.textSecondary, marginBottom: 4, fontFamily: fonts.sans },
+  cardReason: { fontSize: 12, color: colors.primary, fontWeight: "500", fontFamily: fonts.sans },
+  cardContact: { fontSize: 13, color: colors.textSecondary, marginTop: 4, fontFamily: fonts.sans },
+  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center", padding: 40, fontFamily: fonts.sans },
 });

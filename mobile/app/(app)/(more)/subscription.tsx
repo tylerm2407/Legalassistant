@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking } from "react-native";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 export default function SubscriptionScreen() {
   const handleUpgrade = () => {
@@ -52,35 +52,65 @@ const styles = StyleSheet.create({
   content: { padding: 20 },
   planCard: {
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 20,
     borderWidth: 1,
     borderColor: colors.border,
     marginBottom: 20,
   },
-  planLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: "600", marginBottom: 4 },
-  planName: { fontSize: 28, fontWeight: "800", color: colors.text, marginBottom: 6 },
-  planDescription: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },
+  planLabel: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
+  },
+  planName: {
+    fontSize: 32,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 6,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.5,
+  },
+  planDescription: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, fontFamily: fonts.sans },
   proCard: {
     backgroundColor: colors.elevated,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 20,
     borderWidth: 1,
     borderColor: colors.primary,
     marginBottom: 20,
   },
-  proLabel: { fontSize: 20, fontWeight: "800", color: colors.primary, marginBottom: 4 },
-  proPrice: { fontSize: 32, fontWeight: "800", color: colors.text, marginBottom: 16 },
+  proLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: colors.primary,
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
+  },
+  proPrice: {
+    fontSize: 40,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 16,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.5,
+  },
   features: { gap: 10, marginBottom: 20 },
   featureRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   featureCheck: { fontSize: 16, color: colors.success, fontWeight: "700" },
-  featureText: { fontSize: 15, color: colors.text },
+  featureText: { fontSize: 15, color: colors.text, fontFamily: fonts.sans },
   upgradeButton: {
     backgroundColor: colors.primary,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
-  upgradeButtonText: { color: "#ffffff", fontSize: 17, fontWeight: "700" },
-  disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: "center", lineHeight: 18 },
+  upgradeButtonText: { color: "#ffffff", fontSize: 15, fontWeight: "600", fontFamily: fonts.sans, letterSpacing: 0.2 },
+  disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: "center", lineHeight: 18, fontFamily: fonts.sans },
 });

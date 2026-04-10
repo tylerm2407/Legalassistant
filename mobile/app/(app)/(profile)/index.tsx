@@ -14,7 +14,7 @@ import ProfileCard from "@/components/ProfileCard";
 import IssueCard from "@/components/IssueCard";
 import { getProfile, createProfile } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { LegalProfile } from "@/lib/types";
 
 export default function ProfileScreen() {
@@ -273,7 +273,6 @@ export default function ProfileScreen() {
         </Text>
         {!profile?.legal_facts.length ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🧠</Text>
             <Text style={styles.emptyStateText}>
               No legal facts yet. Chat with CaseMate and it will automatically
               remember important details about your situation.
@@ -310,7 +309,6 @@ export default function ProfileScreen() {
         </Text>
         {!profile?.active_issues.length ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📁</Text>
             <Text style={styles.emptyStateText}>
               No active issues. Chat with CaseMate to get started.
             </Text>
@@ -331,7 +329,6 @@ export default function ProfileScreen() {
         </Text>
         {!profile?.documents.length ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📄</Text>
             <Text style={styles.emptyStateText}>
               No documents uploaded yet. Upload legal documents to extract facts automatically.
             </Text>
@@ -340,7 +337,6 @@ export default function ProfileScreen() {
           <View style={styles.documentsList}>
             {(profile?.documents || []).map((doc, index) => (
               <View key={index} style={styles.documentItem}>
-                <Text style={styles.documentIcon}>📄</Text>
                 <Text style={styles.documentName}>{doc}</Text>
               </View>
             ))}
@@ -410,7 +406,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   errorBanner: {
-    backgroundColor: colors.errorMuted + "20",
+    backgroundColor: colors.errorMuted,
     borderWidth: 1,
     borderColor: colors.error,
     borderRadius: 12,
@@ -444,7 +440,7 @@ const styles = StyleSheet.create({
   },
   editSection: {
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 20,
     borderWidth: 1,
     borderColor: colors.border,
@@ -461,10 +457,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.text,
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textMuted,
     marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
   },
   sectionSubtitle: {
     fontSize: 13,
@@ -474,7 +473,7 @@ const styles = StyleSheet.create({
     marginTop: -8,
   },
   memoryBadge: {
-    backgroundColor: colors.elevated,
+    backgroundColor: tokens.accentSubtle,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -482,10 +481,11 @@ const styles = StyleSheet.create({
   },
   memoryBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.primary,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
   },
   field: {
     gap: 4,
@@ -499,16 +499,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
     color: colors.text,
+    fontFamily: fonts.sans,
   },
   saveButton: {
     backgroundColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
     marginTop: 4,
   },
@@ -518,7 +519,8 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
+    fontFamily: fonts.sans,
   },
   factsList: {
     gap: 8,
@@ -527,7 +529,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     backgroundColor: colors.surface,
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
@@ -567,14 +569,12 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     gap: 8,
   },
-  emptyIcon: {
-    fontSize: 28,
-  },
   emptyStateText: {
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
+    fontFamily: fonts.sans,
   },
   documentsList: {
     gap: 8,
@@ -583,20 +583,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
     gap: 10,
-  },
-  documentIcon: {
-    fontSize: 18,
   },
   documentName: {
     flex: 1,
     fontSize: 14,
     color: colors.textSecondary,
     fontWeight: "500",
+    fontFamily: fonts.sans,
   },
   statsRow: {
     flexDirection: "row",
@@ -612,15 +610,20 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: "800",
+    fontSize: 28,
+    fontWeight: "500",
     color: colors.primary,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: colors.textMuted,
-    fontWeight: "500",
+    fontWeight: "600",
     marginTop: 4,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
   },
   memberSince: {
     fontSize: 13,
@@ -630,14 +633,15 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 32,
-    backgroundColor: colors.error + "15",
+    backgroundColor: colors.errorMuted,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
   logoutButtonText: {
     color: colors.error,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
+    fontFamily: fonts.sans,
   },
 });

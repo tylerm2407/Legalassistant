@@ -10,7 +10,7 @@ import {
 import * as ExpoDocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { uploadDocument } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 
 interface DocumentPickerProps {
   userId: string;
@@ -127,9 +127,8 @@ export default function DocumentPickerComponent({
         disabled={isUploading}
         activeOpacity={0.7}
       >
-        <Text style={styles.uploadIcon}>📎</Text>
         <Text style={styles.uploadButtonText}>
-          {isUploading ? "Uploading..." : "Upload Document"}
+          {isUploading ? "Uploading..." : "Browse documents"}
         </Text>
       </TouchableOpacity>
 
@@ -140,8 +139,7 @@ export default function DocumentPickerComponent({
             onPress={handleDocumentPick}
             activeOpacity={0.7}
           >
-            <Text style={styles.optionIcon}>📄</Text>
-            <Text style={styles.optionText}>Choose File</Text>
+            <Text style={styles.optionText}>Document</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -149,8 +147,7 @@ export default function DocumentPickerComponent({
             onPress={handleCameraPick}
             activeOpacity={0.7}
           >
-            <Text style={styles.optionIcon}>📷</Text>
-            <Text style={styles.optionText}>Take Photo</Text>
+            <Text style={styles.optionText}>Photo</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -195,23 +192,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.elevated,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colors.primary,
     borderStyle: "dashed",
-    borderRadius: 14,
+    borderRadius: 8,
     paddingVertical: 20,
     gap: 10,
   },
   uploadButtonDisabled: {
     opacity: 0.6,
   },
-  uploadIcon: {
-    fontSize: 22,
-  },
   uploadButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 15,
+    fontWeight: "600",
     color: colors.primary,
+    fontFamily: fonts.sans,
   },
   optionsContainer: {
     flexDirection: "row",
@@ -225,17 +220,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingVertical: 14,
     gap: 8,
-  },
-  optionIcon: {
-    fontSize: 18,
   },
   optionText: {
     fontSize: 15,
     fontWeight: "600",
     color: colors.text,
+    fontFamily: fonts.sans,
   },
   progressContainer: {
     gap: 8,
@@ -263,17 +256,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   factsContainer: {
-    backgroundColor: colors.success + "15",
+    backgroundColor: tokens.accentSubtle,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.success,
   },
   factsTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: colors.success,
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textMuted,
     marginBottom: 10,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
   },
   factItem: {
     flexDirection: "row",

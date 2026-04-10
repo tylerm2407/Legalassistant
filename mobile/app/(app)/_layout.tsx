@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { Tabs } from "expo-router";
 import { Text, StyleSheet, ActivityIndicator, View } from "react-native";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
   return (
@@ -49,25 +49,24 @@ export default function AppLayout() {
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          paddingBottom: 4,
-          paddingTop: 4,
-          height: 60,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 56,
         },
         headerStyle: {
           backgroundColor: colors.surface,
         },
         headerTintColor: colors.text,
         headerTitleStyle: {
-          fontWeight: "700",
+          fontFamily: fonts.serif,
+          fontWeight: "500",
           fontSize: 18,
+          color: colors.text,
         },
       }}
     >
@@ -76,7 +75,7 @@ export default function AppLayout() {
         options={{
           title: "Chat",
           headerTitle: "CaseMate",
-          tabBarIcon: ({ focused }) => <TabIcon icon="💬" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Chat" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -84,7 +83,7 @@ export default function AppLayout() {
         options={{
           title: "Profile",
           headerTitle: "Your Profile",
-          tabBarIcon: ({ focused }) => <TabIcon icon="👤" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Profile" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -92,7 +91,7 @@ export default function AppLayout() {
         options={{
           title: "Rights",
           headerTitle: "Know Your Rights",
-          tabBarIcon: ({ focused }) => <TabIcon icon="⚖️" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Rights" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -100,7 +99,7 @@ export default function AppLayout() {
         options={{
           title: "Tools",
           headerTitle: "Legal Tools",
-          tabBarIcon: ({ focused }) => <TabIcon icon="🛠️" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Tools" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -108,7 +107,7 @@ export default function AppLayout() {
         options={{
           title: "More",
           headerTitle: "More",
-          tabBarIcon: ({ focused }) => <TabIcon icon="☰" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="More" focused={focused} />,
         }}
       />
     </Tabs>
@@ -117,10 +116,14 @@ export default function AppLayout() {
 
 const styles = StyleSheet.create({
   tabIcon: {
-    fontSize: 22,
-    opacity: 0.5,
+    fontSize: 12,
+    fontWeight: "600",
+    fontFamily: fonts.sans,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+    color: colors.textMuted,
   },
   tabIconFocused: {
-    opacity: 1,
+    color: colors.primary,
   },
 });

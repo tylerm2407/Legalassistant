@@ -5,28 +5,30 @@ import {
 } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { getDeadlines, createDeadline, deleteDeadline } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { Deadline } from "@/lib/types";
 
-function getUrgencyColor(dateStr: string): string {
+type Urgency = { fg: string; bg: string };
+
+function getUrgency(dateStr: string): Urgency {
   const days = Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
-  if (days < 0) return colors.error;
-  if (days <= 3) return "#f97316";
-  if (days <= 7) return colors.warning;
-  return colors.success;
+  if (days < 0) return { fg: colors.error, bg: colors.errorMuted };
+  if (days <= 3) return { fg: colors.warning, bg: tokens.warningSubtle };
+  if (days <= 7) return { fg: colors.warning, bg: tokens.warningSubtle };
+  return { fg: tokens.accent, bg: tokens.accentSubtle };
 }
 
 function DeadlineCard({ deadline, onDelete }: { deadline: Deadline; onDelete: () => void }) {
-  const urgencyColor = getUrgencyColor(deadline.date);
+  const urgency = getUrgency(deadline.date);
   const daysLeft = Math.ceil((new Date(deadline.date).getTime() - Date.now()) / 86400000);
   const label = daysLeft < 0 ? `${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? "Today" : `${daysLeft}d left`;
 
   return (
-    <View style={[styles.deadlineCard, { borderLeftColor: urgencyColor }]}>
+    <View style={[styles.deadlineCard, { borderLeftColor: urgency.fg }]}>
       <View style={styles.deadlineHeader}>
         <Text style={styles.deadlineTitle}>{deadline.title}</Text>
-        <View style={[styles.urgencyBadge, { backgroundColor: urgencyColor + "20" }]}>
-          <Text style={[styles.urgencyText, { color: urgencyColor }]}>{label}</Text>
+        <View style={[styles.urgencyBadge, { backgroundColor: urgency.bg }]}>
+          <Text style={[styles.urgencyText, { color: urgency.fg }]}>{label}</Text>
         </View>
       </View>
       <Text style={styles.deadlineDate}>{new Date(deadline.date).toLocaleDateString()}</Text>
@@ -151,37 +153,66 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
   list: { padding: 16, gap: 12 },
   empty: { padding: 40, alignItems: "center" },
-  emptyText: { color: colors.textSecondary, fontSize: 14 },
+  emptyText: { color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sans },
   deadlineCard: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 16,
     borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
   },
   deadlineHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
-  deadlineTitle: { fontSize: 16, fontWeight: "700", color: colors.text, flex: 1 },
-  urgencyBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  urgencyText: { fontSize: 11, fontWeight: "700" },
-  deadlineDate: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
-  deadlineArea: { fontSize: 12, color: colors.primary, fontWeight: "500", marginBottom: 4, textTransform: "capitalize" },
-  deadlineNotes: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  deadlineTitle: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: colors.text,
+    flex: 1,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
+  },
+  urgencyBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  urgencyText: {
+    fontSize: 10,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
+  },
+  deadlineDate: { fontSize: 13, color: colors.textSecondary, marginBottom: 4, fontFamily: fonts.sans },
+  deadlineArea: {
+    fontSize: 11,
+    color: colors.primary,
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
+  },
+  deadlineNotes: { fontSize: 13, color: colors.textSecondary, marginTop: 4, fontFamily: fonts.sans },
   deleteBtn: { alignSelf: "flex-end", marginTop: 8 },
-  deleteBtnText: { color: colors.error, fontSize: 13, fontWeight: "600" },
+  deleteBtnText: { color: colors.error, fontSize: 13, fontWeight: "600", fontFamily: fonts.sans },
   fab: {
     position: "absolute", bottom: 24, right: 24, width: 56, height: 56,
     borderRadius: 28, backgroundColor: colors.primary, justifyContent: "center",
     alignItems: "center", elevation: 4, shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4,
   },
-  fabText: { color: "#ffffff", fontSize: 28, fontWeight: "600", marginTop: -2 },
+  fabText: { color: "#ffffff", fontSize: 28, fontWeight: "400", marginTop: -2 },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
-  modalContent: { backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, gap: 12 },
-  modalTitle: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  modalContent: { backgroundColor: colors.surface, borderTopLeftRadius: 12, borderTopRightRadius: 12, padding: 24, gap: 12 },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
+  },
   input: {
-    backgroundColor: colors.inputBg, borderRadius: 10, paddingHorizontal: 14,
-    paddingVertical: 12, fontSize: 15, color: colors.text,
+    backgroundColor: colors.inputBg, borderRadius: 8, paddingHorizontal: 14,
+    paddingVertical: 12, fontSize: 15, color: colors.text, fontFamily: fonts.sans,
+    borderWidth: 1, borderColor: colors.border,
   },
   modalButtons: { flexDirection: "row", gap: 12, marginTop: 8 },
-  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center", backgroundColor: colors.elevated },
-  cancelBtnText: { color: colors.textSecondary, fontWeight: "600", fontSize: 15 },
-  createBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center", backgroundColor: colors.primary },
-  createBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 15 },
+  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 8, alignItems: "center", backgroundColor: colors.elevated },
+  cancelBtnText: { color: colors.textSecondary, fontWeight: "600", fontSize: 14, fontFamily: fonts.sans },
+  createBtn: { flex: 1, paddingVertical: 14, borderRadius: 8, alignItems: "center", backgroundColor: colors.primary },
+  createBtnText: { color: "#ffffff", fontWeight: "600", fontSize: 14, fontFamily: fonts.sans },
 });

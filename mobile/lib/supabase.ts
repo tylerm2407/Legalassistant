@@ -4,7 +4,7 @@ import * as SecureStore from "expo-secure-store";
 const supabaseUrl =
   process.env.EXPO_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
 const supabaseKey =
-  process.env.EXPO_PUBLIC_SUPABASE_KEY || "placeholder";
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || process.env.EXPO_PUBLIC_SUPABASE_KEY || "placeholder";
 
 const secureStoreAdapter = {
   getItem: (key: string) => SecureStore.getItemAsync(key),

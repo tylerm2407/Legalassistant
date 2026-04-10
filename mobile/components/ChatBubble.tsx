@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { Message } from "@/lib/types";
 
 interface ChatBubbleProps {
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 18,
+    borderRadius: 12,
   },
   bubbleUser: {
     backgroundColor: colors.primary,
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   bubbleError: {
-    backgroundColor: colors.error + "15",
+    backgroundColor: colors.errorMuted,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
     borderColor: colors.error,
@@ -120,15 +120,17 @@ const styles = StyleSheet.create({
   },
   legalAreaText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.primary,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
   },
   messageText: {
     fontSize: 15,
-    lineHeight: 21,
-    color: colors.textSecondary,
+    lineHeight: 22,
+    color: colors.text,
+    fontFamily: fonts.sans,
   },
   messageTextUser: {
     color: "#ffffff",
@@ -144,8 +146,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   timestampUser: {
-    color: "rgba(255, 255, 255, 0.6)",
+    color: tokens.accentSubtle,
     textAlign: "right",
+    opacity: 0.8,
   },
   timestampAssistant: {
     color: colors.textMuted,

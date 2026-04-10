@@ -16,7 +16,7 @@ import ChatBubble from "@/components/ChatBubble";
 import ActionSheet from "@/components/ActionSheet";
 import { chat, getConversation } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import type { Message, ConversationDetail } from "@/lib/types";
 
 const WELCOME_MESSAGE: Message = {
@@ -234,7 +234,7 @@ export default function ChatScreen() {
           onPress={() => setShowActions(true)}
           activeOpacity={0.7}
         >
-          <Text style={styles.actionButtonIcon}>⚡</Text>
+          <Text style={styles.actionButtonIcon}>+</Text>
         </TouchableOpacity>
 
         <TextInput
@@ -306,6 +306,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.primary,
     fontWeight: "600",
+    fontFamily: fonts.sans,
   },
   legalAreaIndicator: {
     backgroundColor: colors.elevated,
@@ -315,9 +316,11 @@ const styles = StyleSheet.create({
   },
   legalAreaIndicatorText: {
     fontSize: 11,
-    color: colors.success,
-    fontWeight: "700",
-    textTransform: "capitalize",
+    color: colors.primary,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
   },
   historyLoading: {
     flex: 1,
@@ -393,13 +396,16 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     backgroundColor: colors.inputBg,
-    borderRadius: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
     color: colors.text,
     maxHeight: 120,
     minHeight: 40,
+    fontFamily: fonts.sans,
   },
   sendButton: {
     width: 40,
@@ -416,6 +422,6 @@ const styles = StyleSheet.create({
   sendButtonIcon: {
     color: "#ffffff",
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 });

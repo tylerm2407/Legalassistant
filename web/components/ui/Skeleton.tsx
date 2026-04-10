@@ -1,9 +1,13 @@
 import React from "react";
 
+/**
+ * Editorial skeletons. Warm gray placeholders on warm off-white,
+ * no shimmer, no glow.
+ */
 function SkeletonLine({ width = "100%", height = "16px" }: { width?: string; height?: string }) {
   return (
     <div
-      className="animate-pulse rounded bg-white/[0.06]"
+      className="animate-pulse rounded bg-border"
       style={{ width, height }}
     />
   );
@@ -21,7 +25,7 @@ function SkeletonBlock({ lines = 3, className = "" }: { lines?: number; classNam
 
 function SkeletonCard({ className = "" }: { className?: string }) {
   return (
-    <div className={`rounded-xl border border-white/10 bg-white/[0.02] p-5 ${className}`}>
+    <div className={`rounded-lg border border-border bg-white p-8 ${className}`}>
       <SkeletonLine width="40%" height="20px" />
       <div className="mt-4 space-y-2">
         <SkeletonLine />
@@ -35,21 +39,18 @@ function SkeletonCard({ className = "" }: { className?: string }) {
 function SkeletonChat() {
   return (
     <div className="space-y-4 p-4">
-      {/* Assistant message skeleton */}
       <div className="flex justify-start">
-        <div className="max-w-[80%] rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="max-w-[80%] rounded-lg border border-border bg-white p-6">
           <SkeletonBlock lines={3} />
         </div>
       </div>
-      {/* User message skeleton */}
       <div className="flex justify-end">
-        <div className="max-w-[60%] rounded-2xl bg-blue-600/20 p-4">
+        <div className="max-w-[60%] rounded-lg bg-accent-subtle p-6">
           <SkeletonBlock lines={2} />
         </div>
       </div>
-      {/* Assistant message skeleton */}
       <div className="flex justify-start">
-        <div className="max-w-[80%] rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="max-w-[80%] rounded-lg border border-border bg-white p-6">
           <SkeletonBlock lines={4} />
         </div>
       </div>
@@ -59,7 +60,7 @@ function SkeletonChat() {
 
 function SkeletonList({ items = 4, className = "" }: { items?: number; className?: string }) {
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-4 ${className}`}>
       {Array.from({ length: items }).map((_: unknown, i: number) => (
         <SkeletonCard key={i} />
       ))}
@@ -71,7 +72,7 @@ function SkeletonProfile() {
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center gap-4">
-        <div className="h-16 w-16 animate-pulse rounded-full bg-white/[0.06]" />
+        <div className="h-16 w-16 animate-pulse rounded-full bg-border" />
         <div className="flex-1 space-y-2">
           <SkeletonLine width="50%" height="20px" />
           <SkeletonLine width="30%" />

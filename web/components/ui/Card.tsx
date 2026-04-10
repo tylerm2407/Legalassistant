@@ -7,10 +7,14 @@ interface CardProps {
   children: React.ReactNode;
 }
 
+/**
+ * Editorial card: white on warm off-white, hairline border, generous padding,
+ * no drop shadow. Structure reads like a printed page, not a SaaS panel.
+ */
 function Card({ className = "", children }: CardProps) {
   return (
     <div
-      className={`bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden ${className}`}
+      className={`bg-white border border-border rounded-lg overflow-hidden ${className}`}
     >
       {children}
     </div>
@@ -19,20 +23,20 @@ function Card({ className = "", children }: CardProps) {
 
 function CardHeader({ className = "", children }: CardProps) {
   return (
-    <div className={`px-6 py-4 border-b border-white/[0.06] ${className}`}>
+    <div className={`px-8 py-6 border-b border-border ${className}`}>
       {children}
     </div>
   );
 }
 
 function CardBody({ className = "", children }: CardProps) {
-  return <div className={`px-6 py-4 ${className}`}>{children}</div>;
+  return <div className={`px-8 py-6 ${className}`}>{children}</div>;
 }
 
 function CardFooter({ className = "", children }: CardProps) {
   return (
     <div
-      className={`px-6 py-4 border-t border-white/[0.06] bg-white/[0.02] ${className}`}
+      className={`px-8 py-6 border-t border-border bg-bg ${className}`}
     >
       {children}
     </div>

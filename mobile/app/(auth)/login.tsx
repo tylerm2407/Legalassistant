@@ -13,7 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -111,9 +111,7 @@ export default function LoginScreen() {
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoIcon}>⚖</Text>
-            </View>
+            <Text style={styles.eyebrow}>CASEMATE</Text>
             <Text style={styles.title}>
               {isSignUp ? "Create Account" : "Welcome Back"}
             </Text>
@@ -243,29 +241,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
-  logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
+  eyebrow: {
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: colors.primary,
     marginBottom: 20,
   },
-  logoIcon: {
-    fontSize: 36,
-    color: "#ffffff",
-  },
   title: {
-    fontSize: 28,
-    fontWeight: "800",
+    fontSize: 32,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 8,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 15,
     color: colors.textSecondary,
     textAlign: "center",
+    fontFamily: fonts.sans,
   },
   form: {
     gap: 16,
@@ -282,15 +278,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     color: colors.text,
+    fontFamily: fonts.sans,
   },
   inputError: {
     borderColor: colors.error,
-    backgroundColor: colors.error + "15",
+    backgroundColor: colors.errorMuted,
   },
   fieldError: {
     fontSize: 13,
@@ -300,7 +297,7 @@ const styles = StyleSheet.create({
   authButton: {
     backgroundColor: colors.primary,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
     marginTop: 8,
   },
@@ -309,8 +306,9 @@ const styles = StyleSheet.create({
   },
   authButtonText: {
     color: "#ffffff",
-    fontSize: 17,
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: fonts.sans,
   },
   toggleContainer: {
     alignItems: "center",

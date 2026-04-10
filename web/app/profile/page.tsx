@@ -2,13 +2,11 @@
 
 import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import Card from "@/components/ui/Card";
 import CaseHistory from "@/components/CaseHistory";
 import DocumentUpload from "@/components/DocumentUpload";
 import { api } from "@/lib/api";
 import type { LegalProfile } from "@/lib/types";
+import { File, ArrowRight } from "@phosphor-icons/react";
 
 const DEMO_USER_ID = "demo-sarah-chen-uuid";
 
@@ -34,8 +32,8 @@ export default function ProfilePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen bg-bg flex items-center justify-center">
+          <p className="font-sans text-ink-secondary">Loading…</p>
         </div>
       }
     >
@@ -81,11 +79,13 @@ function ProfilePageInner() {
           setEmployment(p.employment_type);
           setFamily(p.family_status);
         } else {
-          setError("Profile not found.");
+          setError("We couldn't find your profile. Let's get you set up.");
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load profile."
+          err instanceof Error
+            ? err.message
+            : "We couldn't load your profile. Let's try again."
         );
       } finally {
         setLoading(false);
@@ -108,11 +108,13 @@ function ProfilePageInner() {
         family_status: family,
       });
       setProfile(updated);
-      setSuccess("Profile saved successfully.");
+      setSuccess("Saved.");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to save profile."
+        err instanceof Error
+          ? err.message
+          : "We couldn't save your changes. Let's try again."
       );
     } finally {
       setSaving(false);
@@ -121,25 +123,26 @@ function ProfilePageInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="font-sans text-ink-secondary">Loading…</p>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
-        <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-8 max-w-md text-center">
-          <h2 className="text-lg font-semibold text-white mb-2">
-            Profile Not Found
+      <div className="min-h-screen bg-bg flex items-center justify-center p-4">
+        <div className="bg-white border border-border rounded-lg p-8 max-w-md text-center">
+          <h2 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-3">
+            We couldn't find your profile
           </h2>
-          <p className="text-sm text-gray-400 mb-4">{error}</p>
+          <p className="font-sans text-base text-ink-secondary mb-6">{error}</p>
           <a
             href="/onboarding"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 shadow-glow-md transition-all"
+            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-md font-sans font-medium hover:bg-accent-hover transition-colors"
           >
-            Start Onboarding
+            Start onboarding
+            <ArrowRight className="w-4 h-4" weight="regular" />
           </a>
         </div>
       </div>
@@ -147,165 +150,180 @@ function ProfilePageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-bg">
       {/* Header */}
-      <header className="bg-white/[0.03] backdrop-blur-xl border-b border-white/10">
-        <div className="container-wide py-4 flex items-center justify-between">
-          <div>
-            <a href="/" className="text-xl font-bold text-blue-400">
+      <header className="bg-bg border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <a href="/" className="font-serif text-xl font-medium tracking-tight text-accent">
               CaseMate
             </a>
-            <span className="text-gray-600 mx-2">/</span>
-            <span className="text-sm text-gray-400">Profile</span>
+            <span className="text-ink-tertiary">/</span>
+            <span className="font-sans text-sm text-ink-secondary">Your profile</span>
           </div>
           <a
             href={`/chat?userId=${userId}`}
-            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            className="font-sans text-sm text-accent hover:text-accent-hover transition-colors"
           >
-            Back to Chat
+            Back to chat
           </a>
         </div>
       </header>
 
-      <main className="container-narrow py-8 space-y-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        {/* Page intro */}
+        <div>
+          <h1 className="font-serif text-5xl md:text-6xl font-medium tracking-tight leading-tight text-ink-primary">
+            Your profile
+          </h1>
+          <p className="font-sans text-base text-ink-secondary mt-4 max-w-[65ch]">
+            The more we know about you, the more specific we can be. Everything
+            here stays with you and shapes every answer CaseMate gives.
+          </p>
+        </div>
+
         {/* Profile Form */}
-        <Card>
-          <Card.Header>
-            <h2 className="text-lg font-semibold text-white">
-              Your Profile
+        <section className="bg-white border border-border rounded-lg p-8">
+          <div className="mb-6">
+            <h2 className="font-serif text-2xl font-medium tracking-tight text-ink-primary">
+              About you
             </h2>
-            <p className="text-sm text-gray-500">
-              Member since{" "}
-              {new Date(profile.member_since).toLocaleDateString()} |{" "}
+            <p className="font-sans text-sm text-ink-tertiary mt-1">
+              Member since {new Date(profile.member_since).toLocaleDateString()} ·{" "}
               {profile.conversation_count} conversations
             </p>
-          </Card.Header>
-          <Card.Body>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Display Name"
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                Display name
+              </label>
+              <input
+                type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none placeholder:text-ink-tertiary"
               />
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  State
-                </label>
-                <select
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
-                >
-                  <option value="">Select state</option>
-                  {US_STATES.map((s: string) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Input
-                label="Housing Situation"
+            </div>
+            <div>
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                State
+              </label>
+              <select
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
+              >
+                <option value="">Select state</option>
+                {US_STATES.map((s: string) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                Housing situation
+              </label>
+              <input
+                type="text"
                 value={housing}
                 onChange={(e) => setHousing(e.target.value)}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none placeholder:text-ink-tertiary"
               />
-              <Input
-                label="Employment Type"
+            </div>
+            <div>
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                Employment type
+              </label>
+              <input
+                type="text"
                 value={employment}
                 onChange={(e) => setEmployment(e.target.value)}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none placeholder:text-ink-tertiary"
               />
-              <Input
-                label="Family Status"
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                Family status
+              </label>
+              <input
+                type="text"
                 value={family}
                 onChange={(e) => setFamily(e.target.value)}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none placeholder:text-ink-tertiary"
               />
             </div>
-          </Card.Body>
-          <Card.Footer>
-            <div className="flex items-center justify-between">
-              <div>
-                {error && (
-                  <p className="text-sm text-red-400">{error}</p>
-                )}
-                {success && (
-                  <p className="text-sm text-green-400">{success}</p>
-                )}
-              </div>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-border flex items-center justify-between gap-4">
+            <div className="min-h-[1.25rem]">
+              {error && (
+                <p className="font-sans text-sm text-warning">{error}</p>
+              )}
+              {success && (
+                <p className="font-sans text-sm text-accent">{success}</p>
+              )}
             </div>
-          </Card.Footer>
-        </Card>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="bg-accent text-white px-6 py-3 rounded-md font-sans font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </div>
+        </section>
 
         {/* Active Issues */}
-        <Card>
-          <Card.Header>
-            <h2 className="text-lg font-semibold text-white">
-              Active Issues
-            </h2>
-          </Card.Header>
-          <Card.Body>
-            <CaseHistory issues={profile.active_issues} />
-          </Card.Body>
-        </Card>
+        <section className="bg-white border border-border rounded-lg p-8">
+          <h2 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-6">
+            What you're dealing with
+          </h2>
+          <CaseHistory issues={profile.active_issues} />
+        </section>
 
         {/* Documents */}
-        <Card>
-          <Card.Header>
-            <h2 className="text-lg font-semibold text-white">
-              Documents
-            </h2>
-          </Card.Header>
-          <Card.Body>
-            {profile.documents.length > 0 && (
-              <ul className="space-y-2 mb-6">
-                {profile.documents.map((doc: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-2 text-sm text-gray-300 p-2 bg-white/[0.03] rounded-lg border border-white/[0.06]"
-                  >
-                    <svg
-                      className="w-4 h-4 text-gray-500 shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                      />
-                    </svg>
-                    {doc}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <DocumentUpload userId={userId} />
-          </Card.Body>
-        </Card>
+        <section className="bg-white border border-border rounded-lg p-8">
+          <h2 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-6">
+            Your documents
+          </h2>
+          {profile.documents.length > 0 && (
+            <ul className="space-y-2 mb-6">
+              {profile.documents.map((doc: string, i: number) => (
+                <li
+                  key={i}
+                  className="flex items-center gap-3 font-sans text-sm text-ink-primary p-3 bg-bg rounded-md border border-border"
+                >
+                  <File className="w-5 h-5 text-ink-secondary shrink-0" weight="regular" />
+                  {doc}
+                </li>
+              ))}
+            </ul>
+          )}
+          <DocumentUpload userId={userId} />
+        </section>
 
         {/* Legal Facts */}
         {profile.legal_facts.length > 0 && (
-          <Card>
-            <Card.Header>
-              <h2 className="text-lg font-semibold text-white">
-                Known Legal Facts
-              </h2>
-            </Card.Header>
-            <Card.Body>
-              <ul className="space-y-1.5">
-                {profile.legal_facts.map((fact: string, i: number) => (
-                  <li key={i} className="text-sm text-gray-300 flex gap-2">
-                    <span className="text-blue-400 shrink-0">&#8226;</span>
-                    {fact}
-                  </li>
-                ))}
-              </ul>
-            </Card.Body>
-          </Card>
+          <section className="bg-white border border-border rounded-lg p-8">
+            <h2 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-2">
+              What we remember
+            </h2>
+            <p className="font-sans text-sm text-ink-tertiary mb-6">
+              Facts CaseMate has picked up from your conversations over time.
+            </p>
+            <ul className="space-y-3">
+              {profile.legal_facts.map((fact: string, i: number) => (
+                <li key={i} className="font-sans text-base text-ink-primary flex gap-3 max-w-[65ch]">
+                  <span className="text-accent shrink-0 leading-relaxed">•</span>
+                  <span className="leading-relaxed">{fact}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </main>
     </div>

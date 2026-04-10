@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "@/lib/i18n";
 import translations from "@/lib/i18n/translations";
+import { Warning } from "@phosphor-icons/react";
 
 /** All 50 US states used in the state selection dropdown during onboarding. */
 const US_STATES = [
@@ -177,17 +178,27 @@ export default function OnboardingFlow() {
 
   const stepOfLabel = translations.stepOf[locale];
 
+  // Shared radio option styling: selected vs unselected
+  const radioClass = (selected: boolean) =>
+    `flex items-center gap-3 p-4 border rounded-md cursor-pointer transition-colors ${
+      selected
+        ? "border-accent bg-accent-subtle"
+        : "border-border hover:border-border-strong hover:bg-bg-hover"
+    }`;
+
   function renderStep() {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">
-              {t("letsGetToKnowYou")}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {t("onboardingPersonalizeNote")}
-            </p>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="font-serif font-medium tracking-tight leading-tight text-3xl text-ink-primary">
+                {t("letsGetToKnowYou")}
+              </h2>
+              <p className="font-sans text-ink-secondary max-w-[65ch]">
+                {t("onboardingPersonalizeNote")}
+              </p>
+            </div>
             <Input
               label={t("yourName")}
               placeholder={t("namePlaceholder")}
@@ -195,18 +206,18 @@ export default function OnboardingFlow() {
               onChange={(e) => update("displayName", e.target.value)}
             />
             <div>
-              <label htmlFor="onboarding-state" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="onboarding-state" className="block text-sm font-sans font-medium text-ink-primary mb-2">
                 {t("state")}
               </label>
               <select
                 id="onboarding-state"
                 value={form.state}
                 onChange={(e) => update("state", e.target.value)}
-                className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50"
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-sm text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20"
               >
-                <option value="" className="text-black bg-white">{t("selectYourState")}</option>
+                <option value="">{t("selectYourState")}</option>
                 {US_STATES.map((s: string) => (
-                  <option key={s} value={s} className="text-black bg-white">
+                  <option key={s} value={s}>
                     {s}
                   </option>
                 ))}
@@ -217,14 +228,16 @@ export default function OnboardingFlow() {
 
       case 2:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">
-              {t("housingSituationTitle")}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {t("housingNote")}
-            </p>
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="font-serif font-medium tracking-tight leading-tight text-3xl text-ink-primary">
+                {t("housingSituationTitle")}
+              </h2>
+              <p className="font-sans text-ink-secondary max-w-[65ch]">
+                {t("housingNote")}
+              </p>
+            </div>
+            <div className="space-y-3">
               {[
                 { value: "renter", label: t("renter") },
                 { value: "homeowner", label: t("homeowner") },
@@ -232,11 +245,7 @@ export default function OnboardingFlow() {
               ].map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                    form.housingSituation === opt.value
-                      ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
-                      : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
-                  }`}
+                  className={radioClass(form.housingSituation === opt.value)}
                 >
                   <input
                     type="radio"
@@ -244,9 +253,9 @@ export default function OnboardingFlow() {
                     value={opt.value}
                     checked={form.housingSituation === opt.value}
                     onChange={(e) => update("housingSituation", e.target.value)}
-                    className="text-blue-500"
+                    className="accent-accent"
                   />
-                  <span className="text-sm text-gray-200">{opt.label}</span>
+                  <span className="font-sans text-sm text-ink-primary">{opt.label}</span>
                 </label>
               ))}
             </div>
@@ -261,23 +270,21 @@ export default function OnboardingFlow() {
 
       case 3:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">
-              {t("employmentTypeTitle")}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {t("employmentNote")}
-            </p>
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="font-serif font-medium tracking-tight leading-tight text-3xl text-ink-primary">
+                {t("employmentTypeTitle")}
+              </h2>
+              <p className="font-sans text-ink-secondary max-w-[65ch]">
+                {t("employmentNote")}
+              </p>
+            </div>
+            <div className="space-y-3">
               {["W-2 Employee", "1099 Contractor", "Unemployed", "Student", "Retired"].map(
                 (opt: string) => (
                   <label
                     key={opt}
-                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                      form.employmentType === opt.toLowerCase()
-                        ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
-                        : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
-                    }`}
+                    className={radioClass(form.employmentType === opt.toLowerCase())}
                   >
                     <input
                       type="radio"
@@ -287,9 +294,9 @@ export default function OnboardingFlow() {
                       onChange={(e) =>
                         update("employmentType", e.target.value)
                       }
-                      className="text-blue-500"
+                      className="accent-accent"
                     />
-                    <span className="text-sm text-gray-200">{opt}</span>
+                    <span className="font-sans text-sm text-ink-primary">{opt}</span>
                   </label>
                 )
               )}
@@ -305,42 +312,38 @@ export default function OnboardingFlow() {
 
       case 4:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">
-              {t("familyStatusTitle")}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {t("familyNote")}
-            </p>
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="font-serif font-medium tracking-tight leading-tight text-3xl text-ink-primary">
+                {t("familyStatusTitle")}
+              </h2>
+              <p className="font-sans text-ink-secondary max-w-[65ch]">
+                {t("familyNote")}
+              </p>
+            </div>
+            <div className="space-y-3">
               {[
                 { value: "single", label: t("single") },
                 { value: "married", label: t("married") },
                 { value: "divorced", label: t("divorced") },
                 { value: "widowed", label: t("widowed") },
                 { value: "domestic partnership", label: t("domesticPartnership") },
-              ].map(
-                (opt) => (
-                  <label
-                    key={opt.value}
-                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                      form.familyStatus === opt.value
-                        ? "border-blue-500 bg-blue-500/10 shadow-glow-sm"
-                        : "border-white/10 hover:border-white/20 hover:bg-white/[0.03]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="family"
-                      value={opt.value}
-                      checked={form.familyStatus === opt.value}
-                      onChange={(e) => update("familyStatus", e.target.value)}
-                      className="text-blue-500"
-                    />
-                    <span className="text-sm text-gray-200">{opt.label}</span>
-                  </label>
-                )
-              )}
+              ].map((opt) => (
+                <label
+                  key={opt.value}
+                  className={radioClass(form.familyStatus === opt.value)}
+                >
+                  <input
+                    type="radio"
+                    name="family"
+                    value={opt.value}
+                    checked={form.familyStatus === opt.value}
+                    onChange={(e) => update("familyStatus", e.target.value)}
+                    className="accent-accent"
+                  />
+                  <span className="font-sans text-sm text-ink-primary">{opt.label}</span>
+                </label>
+              ))}
             </div>
             <Input
               label={t("numberOfDependents")}
@@ -355,32 +358,42 @@ export default function OnboardingFlow() {
 
       case 5:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">
-              {t("currentLegalIssue")}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {t("legalIssueNote")}
-            </p>
-            <textarea
-              value={form.currentIssue}
-              onChange={(e) => update("currentIssue", e.target.value)}
-              rows={5}
-              placeholder={t("legalIssuePlaceholder")}
-              className="w-full px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 resize-none placeholder:text-gray-600"
-            />
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="font-serif font-medium tracking-tight leading-tight text-3xl text-ink-primary">
+                {t("currentLegalIssue")}
+              </h2>
+              <p className="font-sans text-ink-secondary max-w-[65ch]">
+                {t("legalIssueNote")}
+              </p>
+            </div>
+            <div>
+              <label htmlFor="onboarding-issue" className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                {t("currentLegalIssue")}
+              </label>
+              <textarea
+                id="onboarding-issue"
+                value={form.currentIssue}
+                onChange={(e) => update("currentIssue", e.target.value)}
+                rows={5}
+                placeholder={t("legalIssuePlaceholder")}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-sm text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-ink-tertiary resize-none"
+              />
+            </div>
           </div>
         );
 
       case 6:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">
-              {t("preferredLanguage")}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {t("languageNote")}
-            </p>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="font-serif font-medium tracking-tight leading-tight text-3xl text-ink-primary">
+                {t("preferredLanguage")}
+              </h2>
+              <p className="font-sans text-ink-secondary max-w-[65ch]">
+                {t("languageNote")}
+              </p>
+            </div>
             <div className="flex gap-3">
               {(
                 [
@@ -392,10 +405,10 @@ export default function OnboardingFlow() {
                   key={lang.code}
                   type="button"
                   onClick={() => update("languagePreference", lang.code)}
-                  className={`flex-1 py-3 px-4 rounded-lg border text-sm font-medium transition-all ${
+                  className={`flex-1 py-3 px-4 rounded-md border font-sans font-medium text-sm transition-colors ${
                     form.languagePreference === lang.code
-                      ? "border-blue-500 bg-blue-500/10 text-white shadow-glow-sm"
-                      : "border-white/10 text-gray-400 hover:border-white/20 hover:bg-white/[0.03]"
+                      ? "border-accent bg-accent-subtle text-ink-primary"
+                      : "border-border text-ink-secondary hover:border-border-strong hover:bg-bg-hover"
                   }`}
                 >
                   {lang.label}
@@ -411,41 +424,51 @@ export default function OnboardingFlow() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
-        {/* Progress bar */}
+    <div className="min-h-screen bg-bg flex items-center justify-center p-6">
+      <div className="w-full max-w-xl">
+        {/* Step indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-400">
-              {typeof stepOfLabel === "function" ? stepOfLabel(step, TOTAL_STEPS) : `${t("step")} ${step} ${t("of")} ${TOTAL_STEPS}`}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-sans font-medium text-accent">
+              {typeof stepOfLabel === "function"
+                ? stepOfLabel(step, TOTAL_STEPS)
+                : `${t("step")} ${step} ${t("of")} ${TOTAL_STEPS}`}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm font-sans text-ink-tertiary">
               {Math.round((step / TOTAL_STEPS) * 100)}%
             </span>
           </div>
-          <div className="w-full bg-white/10 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-blue-600 to-violet-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
-            />
+          <div className="flex items-center gap-2">
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
+              const isActive = i + 1 <= step;
+              return (
+                <div
+                  key={i}
+                  className={`h-1 flex-1 rounded-sm transition-colors ${
+                    isActive ? "bg-accent" : "bg-border"
+                  }`}
+                />
+              );
+            })}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs font-sans text-ink-tertiary mt-3">
             {t("onboardingSecureNotice")}
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-6">
+        <div className="bg-white border border-border rounded-lg p-8">
           {renderStep()}
 
           {error && (
-            <p className="mt-4 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-              {error}
-            </p>
+            <div className="mt-6 flex items-start gap-2 text-sm font-sans text-warning bg-warning-subtle border border-warning/30 rounded-md p-3">
+              <Warning className="w-4 h-4 shrink-0 mt-0.5" weight="regular" />
+              <span>{error}</span>
+            </div>
           )}
 
           {/* Navigation */}
-          <div className="flex items-center justify-between mt-8">
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
             <Button
               variant="ghost"
               onClick={() => setStep((s) => s - 1)}

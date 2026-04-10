@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import ChatInterface from "@/components/ChatInterface";
 import type { LegalProfile } from "@/lib/types";
 import { api } from "@/lib/api";
@@ -16,7 +17,6 @@ import { useAuth } from "@/lib/auth";
  * @returns The user's LegalProfile, or null if not found
  */
 async function loadProfile(userId: string): Promise<LegalProfile | null> {
-  // Try localStorage first (saved during onboarding)
   try {
     const raw = localStorage.getItem("casemate_profile");
     if (raw) {
@@ -29,11 +29,9 @@ async function loadProfile(userId: string): Promise<LegalProfile | null> {
     // localStorage parse failed — fall through
   }
 
-  // Fall back to backend API
   try {
     const profile = await api.getProfile(userId);
     if (profile) {
-      // Cache it for next time
       try {
         localStorage.setItem("casemate_profile", JSON.stringify(profile));
       } catch {
@@ -59,11 +57,8 @@ export default function ChatPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-sm text-gray-400">Loading...</p>
-          </div>
+        <div className="min-h-screen bg-bg flex items-center justify-center">
+          <p className="font-sans text-base text-ink-secondary">Loading…</p>
         </div>
       }
     >
@@ -100,14 +95,14 @@ function ChatPageInner() {
           setProfile(p);
         } else {
           setError(
-            "Profile not found. Please complete onboarding first."
+            "We don't have your profile yet. Let's set it up."
           );
         }
       } catch (err) {
         setError(
           err instanceof Error
             ? err.message
-            : "Failed to load profile. Please try again."
+            : "We couldn't load your profile. Please try again."
         );
       } finally {
         setLoading(false);
@@ -119,36 +114,34 @@ function ChatPageInner() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-gray-400">Loading your profile...</p>
-        </div>
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="font-sans text-base text-ink-secondary">
+          Loading your profile…
+        </p>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
-        <div className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-8 max-w-md text-center">
-          <div className="text-red-400 text-3xl mb-4">!</div>
-          <h2 className="text-lg font-semibold text-white mb-2">
-            Unable to Load Profile
+      <div className="min-h-screen bg-bg flex items-center justify-center p-6">
+        <div className="bg-white border border-border rounded-lg p-10 max-w-md text-center">
+          <h2 className="font-serif text-2xl font-medium text-ink-primary mb-3">
+            Let's set up your profile
           </h2>
-          <p className="text-sm text-gray-400 mb-6">
-            {error || "Something went wrong."}
+          <p className="font-sans text-base text-ink-secondary mb-8 max-w-[45ch]">
+            {error || "We need a few details about your situation so CaseMate can help."}
           </p>
           <div className="flex items-center justify-center gap-3">
-            <a
+            <Link
               href="/onboarding"
-              className="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 shadow-glow-md transition-all"
+              className="inline-flex items-center px-6 py-3 bg-accent text-white text-base font-sans font-medium rounded-md hover:bg-accent-hover transition-colors"
             >
-              Start Onboarding
-            </a>
+              Start onboarding
+            </Link>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-4 py-2 border border-white/15 text-gray-300 text-sm font-medium rounded-lg hover:bg-white/5 hover:border-white/25 transition-all"
+              className="inline-flex items-center px-6 py-3 border border-border-strong text-ink-primary text-base font-sans font-medium rounded-md hover:bg-bg-hover transition-colors"
             >
               Retry
             </button>

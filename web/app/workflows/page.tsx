@@ -5,6 +5,7 @@ import WorkflowWizard from "@/components/WorkflowWizard";
 import { WORKFLOW_TEMPLATES } from "@/lib/workflow-templates";
 import { useTranslation } from "@/lib/i18n";
 import type { WorkflowStep } from "@/lib/shared-types/workflows";
+import { ArrowLeft, X, CheckCircle, ArrowRight } from "@phosphor-icons/react";
 
 /** Persisted workflow instance stored in localStorage. */
 interface SavedWorkflow {
@@ -118,23 +119,21 @@ export default function WorkflowsPage() {
 
   if (!loaded) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="font-sans text-ink-secondary">Loading…</p>
       </div>
     );
   }
 
   if (selectedWorkflow) {
     return (
-      <div className="min-h-screen bg-[#050505] p-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-bg">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <button
             onClick={() => setSelectedWorkflow(null)}
-            className="text-sm text-gray-400 hover:text-white mb-6 flex items-center gap-1.5 transition-colors"
+            className="font-sans text-sm text-ink-secondary hover:text-ink-primary mb-8 flex items-center gap-2 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <ArrowLeft className="w-4 h-4" weight="regular" />
             {t("backToWorkflows")}
           </button>
           <WorkflowWizard
@@ -153,16 +152,23 @@ export default function WorkflowsPage() {
   const completedWorkflows = activeWorkflows.filter((w) => w.status === "completed");
 
   return (
-    <div className="min-h-screen bg-[#050505] p-6">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold text-white mb-2">{t("guidedWorkflows")}</h1>
-        <p className="text-gray-400 mb-8">{t("workflowsDescription")}</p>
+    <div className="min-h-screen bg-bg">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-12 max-w-[65ch]">
+          <h1 className="font-serif text-5xl md:text-6xl font-medium tracking-tight leading-tight text-ink-primary">
+            Step by step
+          </h1>
+          <p className="font-sans text-base text-ink-secondary mt-4">
+            Pick a situation and we'll walk you through exactly what to do,
+            one step at a time. No legalese. No guessing.
+          </p>
+        </div>
 
         {/* Active Workflows */}
         {inProgressWorkflows.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              {t("yourActiveWorkflows")}
+          <div className="mb-12">
+            <h2 className="font-sans text-sm font-medium text-ink-tertiary uppercase tracking-wider mb-4">
+              In progress
             </h2>
             <div className="space-y-3">
               {inProgressWorkflows.map((w) => {
@@ -170,33 +176,33 @@ export default function WorkflowsPage() {
                 return (
                   <div
                     key={w.id}
-                    className="flex items-center gap-3 p-4 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all"
+                    className="flex items-center gap-4 bg-white border border-border rounded-lg p-6 hover:border-border-strong transition-colors"
                   >
                     <button
                       onClick={() => handleLoadWorkflow(w.id)}
                       className="flex-1 text-left"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-semibold text-white">{w.title}</h3>
-                        <span className="text-xs text-blue-400">
-                          {t("step")} {w.current_step + 1} {t("of")} {w.steps.length}
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-serif text-2xl font-medium tracking-tight text-ink-primary">
+                          {w.title}
+                        </h3>
+                        <span className="font-sans text-sm text-ink-secondary shrink-0 ml-4">
+                          Step {w.current_step + 1} of {w.steps.length}
                         </span>
                       </div>
-                      <div className="w-full bg-white/10 rounded-full h-1.5">
+                      <div className="w-full bg-bg-hover rounded-md h-1.5 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-blue-600 to-violet-500 h-1.5 rounded-full transition-all"
+                          className="bg-accent h-1.5 transition-all"
                           style={{ width: `${(completedSteps / w.steps.length) * 100}%` }}
                         />
                       </div>
                     </button>
                     <button
                       onClick={() => handleDeleteWorkflow(w.id)}
-                      className="text-gray-600 hover:text-red-400 transition-colors p-1"
-                      title="Delete workflow"
+                      className="text-ink-tertiary hover:text-warning transition-colors p-2"
+                      title="Remove"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <X className="w-4 h-4" weight="regular" />
                     </button>
                   </div>
                 );
@@ -207,35 +213,31 @@ export default function WorkflowsPage() {
 
         {/* Completed Workflows */}
         {completedWorkflows.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              {t("completed")}
+          <div className="mb-12">
+            <h2 className="font-sans text-sm font-medium text-ink-tertiary uppercase tracking-wider mb-4">
+              Completed
             </h2>
             <div className="space-y-3">
               {completedWorkflows.map((w) => (
                 <div
                   key={w.id}
-                  className="flex items-center gap-3 p-4 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-green-500/20"
+                  className="flex items-center gap-4 bg-white border border-border rounded-lg p-6"
                 >
                   <button
                     onClick={() => handleLoadWorkflow(w.id)}
-                    className="flex-1 text-left"
+                    className="flex-1 text-left flex items-center gap-3"
                   >
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-white">{w.title}</h3>
-                      <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                        {t("completed")}
-                      </span>
-                    </div>
+                    <CheckCircle className="w-5 h-5 text-accent shrink-0" weight="regular" />
+                    <h3 className="font-serif text-xl font-medium tracking-tight text-ink-primary">
+                      {w.title}
+                    </h3>
                   </button>
                   <button
                     onClick={() => handleDeleteWorkflow(w.id)}
-                    className="text-gray-600 hover:text-red-400 transition-colors p-1"
-                    title="Delete workflow"
+                    className="text-ink-tertiary hover:text-warning transition-colors p-2"
+                    title="Remove"
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-4 h-4" weight="regular" />
                   </button>
                 </div>
               ))}
@@ -244,29 +246,34 @@ export default function WorkflowsPage() {
         )}
 
         {/* Available Templates */}
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-          {t("availableWorkflows")}
+        <h2 className="font-sans text-sm font-medium text-ink-tertiary uppercase tracking-wider mb-4">
+          Available guides
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {WORKFLOW_TEMPLATES.map((tmpl) => (
             <div
               key={tmpl.id}
-              className="p-5 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 hover:border-blue-500/30 transition-all"
+              className="bg-white border border-border rounded-lg p-6 hover:border-border-strong transition-colors flex flex-col"
             >
-              <span className="text-xs text-blue-400 font-medium">
+              <span className="font-sans text-xs font-medium text-accent uppercase tracking-wider mb-2">
                 {tmpl.domain.replace(/_/g, " ")}
               </span>
-              <h3 className="text-base font-semibold text-white mt-1 mb-1">{tmpl.title}</h3>
-              <p className="text-sm text-gray-400 mb-3">{tmpl.description}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">
-                  {tmpl.steps.length} {t("steps")} · {tmpl.estimated_time}
+              <h3 className="font-serif text-2xl font-medium tracking-tight text-ink-primary mb-2">
+                {tmpl.title}
+              </h3>
+              <p className="font-sans text-base text-ink-secondary mb-6 flex-1 max-w-[65ch]">
+                {tmpl.description}
+              </p>
+              <div className="flex items-center justify-between pt-4 border-t border-border">
+                <span className="font-sans text-sm text-ink-tertiary">
+                  {tmpl.steps.length} steps · {tmpl.estimated_time}
                 </span>
                 <button
                   onClick={() => handleStartWorkflow(tmpl.id)}
-                  className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                  className="font-sans text-sm font-medium text-accent hover:text-accent-hover transition-colors flex items-center gap-1.5"
                 >
-                  {t("startWorkflow")}
+                  Start
+                  <ArrowRight className="w-4 h-4" weight="regular" />
                 </button>
               </div>
             </div>

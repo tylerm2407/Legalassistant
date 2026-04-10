@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { getWorkflow, updateWorkflowStep } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import type { WorkflowInstance, WorkflowStep } from "@/lib/types";
 
 export default function WorkflowWizardScreen() {
@@ -67,9 +67,23 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20 },
   center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
-  errorText: { color: colors.error, fontSize: 16 },
-  title: { fontSize: 22, fontWeight: "800", color: colors.text, marginBottom: 4 },
-  status: { fontSize: 13, color: colors.textSecondary, marginBottom: 20, textTransform: "capitalize" },
+  errorText: { color: colors.error, fontSize: 16, fontFamily: fonts.sans },
+  title: {
+    fontSize: 28,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.4,
+  },
+  status: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginBottom: 24,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
+  },
   steps: { gap: 12 },
   step: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 16,
@@ -82,10 +96,17 @@ const styles = StyleSheet.create({
     justifyContent: "center", alignItems: "center",
   },
   stepCircleCompleted: { backgroundColor: colors.success },
-  stepCircleText: { color: "#ffffff", fontWeight: "700", fontSize: 13 },
-  stepTitle: { fontSize: 15, fontWeight: "700", color: colors.text, flex: 1 },
+  stepCircleText: { color: "#ffffff", fontWeight: "700", fontSize: 13, fontFamily: fonts.sans },
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.text,
+    flex: 1,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.2,
+  },
   stepTitleCompleted: { textDecorationLine: "line-through", color: colors.textMuted },
-  stepDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 18, marginLeft: 40 },
-  completeBtn: { marginTop: 10, marginLeft: 40, backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, alignSelf: "flex-start" },
-  completeBtnText: { color: "#ffffff", fontWeight: "600", fontSize: 13 },
+  stepDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginLeft: 40, fontFamily: fonts.sans },
+  completeBtn: { marginTop: 10, marginLeft: 40, backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, alignSelf: "flex-start" },
+  completeBtnText: { color: "#ffffff", fontWeight: "600", fontSize: 13, fontFamily: fonts.sans },
 });

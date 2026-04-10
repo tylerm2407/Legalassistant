@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import Card from "./ui/Card";
 import Button from "./ui/Button";
 import { useTranslation } from "@/lib/i18n";
 import { api } from "@/lib/api";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  Lightbulb,
+} from "@phosphor-icons/react";
 
 /**
  * A single step within a guided legal workflow.
@@ -59,9 +64,17 @@ interface WorkflowWizardProps {
  * @param props.initialStep - Step index to start from (supports resuming)
  * @param props.onStepComplete - Callback to persist step completion
  */
-export default function WorkflowWizard({ workflowId, title, steps, initialStep, onStepComplete }: WorkflowWizardProps) {
+export default function WorkflowWizard({
+  workflowId,
+  title,
+  steps,
+  initialStep,
+  onStepComplete,
+}: WorkflowWizardProps) {
   const [currentStep, setCurrentStep] = useState(initialStep);
-  const [stepStatuses, setStepStatuses] = useState<string[]>(steps.map((s: WorkflowStep) => s.status));
+  const [stepStatuses, setStepStatuses] = useState<string[]>(
+    steps.map((s: WorkflowStep) => s.status)
+  );
   const { t } = useTranslation();
 
   const step = steps[currentStep];
@@ -84,107 +97,134 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep, 
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-bold text-white">{title}</h1>
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* Title */}
+      <header className="space-y-3">
+        <h1 className="font-serif font-medium tracking-tight leading-tight text-3xl md:text-4xl text-ink-primary">
+          {title}
+        </h1>
+        <p className="text-sm font-sans text-ink-tertiary">
+          {t("step")} {currentStep + 1} {t("of")} {steps.length}
+        </p>
+      </header>
 
       {/* Step progress */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {steps.map((s: WorkflowStep, i: number) => (
           <button
             key={s.id}
             onClick={() => setCurrentStep(i)}
-            className={`flex-1 h-2 rounded-full transition-all ${
+            className={`flex-1 h-1 rounded-sm transition-colors ${
               stepStatuses[i] === "completed"
-                ? "bg-green-500"
+                ? "bg-accent"
                 : i === currentStep
-                ? "bg-blue-500"
-                : "bg-white/10"
+                ? "bg-accent"
+                : "bg-border"
             }`}
+            aria-label={`${t("step")} ${i + 1}`}
           />
         ))}
       </div>
-      <p className="text-xs text-gray-500">
-        {t("step")} {currentStep + 1} {t("of")} {steps.length}
-      </p>
 
       {/* All complete banner */}
       {allComplete && (
-        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-center">
-          <p className="text-sm font-semibold text-green-400">
-            All steps completed! You can review any step by clicking the progress bar above.
+        <div className="bg-accent-subtle border border-accent/30 rounded-lg p-6 flex items-start gap-3">
+          <CheckCircle className="w-5 h-5 text-accent shrink-0 mt-0.5" weight="regular" />
+          <p className="font-sans text-sm text-ink-primary">
+            You&apos;ve finished every step. You can revisit any step by clicking the progress bar above.
           </p>
         </div>
       )}
 
       {/* Current step */}
-      <Card>
-        <Card.Header>
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-white">{step.title}</h2>
-            {stepStatuses[currentStep] === "completed" && (
-              <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                {t("completed")}
-              </span>
-            )}
-          </div>
-        </Card.Header>
-        <Card.Body>
-          <div className="space-y-5">
-            <p className="text-sm text-gray-300 leading-relaxed">{step.explanation}</p>
+      <section className="bg-white border border-border rounded-lg p-8">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-serif font-medium tracking-tight text-2xl text-ink-primary">
+            {step.title}
+          </h2>
+          {stepStatuses[currentStep] === "completed" && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-accent bg-accent-subtle border border-accent/20 px-2.5 py-1 rounded-md">
+              <CheckCircle className="w-3.5 h-3.5" weight="regular" />
+              {t("completed")}
+            </span>
+          )}
+        </div>
 
-            {step.required_documents.length > 0 && (
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("requiredDocuments")}</h3>
-                <ul className="space-y-1">
-                  {step.required_documents.map((doc: string, i: number) => (
-                    <li key={i} className="text-sm text-gray-300 flex gap-2">
-                      <svg className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                      </svg>
-                      {doc}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+        <div className="space-y-8">
+          <p className="font-sans text-base text-ink-secondary leading-relaxed max-w-[65ch]">
+            {step.explanation}
+          </p>
 
-            {step.tips.length > 0 && (
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("tips")}</h3>
-                <ul className="space-y-1">
-                  {step.tips.map((tip: string, i: number) => (
-                    <li key={i} className="text-sm text-blue-300 flex gap-2">
-                      <span className="text-blue-400 shrink-0">&#x2022;</span>
-                      {tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {step.required_documents.length > 0 && (
+            <div>
+              <h3 className="text-xs font-sans font-medium text-ink-tertiary uppercase tracking-wider mb-3">
+                {t("requiredDocuments")}
+              </h3>
+              <ul className="space-y-2">
+                {step.required_documents.map((doc: string, i: number) => (
+                  <li
+                    key={i}
+                    className="font-sans text-sm text-ink-secondary flex gap-2"
+                  >
+                    <FileText
+                      className="w-4 h-4 text-ink-tertiary shrink-0 mt-0.5"
+                      weight="regular"
+                    />
+                    {doc}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-            {step.deadlines.length > 0 && (
-              <div>
-                <h3 className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-2">{t("deadlines")}</h3>
-                <ul className="space-y-1">
-                  {step.deadlines.map((deadline: string, i: number) => (
-                    <li key={i} className="text-sm text-yellow-400 flex gap-2">
-                      <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {deadline}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </Card.Body>
-      </Card>
+          {step.tips.length > 0 && (
+            <div>
+              <h3 className="text-xs font-sans font-medium text-ink-tertiary uppercase tracking-wider mb-3">
+                {t("tips")}
+              </h3>
+              <ul className="space-y-2">
+                {step.tips.map((tip: string, i: number) => (
+                  <li
+                    key={i}
+                    className="font-sans text-sm text-ink-secondary flex gap-2"
+                  >
+                    <Lightbulb
+                      className="w-4 h-4 text-accent shrink-0 mt-0.5"
+                      weight="regular"
+                    />
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {step.deadlines.length > 0 && (
+            <div className="bg-warning-subtle border border-warning/30 rounded-md p-4">
+              <h3 className="text-xs font-sans font-medium text-warning uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" weight="regular" />
+                {t("deadlines")}
+              </h3>
+              <ul className="space-y-2">
+                {step.deadlines.map((deadline: string, i: number) => (
+                  <li
+                    key={i}
+                    className="font-sans text-sm text-warning flex gap-2"
+                  >
+                    <span className="shrink-0">•</span>
+                    {deadline}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
@@ -193,16 +233,13 @@ export default function WorkflowWizard({ workflowId, title, steps, initialStep, 
         </Button>
         <div className="flex gap-2">
           {stepStatuses[currentStep] !== "completed" && (
-            <Button
-              size="sm"
-              onClick={completeStep}
-            >
+            <Button size="sm" onClick={completeStep}>
               {t("markCompleteBtn")}
             </Button>
           )}
           {currentStep < steps.length - 1 && (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => setCurrentStep(currentStep + 1)}
             >

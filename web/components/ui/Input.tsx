@@ -7,6 +7,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
+/**
+ * Text input styled for the editorial design system.
+ *
+ * Labels sit above the input in small uppercase-ish sans font.
+ * The input itself is white on warm off-white with a hairline border.
+ * Focus state uses the accent green — no glow, no ring bleed.
+ */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className = "", id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
@@ -16,7 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-300 mb-1"
+            className="block text-sm font-sans font-medium text-ink-primary mb-2"
           >
             {label}
           </label>
@@ -24,14 +31,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={`w-full px-3 py-2 bg-white/[0.03] text-white border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:border-blue-500/50 focus:ring-blue-500/20 focus:shadow-glow-sm placeholder:text-gray-600 ${
-            error
-              ? "border-red-500/50 focus:ring-red-500/20 focus:border-red-500/50"
-              : "border-white/10"
+          className={`w-full px-4 py-3 bg-white text-ink-primary border rounded-md text-base font-sans transition-colors focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-ink-tertiary ${
+            error ? "border-warning" : "border-border"
           } ${className}`}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+        {error && <p className="mt-2 text-sm font-sans text-warning">{error}</p>}
       </div>
     );
   }

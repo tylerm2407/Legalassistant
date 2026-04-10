@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { List, Microphone } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import LegalProfileSidebar from "./LegalProfileSidebar";
 import ConversationHistory from "./ConversationHistory";
@@ -14,12 +15,9 @@ import translations from "@/lib/i18n/translations";
 /**
  * Renders a single chat message bubble with role-based styling.
  *
- * User messages appear right-aligned with a blue gradient background.
- * Assistant messages appear left-aligned with a glass-morphism style.
- * Error messages are styled with a red border for visibility.
- *
- * @param props - Component props
- * @param props.message - The chat message to render, including role, content, and optional legal area tag
+ * User messages appear right-aligned with a warm accent-subtle background.
+ * Assistant messages appear left-aligned on white with a hairline border.
+ * Error messages use the muted terracotta warning palette — never red.
  */
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
@@ -27,18 +25,18 @@ function MessageBubble({ message }: { message: Message }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+        className={`max-w-[70ch] px-6 py-4 rounded-lg text-base font-sans leading-relaxed ${
           isUser
-            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-glow-sm"
+            ? "bg-accent-subtle text-ink-primary border border-accent/20"
             : isError
-            ? "bg-red-500/10 text-red-400 border border-red-500/20"
-            : "bg-white/[0.03] backdrop-blur text-gray-200 border border-white/10"
+            ? "bg-warning-subtle text-ink-primary border border-warning/30"
+            : "bg-white text-ink-primary border border-border"
         }`}
       >
-        {message.content}
+        <div className="whitespace-pre-wrap">{message.content}</div>
         {message.legalArea && (
-          <span className="block mt-1 text-xs opacity-70">
-            {message.legalArea.replace("_", " ")}
+          <span className="block mt-2 text-xs font-sans text-ink-tertiary capitalize">
+            {message.legalArea.replace(/_/g, " ")}
           </span>
         )}
       </div>
@@ -48,18 +46,16 @@ function MessageBubble({ message }: { message: Message }) {
 
 /**
  * Animated typing indicator displayed while CaseMate is generating a response.
- *
- * Shows three bouncing dots to indicate the AI assistant is processing
- * the user's legal question through the memory-injected Claude pipeline.
+ * Three quiet dots on a white card — no glow, no color shift.
  */
 function TypingIndicator() {
   return (
     <div className="flex justify-start">
-      <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.1s]" />
-          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+      <div className="bg-white border border-border rounded-lg px-6 py-4">
+        <div className="flex gap-1.5">
+          <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full animate-bounce" />
+          <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full animate-bounce [animation-delay:0.1s]" />
+          <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full animate-bounce [animation-delay:0.2s]" />
         </div>
       </div>
     </div>
@@ -127,7 +123,6 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // Stream response from local Next.js API route → Anthropic Claude
     setIsStreaming(true);
     setStreamingContent("");
 
@@ -135,7 +130,6 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     abortStreamRef.current = () => controller.abort();
 
     try {
-      // Build conversation history for context (exclude greeting and errors)
       const history = messages
         .filter((m) => m.role === "user" || m.role === "assistant")
         .map((m) => ({ role: m.role, content: m.content }));
@@ -208,7 +202,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
             }
           } catch (parseErr) {
             if (parseErr instanceof Error && parseErr.message !== "Stream error") {
-              // Ignore malformed SSE events
+              // ignore malformed SSE
             } else {
               throw parseErr;
             }
@@ -248,10 +242,6 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     }
   }, []);
 
-  /**
-   * Handles transcript auto-send: closes the recorder, sets the input,
-   * and triggers handleSend on next render via a ref flag.
-   */
   const pendingSendRef = useRef(false);
 
   const handleTranscriptSend = useCallback((text: string) => {
@@ -263,7 +253,6 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     }
   }, []);
 
-  // Auto-send when input is set from transcript and pendingSend is flagged
   useEffect(() => {
     if (pendingSendRef.current && input.trim() && !isLoading && !isStreaming) {
       pendingSendRef.current = false;
@@ -275,7 +264,6 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
     if (abortStreamRef.current) {
       abortStreamRef.current();
       abortStreamRef.current = null;
-      // Flush whatever we have so far as a message
       setStreamingContent((current) => {
         if (current) {
           setMessages((prev) => [
@@ -325,13 +313,13 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex h-screen bg-[#050505]">
+    <div className="flex h-screen bg-bg">
       {/* Profile Sidebar */}
       <LegalProfileSidebar profile={profile} />
 
       {/* Conversation History */}
       {showHistory && (
-        <div className="w-[240px] shrink-0 border-r border-white/10 bg-white/[0.01]">
+        <div className="w-[260px] shrink-0 border-r border-border bg-bg">
           <ConversationHistory
             activeConversationId={conversationId}
             onSelectConversation={handleSelectConversation}
@@ -343,48 +331,39 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="bg-white/[0.03] backdrop-blur-xl border-b border-white/10 px-6 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
+        <header className="bg-bg border-b border-border px-8 py-5 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              className="p-2 text-ink-secondary hover:text-ink-primary hover:bg-bg-hover rounded-md transition-colors"
               title={showHistory ? t("hideHistory") : t("showHistory")}
+              aria-label="Toggle conversation history"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
+              <List className="w-5 h-5" weight="regular" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-white">CaseMate</h1>
-              <p className="text-xs text-gray-500">{t("chatSubtitle")}</p>
+              <h1 className="font-serif text-xl font-medium text-ink-primary">CaseMate</h1>
+              <p className="text-sm font-sans text-ink-secondary">{t("chatSubtitle")}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {lastLegalArea && (
-              <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full font-medium">
-                {lastLegalArea.replace(/_/g, " ")}
-              </span>
-            )}
-            <nav className="flex items-center gap-1 ml-3">
-              <a href="/rights" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navRights")}</a>
-              <a href="/workflows" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navWorkflows")}</a>
-              <a href="/deadlines" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navDeadlines")}</a>
-              <a href="/attorneys" className="text-xs text-gray-500 hover:text-white px-2 py-1 rounded transition-colors">{t("navAttorneys")}</a>
-            </nav>
-          </div>
+          {lastLegalArea && (
+            <span className="text-sm font-sans font-medium text-accent bg-accent-subtle border border-accent/20 px-3 py-1 rounded-md capitalize">
+              {lastLegalArea.replace(/_/g, " ")}
+            </span>
+          )}
         </header>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 scrollbar-thin bg-bg">
           {messages.map((msg: Message, i: number) => (
             <MessageBubble key={i} message={msg} />
           ))}
           {isLoading && <TypingIndicator />}
           {isStreaming && streamingContent && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] px-4 py-3 rounded-2xl text-sm bg-white/[0.03] backdrop-blur text-gray-200 border border-white/10">
-                {streamingContent}
-                <span className="inline-block w-1.5 h-4 bg-blue-400 ml-0.5 animate-pulse" />
+              <div className="max-w-[70ch] px-6 py-4 rounded-lg text-base font-sans leading-relaxed bg-white text-ink-primary border border-border">
+                <div className="whitespace-pre-wrap">{streamingContent}</div>
+                <span className="inline-block w-[2px] h-4 bg-accent ml-0.5 animate-pulse align-middle" />
               </div>
             </div>
           )}
@@ -397,9 +376,9 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
         )}
 
         {/* Input */}
-        <div className="bg-white/[0.03] backdrop-blur-xl border-t border-white/10 px-6 py-4 shrink-0">
+        <div className="bg-bg border-t border-border px-8 py-5 shrink-0">
           {showRecorder && (
-            <div className="max-w-4xl mx-auto mb-3">
+            <div className="max-w-4xl mx-auto mb-4">
               <AudioRecorder
                 onTranscript={handleTranscript}
                 onTranscriptSend={handleTranscriptSend}
@@ -414,26 +393,22 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               onKeyDown={handleKeyDown}
               placeholder={t("chatPlaceholder")}
               rows={1}
-              className="flex-1 px-4 py-2.5 bg-white/[0.03] text-white border border-white/10 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:border-blue-500/50 focus:ring-blue-500/20 focus:shadow-glow-sm placeholder:text-gray-600"
+              className="flex-1 px-4 py-3 bg-white text-ink-primary border border-border rounded-md text-base font-sans resize-none focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-ink-tertiary"
             />
             <button
               onClick={() => setShowRecorder(!showRecorder)}
-              className={`p-2.5 rounded-xl border transition-colors ${
+              className={`p-3 rounded-md border transition-colors ${
                 showRecorder
-                  ? "bg-red-500/20 border-red-500/30 text-red-400"
-                  : "bg-white/[0.03] border-white/10 text-gray-400 hover:text-white hover:bg-white/[0.06]"
+                  ? "bg-accent-subtle border-accent/30 text-accent"
+                  : "bg-white border-border text-ink-secondary hover:text-ink-primary hover:bg-bg-hover"
               }`}
               title={showRecorder ? t("closeRecorder") : t("voiceInput")}
+              aria-label={showRecorder ? "Close recorder" : "Voice input"}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-              </svg>
+              <Microphone className="w-5 h-5" weight="regular" />
             </button>
             {isStreaming ? (
-              <Button
-                onClick={handleStopStream}
-                size="md"
-              >
+              <Button onClick={handleStopStream} size="md">
                 {t("stop")}
               </Button>
             ) : (
@@ -446,10 +421,7 @@ export default function ChatInterface({ profile }: ChatInterfaceProps) {
               </Button>
             )}
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center flex items-center justify-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
+          <p className="text-xs font-sans text-ink-tertiary mt-3 text-center max-w-[60ch] mx-auto leading-relaxed">
             {t("chatDisclaimer")}
           </p>
         </div>

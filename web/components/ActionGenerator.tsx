@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Button from "./ui/Button";
-import Card from "./ui/Card";
 import { api } from "@/lib/api";
 import type { DemandLetter, RightsSummary, Checklist } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
+import { FileText, Scales, ListChecks, Copy, Check, CircleNotch, Warning } from "@phosphor-icons/react";
 
 /** The three types of legal actions CaseMate can generate from the user's profile context. */
 type ActionType = "letter" | "rights" | "checklist";
@@ -70,7 +70,7 @@ export default function ActionGenerator({ userId }: ActionGeneratorProps) {
       setResultType(action);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : t("failedToGenerate")
+        err instanceof Error ? err.message : "We couldn't generate that right now. Let's try again."
       );
     } finally {
       setLoading(false);
@@ -107,186 +107,198 @@ export default function ActionGenerator({ userId }: ActionGeneratorProps) {
       case "letter": {
         const letter = result as DemandLetter;
         return (
-          <Card>
-            <Card.Header>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  {t("demandLetter")}
-                </h3>
-                <Button variant="ghost" size="sm" onClick={handleCopy}>
-                  {copied ? t("copied") : t("copy")}
-                </Button>
+          <div className="bg-white border border-border rounded-lg p-6 mt-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif font-medium tracking-tight text-ink-primary text-lg">
+                {t("demandLetter")}
+              </h3>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-sm text-ink-secondary hover:text-ink-primary transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4" weight="regular" />
+                    {t("copied")}
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" weight="regular" />
+                    {t("copy")}
+                  </>
+                )}
+              </button>
+            </div>
+            <pre className="text-sm text-ink-primary whitespace-pre-wrap font-sans leading-relaxed">
+              {letter.letter_text}
+            </pre>
+            {letter.legal_citations.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-border">
+                <p className="text-xs font-sans font-medium text-ink-tertiary uppercase tracking-wider mb-2">
+                  {t("legalCitations")}
+                </p>
+                <ul className="space-y-1">
+                  {letter.legal_citations.map((cite: string, i: number) => (
+                    <li key={i} className="font-mono text-sm text-ink-secondary">
+                      {cite}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </Card.Header>
-            <Card.Body>
-              <pre className="text-sm text-gray-200 whitespace-pre-wrap font-sans leading-relaxed">
-                {letter.letter_text}
-              </pre>
-              {letter.legal_citations.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    {t("legalCitations")}
-                  </p>
-                  <ul className="space-y-1">
-                    {letter.legal_citations.map((cite: string, i: number) => (
-                      <li key={i} className="citation">
-                        {cite}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <p className="trust-disclaimer">
-                {t("aiDisclaimer")}
-              </p>
-            </Card.Body>
-          </Card>
+            )}
+            <p className="mt-4 text-xs text-ink-tertiary leading-relaxed">
+              {t("aiDisclaimer")}
+            </p>
+          </div>
         );
       }
 
       case "rights": {
         const rights = result as RightsSummary;
         return (
-          <Card>
-            <Card.Header>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  {t("rightsSummary")}
-                </h3>
-                <Button variant="ghost" size="sm" onClick={handleCopy}>
-                  {copied ? t("copied") : t("copy")}
-                </Button>
+          <div className="bg-white border border-border rounded-lg p-6 mt-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif font-medium tracking-tight text-ink-primary text-lg">
+                {t("rightsSummary")}
+              </h3>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-sm text-ink-secondary hover:text-ink-primary transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4" weight="regular" />
+                    {t("copied")}
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" weight="regular" />
+                    {t("copy")}
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-sm text-ink-primary leading-relaxed mb-4">
+              {rights.summary_text}
+            </p>
+            {rights.key_rights.length > 0 && (
+              <div>
+                <p className="text-xs font-sans font-medium text-ink-tertiary uppercase tracking-wider mb-2">
+                  {t("keyRights")}
+                </p>
+                <ul className="space-y-2">
+                  {rights.key_rights.map((right: string, i: number) => (
+                    <li
+                      key={i}
+                      className="text-sm text-ink-primary flex gap-2"
+                    >
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" weight="regular" />
+                      <span>{right}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </Card.Header>
-            <Card.Body>
-              <p className="text-sm text-gray-200 leading-relaxed mb-4">
-                {rights.summary_text}
-              </p>
-              {rights.key_rights.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    {t("keyRights")}
-                  </p>
-                  <ul className="space-y-1.5">
-                    {rights.key_rights.map((right: string, i: number) => (
-                      <li
-                        key={i}
-                        className="text-sm text-gray-300 flex gap-2"
-                      >
-                        <span className="text-green-400 shrink-0">&#10003;</span>
-                        {right}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <p className="trust-disclaimer">
-                {t("aiDisclaimer")}
-              </p>
-            </Card.Body>
-          </Card>
+            )}
+            <p className="mt-4 text-xs text-ink-tertiary leading-relaxed">
+              {t("aiDisclaimer")}
+            </p>
+          </div>
         );
       }
 
       case "checklist": {
         const checklist = result as Checklist;
         return (
-          <Card>
-            <Card.Header>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  {t("legalChecklist")}
-                </h3>
-                <Button variant="ghost" size="sm" onClick={handleCopy}>
-                  {copied ? t("copied") : t("copy")}
-                </Button>
-              </div>
-            </Card.Header>
-            <Card.Body>
-              <ul className="space-y-2">
-                {checklist.items.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-sm">
-                    <input
-                      type="checkbox"
-                      className="mt-0.5 rounded border-white/15 bg-white/[0.03] text-blue-500 focus:ring-blue-500/20 accent-blue-500"
-                    />
-                    <div>
-                      <span className="text-gray-200">{item}</span>
-                      {checklist.deadlines[i] && (
-                        <span className="block text-xs text-red-400 mt-0.5">
-                          {t("deadline")}: {checklist.deadlines[i]}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <p className="trust-disclaimer">
-                {t("aiDisclaimer")}
-              </p>
-            </Card.Body>
-          </Card>
+          <div className="bg-white border border-border rounded-lg p-6 mt-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif font-medium tracking-tight text-ink-primary text-lg">
+                {t("legalChecklist")}
+              </h3>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-sm text-ink-secondary hover:text-ink-primary transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4" weight="regular" />
+                    {t("copied")}
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" weight="regular" />
+                    {t("copy")}
+                  </>
+                )}
+              </button>
+            </div>
+            <ul className="space-y-3">
+              {checklist.items.map((item: string, i: number) => (
+                <li key={i} className="flex items-start gap-3 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded border-border bg-white text-accent focus:ring-accent/20 accent-accent"
+                  />
+                  <div>
+                    <span className="text-ink-primary">{item}</span>
+                    {checklist.deadlines[i] && (
+                      <span className="block text-xs text-warning mt-1">
+                        {t("deadline")}: {checklist.deadlines[i]}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-ink-tertiary leading-relaxed">
+              {t("aiDisclaimer")}
+            </p>
+          </div>
         );
       }
     }
   }
 
+  const actionButton = (action: ActionType, label: string, Icon: typeof FileText) => {
+    const isActive = loading && activeAction === action;
+    return (
+      <button
+        onClick={() => handleGenerate(action)}
+        disabled={loading}
+        className="flex items-center gap-2 px-4 py-2 text-sm font-sans font-medium text-ink-primary bg-white border border-border-strong rounded-md hover:bg-bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActive ? (
+          <>
+            <CircleNotch className="w-4 h-4 animate-spin" weight="regular" />
+            Working on it
+          </>
+        ) : (
+          <>
+            <Icon className="w-4 h-4 text-ink-secondary" weight="regular" />
+            {label}
+          </>
+        )}
+      </button>
+    );
+  };
+
   return (
-    <div className="bg-white/[0.02] border-t border-white/10 px-6 py-3 shrink-0">
+    <div className="bg-bg border-t border-border px-6 py-4 shrink-0">
       {/* Action buttons */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs text-gray-500 mr-1">{t("actions")}</span>
-        <button
-          onClick={() => handleGenerate("letter")}
-          disabled={loading}
-          className="px-3 py-1.5 text-sm font-medium text-gray-300 border border-white/10 rounded-lg hover:border-blue-500/30 hover:shadow-glow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading && activeAction === "letter" ? (
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 border border-gray-500 border-t-transparent rounded-full animate-spin" />
-              {t("generating")}
-            </span>
-          ) : (
-            t("generateLetter")
-          )}
-        </button>
-        <button
-          onClick={() => handleGenerate("rights")}
-          disabled={loading}
-          className="px-3 py-1.5 text-sm font-medium text-gray-300 border border-white/10 rounded-lg hover:border-blue-500/30 hover:shadow-glow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading && activeAction === "rights" ? (
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 border border-gray-500 border-t-transparent rounded-full animate-spin" />
-              {t("generating")}
-            </span>
-          ) : (
-            t("rightsSummary")
-          )}
-        </button>
-        <button
-          onClick={() => handleGenerate("checklist")}
-          disabled={loading}
-          className="px-3 py-1.5 text-sm font-medium text-gray-300 border border-white/10 rounded-lg hover:border-blue-500/30 hover:shadow-glow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading && activeAction === "checklist" ? (
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 border border-gray-500 border-t-transparent rounded-full animate-spin" />
-              {t("generating")}
-            </span>
-          ) : (
-            t("checklist")
-          )}
-        </button>
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <span className="text-sm font-sans text-ink-secondary mr-1">{t("actions")}</span>
+        {actionButton("letter", t("generateLetter"), FileText)}
+        {actionButton("rights", t("rightsSummary"), Scales)}
+        {actionButton("checklist", t("checklist"), ListChecks)}
       </div>
 
       {error && (
-        <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2 mb-2">
-          {error}
-        </p>
+        <div className="mt-3 flex items-start gap-2 bg-warning-subtle border border-warning/30 rounded-md p-3">
+          <Warning className="w-4 h-4 text-warning shrink-0 mt-0.5" weight="regular" />
+          <p className="text-sm text-warning">{error}</p>
+        </div>
       )}
 
-      {result && <div className="max-h-64 overflow-y-auto">{renderResult()}</div>}
+      {result && <div className="max-h-72 overflow-y-auto">{renderResult()}</div>}
     </div>
   );
 }

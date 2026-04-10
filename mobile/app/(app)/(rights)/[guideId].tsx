@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getRightsGuide } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { RightsGuide } from "@/lib/types";
 
 export default function RightsGuideScreen() {
@@ -51,7 +51,6 @@ export default function RightsGuideScreen() {
   if (error || !guide) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>⚠️</Text>
         <Text style={styles.errorText}>{error || "Guide not found."}</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -117,7 +116,6 @@ export default function RightsGuideScreen() {
           <Text style={styles.sectionTitle}>Important Deadlines</Text>
           {guide.deadlines.map((deadline, i) => (
             <View key={i} style={styles.deadlineRow}>
-              <Text style={styles.deadlineIcon}>⏰</Text>
               <Text style={styles.deadlineText}>{deadline}</Text>
             </View>
           ))}
@@ -167,43 +165,46 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 15,
     color: colors.textSecondary,
-  },
-  errorIcon: {
-    fontSize: 32,
+    fontFamily: fonts.sans,
   },
   errorText: {
     color: colors.error,
     fontSize: 16,
     textAlign: "center",
+    fontFamily: fonts.sans,
   },
   retryButton: {
     backgroundColor: colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 24,
-    borderRadius: 10,
+    borderRadius: 8,
     marginTop: 8,
   },
   retryButtonText: {
     color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "600",
+    fontFamily: fonts.sans,
   },
   backButton: {
     paddingVertical: 8,
   },
   backButtonText: {
     color: colors.primary,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
+    fontFamily: fonts.sans,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "800",
+    fontSize: 32,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 8,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.5,
   },
   domainBadge: {
-    backgroundColor: colors.elevated,
+    backgroundColor: tokens.accentSubtle,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 8,
@@ -211,30 +212,37 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   domainBadgeText: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "600",
     color: colors.primary,
-    textTransform: "capitalize",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
   },
   description: {
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textSecondary,
-    lineHeight: 23,
+    lineHeight: 24,
     marginBottom: 16,
+    fontFamily: fonts.sans,
   },
   section: {
     marginTop: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.text,
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textMuted,
     marginBottom: 12,
+    fontFamily: fonts.sans,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
   },
   sectionText: {
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 23,
+    fontFamily: fonts.sans,
   },
   bulletRow: {
     flexDirection: "row",
@@ -243,17 +251,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   bulletDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: colors.primary,
-    marginTop: 6,
+    marginTop: 8,
   },
   bulletText: {
     flex: 1,
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 22,
+    fontFamily: fonts.sans,
   },
   stepRow: {
     flexDirection: "row",
@@ -273,39 +282,38 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 13,
     fontWeight: "700",
+    fontFamily: fonts.sans,
   },
   stepText: {
     flex: 1,
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 22,
+    fontFamily: fonts.sans,
   },
   deadlineRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
     marginBottom: 10,
-    backgroundColor: "#78350f20",
-    borderRadius: 10,
+    backgroundColor: tokens.warningSubtle,
+    borderRadius: 8,
     padding: 12,
-  },
-  deadlineIcon: {
-    fontSize: 16,
-    marginTop: 1,
   },
   deadlineText: {
     flex: 1,
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+    fontFamily: fonts.sans,
   },
   mistakeRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
     marginBottom: 10,
-    backgroundColor: colors.error + "15",
-    borderRadius: 10,
+    backgroundColor: colors.errorMuted,
+    borderRadius: 8,
     padding: 12,
   },
   mistakeIcon: {
@@ -319,22 +327,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+    fontFamily: fonts.sans,
   },
   lawyerSection: {
-    backgroundColor: "#78350f20",
-    borderRadius: 14,
+    backgroundColor: tokens.warningSubtle,
+    borderRadius: 12,
     padding: 18,
     marginTop: 24,
   },
   lawyerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
+    fontSize: 12,
+    fontWeight: "600",
     color: colors.warning,
     marginBottom: 8,
+    fontFamily: fonts.sans,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
   },
   lawyerText: {
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 22,
+    fontFamily: fonts.sans,
   },
 });

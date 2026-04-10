@@ -2,7 +2,7 @@
 
 import React from "react";
 
-type BadgeVariant = "default" | "success" | "warning" | "error";
+type BadgeVariant = "default" | "success" | "warning";
 type BadgeSize = "sm" | "md";
 
 interface BadgeProps {
@@ -12,11 +12,14 @@ interface BadgeProps {
   children: React.ReactNode;
 }
 
+/**
+ * Editorial badges. No pill shapes, no bright colors — everything sits in
+ * the warm palette. "Warning" uses the muted terracotta, never red.
+ */
 const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-white/5 text-gray-300 border border-white/10",
-  success: "bg-green-500/10 text-green-400 border border-green-500/20",
-  warning: "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
-  error: "bg-red-500/10 text-red-400 border border-red-500/20",
+  default: "bg-bg-hover text-ink-secondary border border-border",
+  success: "bg-accent-subtle text-accent border border-accent/20",
+  warning: "bg-warning-subtle text-warning border border-warning/30",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
@@ -32,7 +35,7 @@ function Badge({
 }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center font-sans font-medium rounded-md ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
     >
       {children}
     </span>

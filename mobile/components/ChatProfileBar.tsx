@@ -8,7 +8,7 @@ import {
   Platform,
   UIManager,
 } from "react-native";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { LegalProfile } from "@/lib/types";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -150,13 +150,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: colors.error + "15",
+    backgroundColor: tokens.warningSubtle,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  issuesLabel: { fontSize: 12, color: colors.error, fontWeight: "600" },
-  issuesCount: { fontSize: 16, color: colors.error, fontWeight: "800" },
+  issuesLabel: { fontSize: 12, color: colors.warning, fontWeight: "600", fontFamily: fonts.sans },
+  issuesCount: { fontSize: 16, color: colors.warning, fontWeight: "700", fontFamily: fonts.sans },
   factsSection: { gap: 6 },
   factsLabel: { fontSize: 12, color: colors.textMuted, fontWeight: "600" },
   factRow: { flexDirection: "row", alignItems: "flex-start", gap: 6 },

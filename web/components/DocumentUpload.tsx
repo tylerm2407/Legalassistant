@@ -2,9 +2,9 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import Button from "./ui/Button";
-import Card from "./ui/Card";
 import { api } from "@/lib/api";
 import { useTranslation } from "@/lib/i18n";
+import { Upload, File, Warning, CheckCircle } from "@phosphor-icons/react";
 
 /** MIME types accepted for document upload and legal analysis. */
 const ACCEPTED_TYPES = [
@@ -45,7 +45,7 @@ interface DocumentUploadProps {
 }
 
 /**
- * Drag-and-drop document upload with AI-powered legal analysis.
+ * Drag-and-drop document upload with legal analysis.
  *
  * Accepts PDFs, images, and text files up to 10MB. After upload, the backend
  * extracts text (via pdfplumber for PDFs, OCR for images), sends it to Claude
@@ -80,12 +80,12 @@ export default function DocumentUpload({
 
   async function uploadFile(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError(t("unsupportedFileType"));
+      setError("That file type isn't supported. Try a PDF, image, or text file.");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError(t("fileTooLarge"));
+      setError("That file is too big. Please keep it under 10 MB.");
       return;
     }
 
@@ -114,7 +114,7 @@ export default function DocumentUpload({
     } catch (err) {
       clearInterval(progressInterval);
       setError(
-        err instanceof Error ? err.message : t("uploadFailed")
+        err instanceof Error ? err.message : "We couldn't upload that. Let's try again."
       );
     } finally {
       setUploading(false);
@@ -144,27 +144,18 @@ export default function DocumentUpload({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+        className={`border-2 border-dashed rounded-lg p-10 text-center transition-colors ${
           isDragging
-            ? "border-blue-500 bg-blue-500/5 shadow-glow-md"
-            : "border-white/15 hover:border-white/25 hover:bg-white/[0.02]"
+            ? "border-accent bg-accent-subtle"
+            : "border-border hover:border-border-strong bg-white"
         }`}
       >
-        <svg
-          className="w-10 h-10 text-gray-500 mx-auto mb-3"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 3.75 3.75 0 013.577 5.487A3.75 3.75 0 0117.25 19.5H6.75z"
-          />
-        </svg>
-        <p className="text-sm text-gray-400 mb-1">
+        <Upload className="w-10 h-10 text-ink-secondary mx-auto mb-4" weight="regular" />
+        <p className="text-base font-sans text-ink-primary mb-1">
           {t("dragAndDrop")}
+        </p>
+        <p className="text-sm font-sans text-ink-tertiary mb-4">
+          {t("fileTypeHint")}
         </p>
         <input
           ref={fileInputRef}
@@ -174,28 +165,25 @@ export default function DocumentUpload({
           className="hidden"
         />
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
           {t("browseFiles")}
         </Button>
-        <p className="text-xs text-gray-500 mt-2">
-          {t("fileTypeHint")}
-        </p>
       </div>
 
       {/* Progress */}
       {uploading && (
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-400">{t("uploading")}</span>
-            <span className="text-xs text-gray-500">{progress}%</span>
+        <div className="bg-white border border-border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-sans text-ink-primary">{t("uploading")}</span>
+            <span className="text-sm font-sans text-ink-secondary">{progress}%</span>
           </div>
-          <div className="w-full bg-white/10 rounded-full h-1.5">
+          <div className="w-full bg-bg rounded-md h-1.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-blue-600 to-violet-500 h-1.5 rounded-full transition-all duration-300"
+              className="bg-accent h-1.5 rounded-md transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -204,74 +192,78 @@ export default function DocumentUpload({
 
       {/* Error */}
       {error && (
-        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          {error}
-        </p>
+        <div className="flex items-start gap-2 bg-warning-subtle border border-warning/30 rounded-md p-3">
+          <Warning className="w-4 h-4 text-warning shrink-0 mt-0.5" weight="regular" />
+          <p className="text-sm font-sans text-warning">{error}</p>
+        </div>
       )}
 
       {/* Result */}
       {result && (
-        <Card>
-          <Card.Header>
-            <h3 className="text-sm font-semibold text-white">
+        <div className="bg-white border border-border rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <File className="w-5 h-5 text-ink-secondary" weight="regular" />
+            <h3 className="font-serif font-medium tracking-tight text-ink-primary text-lg leading-tight">
               {t("documentAnalysis")}: {result.filename}
             </h3>
-          </Card.Header>
-          <Card.Body>
-            <div className="space-y-4">
-              {/* Summary */}
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                  {t("summary")}
-                </p>
-                <p className="text-sm text-gray-300">{result.summary}</p>
-              </div>
+          </div>
 
-              {/* Key Facts */}
-              {result.key_facts.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    {t("keyFacts")}
-                  </p>
-                  <ul className="space-y-1">
-                    {result.key_facts.map((fact: string, i: number) => (
-                      <li
-                        key={i}
-                        className="text-sm text-gray-300 flex gap-2"
-                      >
-                        <span className="text-blue-400 shrink-0">&#8226;</span>
-                        {fact}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Red Flags */}
-              {result.red_flags.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-1">
-                    {t("redFlags")}
-                  </p>
-                  <ul className="space-y-1">
-                    {result.red_flags.map((flag: string, i: number) => (
-                      <li
-                        key={i}
-                        className="text-sm text-red-400 flex gap-2"
-                      >
-                        <span className="shrink-0">&#9888;</span>
-                        {flag}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          <div className="space-y-5">
+            {/* Summary */}
+            <div>
+              <p className="text-xs font-sans font-medium text-ink-tertiary uppercase tracking-wider mb-2">
+                {t("summary")}
+              </p>
+              <p className="text-sm font-sans text-ink-primary leading-relaxed">
+                {result.summary}
+              </p>
             </div>
-            <p className="trust-disclaimer">
-              {t("docDisclaimer")}
-            </p>
-          </Card.Body>
-        </Card>
+
+            {/* Key Facts */}
+            {result.key_facts.length > 0 && (
+              <div>
+                <p className="text-xs font-sans font-medium text-ink-tertiary uppercase tracking-wider mb-2">
+                  {t("keyFacts")}
+                </p>
+                <ul className="space-y-2">
+                  {result.key_facts.map((fact: string, i: number) => (
+                    <li
+                      key={i}
+                      className="text-sm font-sans text-ink-primary flex gap-2"
+                    >
+                      <CheckCircle className="w-4 h-4 text-accent shrink-0 mt-0.5" weight="regular" />
+                      <span>{fact}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Red Flags */}
+            {result.red_flags.length > 0 && (
+              <div>
+                <p className="text-xs font-sans font-medium text-warning uppercase tracking-wider mb-2">
+                  {t("redFlags")}
+                </p>
+                <ul className="space-y-2">
+                  {result.red_flags.map((flag: string, i: number) => (
+                    <li
+                      key={i}
+                      className="text-sm font-sans text-warning flex gap-2"
+                    >
+                      <Warning className="w-4 h-4 shrink-0 mt-0.5" weight="regular" />
+                      <span>{flag}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <p className="mt-5 pt-4 border-t border-border text-xs font-sans text-ink-tertiary leading-relaxed">
+            {t("docDisclaimer")}
+          </p>
+        </div>
       )}
     </div>
   );

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, 
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { getConversations, deleteConversation } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import type { ConversationSummary } from "@/lib/types";
 
 export default function ConversationsScreen() {
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
-  cardArea: { fontSize: 13, color: colors.primary, fontWeight: "600", textTransform: "capitalize" },
+  cardArea: { fontSize: 11, color: colors.primary, fontWeight: "600", textTransform: "uppercase", letterSpacing: 1.2, fontFamily: fonts.sans },
   cardDate: { fontSize: 12, color: colors.textMuted },
   cardPreview: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: 6 },
   cardCount: { fontSize: 12, color: colors.textMuted },

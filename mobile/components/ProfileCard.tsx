@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { LegalProfile } from "@/lib/types";
 
 interface ProfileCardProps {
@@ -22,13 +22,15 @@ function Badge({
   label,
   count,
   color,
+  bg,
 }: {
   label: string;
   count: number;
   color: string;
+  bg: string;
 }) {
   return (
-    <View style={[styles.badge, { backgroundColor: color + "15" }]}>
+    <View style={[styles.badge, { backgroundColor: bg }]}>
       <Text style={[styles.badgeCount, { color }]}>{count}</Text>
       <Text style={[styles.badgeLabel, { color }]}>{label}</Text>
     </View>
@@ -86,11 +88,13 @@ export default function ProfileCard({ profile, onPress }: ProfileCardProps) {
           label="Legal Facts"
           count={profile.legal_facts.length}
           color={colors.primary}
+          bg={tokens.accentSubtle}
         />
         <Badge
           label="Active Issues"
           count={profile.active_issues.filter((i) => i.status === "open").length}
-          color={colors.error}
+          color={colors.warning}
+          bg={tokens.warningSubtle}
         />
       </View>
     </TouchableOpacity>
@@ -100,7 +104,7 @@ export default function ProfileCard({ profile, onPress }: ProfileCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 20,
     borderWidth: 1,
     borderColor: colors.border,
@@ -131,9 +135,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   name: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "500",
     color: colors.text,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   stateBadge: {
     backgroundColor: colors.elevated,
@@ -182,14 +188,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   badgeCount: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
+    fontFamily: fonts.sans,
   },
   badgeLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
   },
 });

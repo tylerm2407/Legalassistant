@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useTranslation } from "@/lib/i18n";
+import { Plus, X, CircleNotch } from "@phosphor-icons/react";
 
 /**
  * Summary of a past conversation for display in the history sidebar.
@@ -81,62 +82,68 @@ export default function ConversationHistory({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-3 border-b border-white/10">
+    <div className="flex flex-col h-full bg-bg">
+      <div className="p-4 border-b border-border">
         <button
           onClick={onNewConversation}
-          className="w-full text-left px-3 py-2 text-sm text-white bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors flex items-center gap-2"
+          className="w-full flex items-center justify-center gap-2 bg-accent text-white px-4 py-3 rounded-md font-sans font-medium hover:bg-accent-hover transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+          <Plus className="w-4 h-4" weight="regular" />
           {t("newConversation")}
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex justify-center py-10">
+            <CircleNotch className="w-5 h-5 text-ink-tertiary animate-spin" weight="regular" />
           </div>
         ) : conversations.length === 0 ? (
-          <p className="text-xs text-gray-500 text-center py-8 px-4">{t("noPreviousConversations")}</p>
+          <p className="text-sm font-sans text-ink-tertiary text-center py-10 px-4">
+            {t("noPreviousConversations")}
+          </p>
         ) : (
-          <div className="p-2 space-y-1">
-            {conversations.map((c: ConversationSummary) => (
-              <div
-                key={c.id}
-                onClick={() => onSelectConversation(c.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === "Enter") onSelectConversation(c.id); }}
-                className={`w-full text-left p-2.5 rounded-lg text-sm transition-all group cursor-pointer ${
-                  c.id === activeConversationId
-                    ? "bg-white/[0.06] border border-white/10"
-                    : "hover:bg-white/[0.03]"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-1">
-                  <p className="text-gray-300 text-xs line-clamp-2 flex-1">{c.preview}</p>
-                  <button
-                    onClick={(e) => handleDelete(c.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-500 hover:text-red-400 transition-all shrink-0"
-                  >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+          <div className="p-3 space-y-1">
+            {conversations.map((c: ConversationSummary) => {
+              const isActive = c.id === activeConversationId;
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => onSelectConversation(c.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter") onSelectConversation(c.id); }}
+                  className={`w-full text-left p-3 rounded-md transition-colors group cursor-pointer border ${
+                    isActive
+                      ? "bg-white border-border-strong"
+                      : "bg-transparent border-transparent hover:bg-bg-hover"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-sans text-ink-primary line-clamp-2 flex-1 leading-snug">
+                      {c.preview}
+                    </p>
+                    <button
+                      onClick={(e) => handleDelete(c.id, e)}
+                      className="opacity-0 group-hover:opacity-100 text-ink-tertiary hover:text-warning transition-all shrink-0"
+                      aria-label="Delete conversation"
+                    >
+                      <X className="w-4 h-4" weight="regular" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    {c.legal_area && (
+                      <span className="text-xs font-sans text-accent capitalize">
+                        {c.legal_area.replace(/_/g, " ")}
+                      </span>
+                    )}
+                    <span className="text-xs font-sans text-ink-tertiary">
+                      {new Date(c.updated_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  {c.legal_area && (
-                    <span className="text-[10px] text-blue-400/70">{c.legal_area.replace(/_/g, " ")}</span>
-                  )}
-                  <span className="text-[10px] text-gray-600">
-                    {new Date(c.updated_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { getWorkflowTemplates, getActiveWorkflows, startWorkflow } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import type { WorkflowTemplate, WorkflowSummary } from "@/lib/types";
 
 export default function WorkflowsScreen() {
@@ -94,19 +94,32 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
   tabs: { flexDirection: "row", padding: 16, gap: 8 },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: colors.elevated, alignItems: "center" },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 8, backgroundColor: colors.elevated, alignItems: "center" },
   tabActive: { backgroundColor: colors.primary },
-  tabText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
-  tabTextActive: { color: colors.text },
+  tabText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary, fontFamily: fonts.sans },
+  tabTextActive: { color: "#ffffff" },
   list: { paddingHorizontal: 16, gap: 12, paddingBottom: 16 },
   card: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 16,
     borderWidth: 1, borderColor: colors.border,
   },
-  cardTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 4 },
-  cardDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 18, marginBottom: 8 },
-  cardMeta: { fontSize: 12, color: colors.textMuted, textTransform: "capitalize" },
-  startBtn: { marginTop: 12, backgroundColor: colors.primary, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
-  startBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 14 },
-  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center", padding: 40 },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
+  },
+  cardDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: 8, fontFamily: fonts.sans },
+  cardMeta: {
+    fontSize: 11,
+    color: colors.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    fontFamily: fonts.sans,
+  },
+  startBtn: { marginTop: 12, backgroundColor: colors.primary, paddingVertical: 12, borderRadius: 8, alignItems: "center" },
+  startBtnText: { color: "#ffffff", fontWeight: "600", fontSize: 14, fontFamily: fonts.sans },
+  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center", padding: 40, fontFamily: fonts.sans },
 });

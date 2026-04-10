@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
+/**
+ * Auth page — first impression. Warm off-white background, centered card,
+ * serif wordmark, plain-language copy. No logo tile, no emoji, no gradient.
+ */
 export default function AuthPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -33,7 +38,7 @@ export default function AuthPage() {
           return;
         }
         setMessage(
-          "Check your email for a confirmation link, then sign in."
+          "Check your email for a confirmation link, then come back and sign in."
         );
         setIsSignUp(false);
       } else {
@@ -46,7 +51,7 @@ export default function AuthPage() {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Authentication failed."
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -54,25 +59,24 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-bg flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
-            &#x2696;
-          </div>
-          <h1 className="text-2xl font-bold text-white">
-            {isSignUp ? "Create Account" : "Welcome Back"}
-          </h1>
-          <p className="text-sm text-gray-400 mt-2">
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-block">
+            <h1 className="font-serif text-4xl font-medium text-accent tracking-tight">
+              CaseMate
+            </h1>
+          </Link>
+          <p className="mt-4 font-sans text-base text-ink-secondary max-w-[40ch] mx-auto">
             {isSignUp
-              ? "Sign up to get personalized legal guidance"
-              : "Sign in to continue with CaseMate"}
+              ? "Create an account and we'll get to know your situation."
+              : "Welcome back. Let's pick up where you left off."}
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/10 p-6 space-y-4"
+          className="bg-white border border-border rounded-lg p-8 space-y-5"
         >
           <Input
             label="Email"
@@ -92,12 +96,12 @@ export default function AuthPage() {
           />
 
           {error && (
-            <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+            <p className="text-sm font-sans text-warning bg-warning-subtle border border-warning/30 rounded-md p-3">
               {error}
             </p>
           )}
           {message && (
-            <p className="text-sm text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+            <p className="text-sm font-sans text-accent bg-accent-subtle border border-accent/20 rounded-md p-3">
               {message}
             </p>
           )}
@@ -108,14 +112,14 @@ export default function AuthPage() {
             className="w-full"
           >
             {loading
-              ? "Please wait..."
+              ? "One moment..."
               : isSignUp
-              ? "Sign Up"
-              : "Sign In"}
+              ? "Create account"
+              : "Sign in"}
           </Button>
 
-          <p className="text-center text-sm text-gray-400">
-            {isSignUp ? "Already have an account? " : "Don't have an account? "}
+          <p className="text-center text-sm font-sans text-ink-secondary">
+            {isSignUp ? "Already have an account? " : "Don't have an account yet? "}
             <button
               type="button"
               onClick={() => {
@@ -123,12 +127,16 @@ export default function AuthPage() {
                 setError("");
                 setMessage("");
               }}
-              className="text-blue-400 hover:text-blue-300 font-medium"
+              className="text-accent hover:text-accent-hover font-medium underline underline-offset-2"
             >
-              {isSignUp ? "Sign In" : "Sign Up"}
+              {isSignUp ? "Sign in" : "Create one"}
             </button>
           </p>
         </form>
+
+        <p className="mt-8 text-center text-xs font-sans text-ink-tertiary max-w-[50ch] mx-auto leading-relaxed">
+          CaseMate isn't a law firm and we aren't your lawyer. We explain your rights in plain English and help you figure out what to do next.
+        </p>
       </div>
     </div>
   );

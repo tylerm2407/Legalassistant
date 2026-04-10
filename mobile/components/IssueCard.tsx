@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { colors } from "@/lib/theme";
+import { colors, fonts, tokens } from "@/lib/theme";
 import type { LegalIssue, IssueStatus } from "@/lib/types";
 
 interface IssueCardProps {
@@ -11,10 +11,10 @@ const STATUS_CONFIG: Record<
   IssueStatus,
   { label: string; bg: string; text: string }
 > = {
-  open: { label: "Open", bg: "#fef3c7", text: "#92400e" },
-  resolved: { label: "Resolved", bg: "#d1fae5", text: "#065f46" },
-  watching: { label: "Watching", bg: "#dbeafe", text: "#1e40af" },
-  escalated: { label: "Escalated", bg: "#fee2e2", text: "#991b1b" },
+  open: { label: "Open", bg: tokens.bgSubtle, text: tokens.inkSecondary },
+  resolved: { label: "Resolved", bg: tokens.accentSubtle, text: tokens.accent },
+  watching: { label: "Watching", bg: tokens.warningSubtle, text: tokens.warning },
+  escalated: { label: "Escalated", bg: tokens.warningSubtle, text: tokens.warning },
 };
 
 function formatDate(dateStr: string): string {
@@ -85,7 +85,7 @@ export default function IssueCard({ issue }: IssueCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
@@ -97,12 +97,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   issueType: {
-    fontSize: 17,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "500",
     color: colors.text,
     textTransform: "capitalize",
     flex: 1,
     marginRight: 8,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   statusBadge: {
     paddingHorizontal: 10,
@@ -110,10 +112,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "600",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 1.5,
+    fontFamily: fonts.sans,
   },
   summary: {
     fontSize: 14,

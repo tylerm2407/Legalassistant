@@ -2,6 +2,14 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import { api } from "@/lib/api";
+import {
+  Microphone,
+  Stop,
+  CheckCircle,
+  X,
+  UploadSimple,
+  PaperPlaneTilt,
+} from "@phosphor-icons/react";
 
 /**
  * Accepted audio MIME types for file uploads.
@@ -49,7 +57,7 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
    */
   const transcribeBlob = useCallback(async (audioBlob: Blob) => {
     if (audioBlob.size === 0) {
-      setError("No audio data to transcribe.");
+      setError("We didn't catch any audio. Give it another try.");
       return;
     }
 
@@ -59,12 +67,12 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
       const data = await api.transcribeAudio(audioBlob);
       const text = data.transcript.trim();
       if (!text) {
-        setError("No speech detected in the audio. Try again.");
+        setError("We couldn't hear anything in that clip. Try again.");
         return;
       }
       setTranscript(text);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Transcription failed.");
+      setError(err instanceof Error ? err.message : "We couldn't transcribe that. Try again.");
     } finally {
       setIsTranscribing(false);
     }
@@ -102,7 +110,7 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
       setError(
         err instanceof Error
           ? err.message
-          : "Could not access microphone. Please check permissions."
+          : "We couldn't reach your microphone. Check your browser permissions."
       );
     }
   }, [transcribeBlob]);
@@ -127,7 +135,7 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
 
     const maxBytes = 25 * 1024 * 1024;
     if (file.size > maxBytes) {
-      setError("Audio file too large. Maximum size is 25MB.");
+      setError("That file is a bit too big. The limit is 25MB.");
       return;
     }
 
@@ -158,47 +166,41 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
   // -- Transcript preview view --
   if (transcript) {
     return (
-      <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
+      <div className="bg-white border border-border rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm font-medium text-green-400">Transcript Ready</span>
+            <CheckCircle className="w-4 h-4 text-accent" weight="regular" />
+            <span className="text-sm font-sans font-medium text-ink-primary">Transcript ready</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-gray-500 hover:text-white transition-colors"
+            className="p-1 text-ink-tertiary hover:text-ink-primary transition-colors"
             title="Close"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-4 h-4" weight="regular" />
           </button>
         </div>
 
         {/* Transcript text */}
         <div className="px-4 py-3 max-h-32 overflow-y-auto">
-          <p className="text-sm text-gray-300 leading-relaxed">{transcript}</p>
+          <p className="text-sm font-sans text-ink-secondary leading-relaxed">{transcript}</p>
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 px-4 py-2 border-t border-white/10 bg-white/[0.02]">
+        <div className="flex items-center gap-2 px-4 py-3 border-t border-border bg-bg">
           <button
             onClick={handleSendForAdvice}
-            className="flex-1 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 bg-accent text-white px-4 py-2 rounded-md font-sans font-medium text-sm hover:bg-accent-hover transition-colors flex items-center justify-center gap-2"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-            </svg>
-            Get Legal Advice
+            <PaperPlaneTilt className="w-4 h-4" weight="regular" />
+            Send for advice
           </button>
           <button
             onClick={handleEditTranscript}
-            className="px-3 py-2 text-sm text-gray-400 border border-white/10 rounded-lg hover:bg-white/[0.05] hover:text-white transition-colors"
+            className="bg-transparent text-ink-primary border border-border-strong rounded-md px-4 py-2 font-sans text-sm hover:bg-bg-hover transition-colors"
           >
-            Edit First
+            Edit first
           </button>
         </div>
       </div>
@@ -207,7 +209,7 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
 
   // -- Recording / Upload view --
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl">
+    <div className="bg-white border border-border rounded-lg">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -217,24 +219,26 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
         className="hidden"
       />
 
-      <div className="flex items-center gap-3 px-4 py-2">
+      <div className="flex items-center gap-3 px-4 py-3">
         {/* Recording indicator */}
         {isRecording && (
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-sm text-red-400">Recording...</span>
+          <div className="flex items-center gap-2 bg-accent-subtle border border-accent/30 rounded-md px-3 py-1.5">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+            <span className="text-sm font-sans text-accent">Recording</span>
           </div>
         )}
 
         {isTranscribing && (
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-            <span className="text-sm text-blue-400">Transcribing...</span>
+          <div className="flex items-center gap-2 bg-accent-subtle border border-accent/30 rounded-md px-3 py-1.5">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+            <span className="text-sm font-sans text-accent">Transcribing</span>
           </div>
         )}
 
-        {error && (
-          <span className="text-sm text-red-400">{error}</span>
+        {error && !isRecording && !isTranscribing && (
+          <span className="text-sm font-sans text-warning bg-warning-subtle border border-warning/30 rounded-md px-3 py-1.5">
+            {error}
+          </span>
         )}
 
         {/* Controls — shown when not recording and not transcribing */}
@@ -242,20 +246,18 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
           <>
             <button
               onClick={startRecording}
-              className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-colors flex items-center gap-1.5"
+              className="bg-accent-subtle text-accent border border-accent/30 rounded-md px-4 py-2 text-sm font-sans font-medium hover:bg-accent/10 transition-colors flex items-center gap-2"
             >
-              <div className="w-2 h-2 bg-red-500 rounded-full" />
+              <Microphone className="w-4 h-4" weight="regular" />
               Record
             </button>
-            <span className="text-xs text-gray-600">or</span>
+            <span className="text-xs font-sans text-ink-tertiary">or</span>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 text-sm bg-white/[0.05] text-gray-400 border border-white/10 rounded-lg hover:bg-white/[0.08] hover:text-white transition-colors flex items-center gap-1.5"
+              className="bg-transparent text-ink-primary border border-border-strong rounded-md px-4 py-2 text-sm font-sans hover:bg-bg-hover transition-colors flex items-center gap-2"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
-              Upload Audio
+              <UploadSimple className="w-4 h-4 text-ink-secondary" weight="regular" />
+              Upload audio
             </button>
           </>
         )}
@@ -264,17 +266,18 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
         {error && !isRecording && !isTranscribing && (
           <button
             onClick={() => { setError(null); }}
-            className="px-3 py-1.5 text-sm text-gray-400 border border-white/10 rounded-lg hover:bg-white/[0.05] transition-colors"
+            className="bg-transparent text-ink-primary border border-border-strong rounded-md px-4 py-2 text-sm font-sans hover:bg-bg-hover transition-colors"
           >
-            Try Again
+            Try again
           </button>
         )}
 
         {isRecording && (
           <button
             onClick={stopRecording}
-            className="px-3 py-1.5 text-sm bg-white/10 text-white border border-white/20 rounded-lg hover:bg-white/20 transition-colors"
+            className="bg-warning-subtle text-warning border border-warning/30 rounded-md px-4 py-2 text-sm font-sans font-medium hover:bg-warning/10 transition-colors flex items-center gap-2"
           >
+            <Stop className="w-4 h-4" weight="regular" />
             Stop
           </button>
         )}
@@ -282,12 +285,10 @@ export default function AudioRecorder({ onTranscript, onTranscriptSend, onClose 
         <button
           onClick={onClose}
           disabled={isTranscribing}
-          className="ml-auto p-1 text-gray-500 hover:text-white transition-colors disabled:opacity-50"
+          className="ml-auto p-1 text-ink-tertiary hover:text-ink-primary transition-colors disabled:opacity-50"
           title="Close recorder"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="w-4 h-4" weight="regular" />
         </button>
       </div>
     </div>

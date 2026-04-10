@@ -278,53 +278,79 @@ export default function AttorneysPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-white mb-2">{t("findAttorney")}</h1>
-        <p className="text-gray-400 mb-8">{t("findAttorneyDescription")}</p>
+    <div className="min-h-screen bg-bg">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-10 max-w-[65ch]">
+          <h1 className="font-serif text-5xl md:text-6xl font-medium tracking-tight leading-tight text-ink-primary">
+            Find a lawyer
+          </h1>
+          <p className="font-sans text-base text-ink-secondary mt-4">
+            Sometimes you need a real attorney in your corner. Here are
+            vetted lawyers who handle your kind of situation in your state.
+          </p>
+        </div>
 
         {/* Search */}
-        <div className="flex gap-3 mb-8">
-          <input
-            type="text"
-            placeholder={t("statePlaceholder")}
-            value={searchState}
-            onChange={(e) => setSearchState(e.target.value.toUpperCase().slice(0, 2))}
-            maxLength={2}
-            className="w-24 px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder:text-gray-600 uppercase"
-          />
-          <input
-            type="text"
-            placeholder={t("zipPlaceholder")}
-            value={searchZip}
-            onChange={(e) => setSearchZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
-            maxLength={5}
-            className="w-28 px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder:text-gray-600"
-          />
-          <select
-            value={searchArea}
-            onChange={(e) => setSearchArea(e.target.value)}
-            className="flex-1 px-3 py-2 bg-white/[0.03] text-white border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 [color-scheme:dark]"
-          >
-            {legalAreaKeys.map((key: string) => (
-              <option key={key} value={key} className="bg-[#1a1a1a]">
-                {areaLookup[key] ?? key}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleSearch}
-            disabled={!searchState || loading}
-            className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-400 disabled:opacity-50 disabled:hover:bg-blue-500 shadow-glow-sm transition-all"
-          >
-            {t("search")}
-          </button>
+        <div className="bg-white border border-border rounded-lg p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                State
+              </label>
+              <input
+                type="text"
+                placeholder="CA"
+                value={searchState}
+                onChange={(e) => setSearchState(e.target.value.toUpperCase().slice(0, 2))}
+                maxLength={2}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none placeholder:text-ink-tertiary uppercase"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                ZIP code
+              </label>
+              <input
+                type="text"
+                placeholder="90012"
+                value={searchZip}
+                onChange={(e) => setSearchZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                maxLength={5}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none placeholder:text-ink-tertiary"
+              />
+            </div>
+            <div className="md:col-span-5">
+              <label className="block text-sm font-sans font-medium text-ink-primary mb-2">
+                Legal area
+              </label>
+              <select
+                value={searchArea}
+                onChange={(e) => setSearchArea(e.target.value)}
+                className="w-full bg-white border border-border rounded-md px-4 py-3 font-sans text-base text-ink-primary focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
+              >
+                {legalAreaKeys.map((key: string) => (
+                  <option key={key} value={key}>
+                    {areaLookup[key] ?? key}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2 flex items-end">
+              <button
+                onClick={handleSearch}
+                disabled={!searchState || loading}
+                className="w-full bg-accent text-white px-6 py-3 rounded-md font-sans font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+              >
+                Search
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Results */}
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className="font-sans text-ink-secondary">Loading…</p>
           </div>
         ) : suggestions.length > 0 ? (
           <div className="space-y-4">
@@ -338,9 +364,13 @@ export default function AttorneysPage() {
             ))}
           </div>
         ) : suggestions.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-2">{t("noAttorneysFound")}</p>
-            <p className="text-xs text-gray-600">{t("tryBroadening")}</p>
+          <div className="bg-white border border-border rounded-lg p-8 text-center">
+            <p className="font-sans text-base text-ink-primary mb-2">
+              No matches yet.
+            </p>
+            <p className="font-sans text-sm text-ink-tertiary">
+              Try widening your search or picking a different area.
+            </p>
           </div>
         ) : null}
       </div>

@@ -15,7 +15,7 @@ import {
   generateRights,
   generateChecklist,
 } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 interface ActionSheetProps {
   visible: boolean;
@@ -132,7 +132,6 @@ export default function ActionSheet({
                 onPress={() => handleAction("letter")}
                 activeOpacity={0.7}
               >
-                <Text style={styles.actionIcon}>✉</Text>
                 <View style={styles.actionInfo}>
                   <Text style={styles.actionLabel}>Demand Letter</Text>
                   <Text style={styles.actionDesc}>
@@ -146,7 +145,6 @@ export default function ActionSheet({
                 onPress={() => handleAction("rights")}
                 activeOpacity={0.7}
               >
-                <Text style={styles.actionIcon}>⚖</Text>
                 <View style={styles.actionInfo}>
                   <Text style={styles.actionLabel}>Rights Summary</Text>
                   <Text style={styles.actionDesc}>
@@ -160,7 +158,6 @@ export default function ActionSheet({
                 onPress={() => handleAction("checklist")}
                 activeOpacity={0.7}
               >
-                <Text style={styles.actionIcon}>✓</Text>
                 <View style={styles.actionInfo}>
                   <Text style={styles.actionLabel}>Action Checklist</Text>
                   <Text style={styles.actionDesc}>
@@ -244,8 +241,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
     paddingHorizontal: 24,
     paddingBottom: 40,
     maxHeight: "85%",
@@ -261,15 +258,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "500",
     color: colors.text,
     marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 14,
     color: colors.textSecondary,
     marginBottom: 20,
+    fontFamily: fonts.sans,
   },
   actions: {
     gap: 12,
@@ -280,27 +280,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.elevated,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
     gap: 14,
-  },
-  actionIcon: {
-    fontSize: 28,
-    width: 44,
-    textAlign: "center",
   },
   actionInfo: {
     flex: 1,
   },
   actionLabel: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "500",
     color: colors.text,
-    marginBottom: 2,
+    marginBottom: 4,
+    fontFamily: fonts.serif,
+    letterSpacing: -0.3,
   },
   actionDesc: {
     fontSize: 13,
     color: colors.textSecondary,
+    fontFamily: fonts.sans,
   },
   loadingContainer: {
     alignItems: "center",
@@ -336,19 +334,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
   copyButtonText: {
     color: "#ffffff",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   newActionButton: {
     flex: 1,
     backgroundColor: colors.elevated,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
   newActionButtonText: {

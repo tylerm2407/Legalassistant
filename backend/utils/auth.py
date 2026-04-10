@@ -12,9 +12,9 @@ import os
 import jwt as pyjwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from supabase import Client, create_client
 
 from backend.utils.logger import get_logger
+from supabase import Client, create_client
 
 _logger = get_logger(__name__)
 
@@ -84,7 +84,12 @@ async def verify_supabase_jwt(
             ) from exc
         except pyjwt.InvalidTokenError as e:
             # Log the specific error before falling through
-            _logger.warning("jwt_local_verify_failed", error=str(e), error_type=type(e).__name__, token_prefix=token[:10])
+            _logger.warning(
+                "jwt_local_verify_failed",
+                error=str(e),
+                error_type=type(e).__name__,
+                token_prefix=token[:10],
+            )
             pass
 
     # Slow path: verify via Supabase Auth API using the user's own token

@@ -7,6 +7,7 @@ calls are made.
 
 from __future__ import annotations
 
+import contextlib
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -19,6 +20,7 @@ from backend.utils.llm_router import LLMResponse, LLMRouter, ProviderMetrics, ge
 def _reset_router_singleton() -> None:
     """Reset the global router singleton between tests."""
     import backend.utils.llm_router as mod
+
     mod._router = None
 
 
@@ -103,9 +105,7 @@ class TestLLMRouterChat:
     async def test_chat_failure_raises(self, router: LLMRouter) -> None:
         """API failure raises after circuit breaker check."""
         mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(
-            side_effect=Exception("Anthropic API down")
-        )
+        mock_client.messages.create = AsyncMock(side_effect=Exception("Anthropic API down"))
 
         with (
             patch("backend.utils.llm_router.get_anthropic_client", return_value=mock_client),
@@ -134,15 +134,11 @@ class TestLLMRouterChat:
     async def test_metrics_tracked_on_failure(self, router: LLMRouter) -> None:
         """Failed calls increment the failure counter."""
         mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(
-            side_effect=Exception("fail")
-        )
+        mock_client.messages.create = AsyncMock(side_effect=Exception("fail"))
 
         with patch("backend.utils.llm_router.get_anthropic_client", return_value=mock_client):
-            try:
+            with contextlib.suppress(Exception):
                 await router.chat("sys", [{"role": "user", "content": "q"}])
-            except Exception:
-                pass
 
         metrics = router.metrics
         assert metrics["anthropic"]["total_failures"] == 1

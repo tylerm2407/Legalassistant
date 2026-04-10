@@ -23,7 +23,6 @@ from backend.memory.summarizer import (
     summarize_if_needed,
 )
 
-
 # ---------------------------------------------------------------------------
 # ConversationSummary model tests
 # ---------------------------------------------------------------------------
@@ -116,11 +115,13 @@ class TestConversationSummary:
 
     def test_from_dict_handles_invalid_types(self) -> None:
         """from_dict handles non-list values gracefully."""
-        summary = ConversationSummary.from_dict({
-            "topics": "not a list",
-            "user_facts": 42,
-            "message_count": "10",
-        })
+        summary = ConversationSummary.from_dict(
+            {
+                "topics": "not a list",
+                "user_facts": 42,
+                "message_count": "10",
+            }
+        )
         assert summary.topics == []
         assert summary.user_facts == []
         assert summary.message_count == 10
@@ -196,7 +197,10 @@ class TestFallbackSummary:
         """Fallback extracts first sentences from messages."""
         messages = [
             {"role": "user", "content": "I got evicted. The landlord gave me 3 days."},
-            {"role": "assistant", "content": "In your state, the minimum notice period is 30 days."},
+            {
+                "role": "assistant",
+                "content": "In your state, the minimum notice period is 30 days.",
+            },
             {"role": "user", "content": "Can I fight this? I paid rent on time."},
         ]
         summary = _fallback_summary(messages)
@@ -230,18 +234,22 @@ class TestGenerateSummary:
     async def test_generate_summary_parses_valid_response(self) -> None:
         """Successfully parses a well-formed Claude response."""
         mock_response = MagicMock()
-        mock_response.content = [TextBlock(
-            type="text",
-            text=json.dumps({
-                "topics": ["security deposit"],
-                "user_facts": ["Landlord did not inspect"],
-                "statutes_cited": ["M.G.L. c.186 §15B"],
-                "advice_given": ["Send demand letter"],
-                "action_items": ["Write letter by Friday"],
-                "unresolved_questions": [],
-                "narrative": "Deposit dispute in Massachusetts.",
-            }),
-        )]
+        mock_response.content = [
+            TextBlock(
+                type="text",
+                text=json.dumps(
+                    {
+                        "topics": ["security deposit"],
+                        "user_facts": ["Landlord did not inspect"],
+                        "statutes_cited": ["M.G.L. c.186 §15B"],
+                        "advice_given": ["Send demand letter"],
+                        "action_items": ["Write letter by Friday"],
+                        "unresolved_questions": [],
+                        "narrative": "Deposit dispute in Massachusetts.",
+                    }
+                ),
+            )
+        ]
 
         mock_client = AsyncMock()
         mock_client.messages.create = AsyncMock(return_value=mock_response)
@@ -316,18 +324,22 @@ class TestSummarizeIfNeeded:
         existing = ConversationSummary(message_count=10).to_dict()
 
         mock_response = MagicMock()
-        mock_response.content = [TextBlock(
-            type="text",
-            text=json.dumps({
-                "topics": ["case discussion"],
-                "user_facts": [],
-                "statutes_cited": [],
-                "advice_given": [],
-                "action_items": [],
-                "unresolved_questions": [],
-                "narrative": "Extended case discussion.",
-            }),
-        )]
+        mock_response.content = [
+            TextBlock(
+                type="text",
+                text=json.dumps(
+                    {
+                        "topics": ["case discussion"],
+                        "user_facts": [],
+                        "statutes_cited": [],
+                        "advice_given": [],
+                        "action_items": [],
+                        "unresolved_questions": [],
+                        "narrative": "Extended case discussion.",
+                    }
+                ),
+            )
+        ]
 
         mock_client = AsyncMock()
         mock_client.messages.create = AsyncMock(return_value=mock_response)

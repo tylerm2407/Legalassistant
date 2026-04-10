@@ -95,10 +95,7 @@ async def find_attorneys(
 
         if zip_code:
             prefix = zip_code[:3]
-            attorneys = [
-                a for a in attorneys
-                if a.zip_code == zip_code or a.zip_code[:3] == prefix
-            ]
+            attorneys = [a for a in attorneys if a.zip_code == zip_code or a.zip_code[:3] == prefix]
 
         return attorneys[:limit]
     except Exception as exc:

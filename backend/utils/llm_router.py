@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from typing import Any
 
 import anthropic
 from anthropic.types import TextBlock
@@ -104,7 +105,7 @@ class LLMRouter:
         self._metrics = ProviderMetrics()
 
     @property
-    def metrics(self) -> dict[str, object]:
+    def metrics(self) -> dict[str, dict[str, Any]]:
         """Current router metrics for observability.
 
         Returns:
@@ -117,9 +118,7 @@ class LLMRouter:
             },
         }
 
-    async def chat(
-        self, system_prompt: str, messages: list[dict[str, str]]
-    ) -> LLMResponse:
+    async def chat(self, system_prompt: str, messages: list[dict[str, str]]) -> LLMResponse:
         """Send a chat completion request to Anthropic Claude.
 
         Args:
@@ -136,6 +135,7 @@ class LLMRouter:
         start = time.monotonic()
 
         try:
+
             @self._breaker
             async def _request() -> str:
                 client = get_anthropic_client()
@@ -204,9 +204,7 @@ class LLMRouter:
         """
         await self._breaker._check_state()
         client = get_anthropic_client()
-        anthropic_messages = [
-            {"role": m["role"], "content": m["content"]} for m in messages
-        ]
+        anthropic_messages = [{"role": m["role"], "content": m["content"]} for m in messages]
         stream = client.messages.stream(
             model=self.model,
             max_tokens=self.max_tokens,

@@ -102,7 +102,9 @@ def test_malformed_jwt_returns_401(auth_client):
 def test_empty_jwt_secret_returns_401(auth_client):
     """An empty JWT secret falls back to Supabase API; without valid config returns 401."""
     token = _make_token()
-    with patch.dict(os.environ, {"SUPABASE_JWT_SECRET": "", "SUPABASE_URL": "", "SUPABASE_SERVICE_ROLE_KEY": ""}):
+    with patch.dict(
+        os.environ, {"SUPABASE_JWT_SECRET": "", "SUPABASE_URL": "", "SUPABASE_SERVICE_ROLE_KEY": ""}
+    ):
         response = auth_client.get(
             "/protected",
             headers={"Authorization": f"Bearer {token}"},

@@ -10,16 +10,14 @@ from __future__ import annotations
 import io
 import os
 
-from openai import AsyncOpenAI, APIError
+from openai import APIError, AsyncOpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from backend.utils.logger import get_logger
 
 _logger = get_logger(__name__)
 
-_SUPPORTED_FORMATS: frozenset[str] = frozenset(
-    {"mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"}
-)
+_SUPPORTED_FORMATS: frozenset[str] = frozenset({"mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"})
 
 
 def _get_openai_client() -> AsyncOpenAI:

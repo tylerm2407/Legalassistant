@@ -4,6 +4,8 @@ Provides REST API endpoints for chat, profile management, document analysis,
 and action generation (demand letters, rights summaries, checklists).
 """
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import json
@@ -14,10 +16,9 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Load .env before any os.environ.get() calls
 from collections.abc import AsyncGenerator, Awaitable, Callable
-from typing import TypedDict, cast
+from typing import Any, Literal, TypedDict, cast
 
 import anthropic
-from anthropic.types import TextBlock
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
@@ -27,6 +28,7 @@ from starlette.responses import StreamingResponse
 from backend.actions.checklist_generator import generate_checklist
 from backend.actions.letter_generator import generate_demand_letter
 from backend.actions.rights_generator import generate_rights_summary
+from backend.audio.transcriber import transcribe_audio
 from backend.deadlines.detector import detect_and_save_deadlines
 from backend.deadlines.tracker import (
     DeadlineCreateRequest,
@@ -36,7 +38,6 @@ from backend.deadlines.tracker import (
     list_deadlines,
     update_deadline,
 )
-from backend.audio.transcriber import transcribe_audio
 from backend.documents.analyzer import analyze_document
 from backend.documents.extractor import extract_text
 from backend.export.email_sender import send_document_email
@@ -90,16 +91,13 @@ from backend.payments.subscription import (
 from backend.referrals.matcher import find_attorneys, get_referral_suggestions
 from backend.utils.audit_log import AuditEventType, record_audit_event
 from backend.utils.auth import verify_supabase_jwt
-from backend.utils.circuit_breaker import CircuitBreakerOpenError, anthropic_breaker
 from backend.utils.client import get_anthropic_client
-from backend.utils.llm_router import get_llm_router
 from backend.utils.lifecycle import get_lifecycle_manager, lifecycle_middleware
+from backend.utils.llm_router import get_llm_router
 from backend.utils.logger import configure_logging, get_logger
 from backend.utils.rate_limiter import rate_limit
-from backend.utils.retry import retry_anthropic
 from backend.utils.telemetry import MetricsCollector, get_metrics_response, telemetry_middleware
 from backend.utils.token_budget import TokenBudgetManager, estimate_tokens
-from backend.utils.type_helpers import as_anthropic_messages
 from backend.workflows.engine import (
     WorkflowStepUpdateRequest,
     get_workflow,
@@ -404,7 +402,7 @@ class ProfileRequest(BaseModel):
     housing_situation: str = Field(..., max_length=500)
     employment_type: str = Field(..., max_length=200)
     family_status: str = Field(..., max_length=500)
-    language_preference: str = Field(default="en", max_length=5)
+    language_preference: Literal["en", "es"] = Field(default="en")
 
 
 class ActionRequest(BaseModel):
@@ -795,7 +793,7 @@ async def chat_stream(
             router = get_llm_router()
             provider_name, stream_obj = await router.stream(system_prompt, api_messages)
 
-            async with stream_obj as anthropic_stream:
+            async with cast(Any, stream_obj) as anthropic_stream:
                 async for text in anthropic_stream.text_stream:
                     full_response_parts.append(text)
                     event_data = json.dumps({"type": "token", "content": text})
@@ -946,8 +944,12 @@ async def patch_profile(
     # Merge updates into existing profile
     update_data = existing.model_dump()
     allowed_fields = {
-        "display_name", "state", "housing_situation",
-        "employment_type", "family_status", "language_preference",
+        "display_name",
+        "state",
+        "housing_situation",
+        "employment_type",
+        "family_status",
+        "language_preference",
     }
     for key, value in body.items():
         if key in allowed_fields:
@@ -959,7 +961,7 @@ async def patch_profile(
         await record_audit_event(
             AuditEventType.PROFILE_UPDATED,
             user_id,
-            {"fields": list(body.keys()), "action": "patch"},
+            {"fields": ",".join(body.keys()), "action": "patch"},
         )
         return {"profile": updated.model_dump(mode="json")}
     except (ValueError, RuntimeError) as exc:
